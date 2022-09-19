@@ -1,5 +1,4 @@
 """Package installation logic"""
-
 import re
 from pathlib import Path
 
@@ -7,6 +6,7 @@ from setuptools import find_packages, setup
 
 _file_dir = Path(__file__).resolve().parent
 _pkg_requirements_path = _file_dir / 'requirements.txt'
+_doc_requirements_path = _file_dir / 'docs' / 'requirements.txt'
 
 
 def get_long_description():
@@ -29,13 +29,17 @@ def get_package_data(directory):
     return list(map(str, directory.rglob('*')))
 
 
-def get_extras(**extra_definitions):
+def get_extras(**paths):
     """Return a dictionary of package extras
 
     Values for `tests` and `all` are generated automatically
     """
 
-    return {'tests': ['coverage'], }
+    extras = {'tests': ['coverage'], }
+    for extra_name, path in paths.items():
+        extras[extra_name] = get_requirements(path)
+
+    return extras
 
 
 def get_meta(value):
@@ -43,9 +47,6 @@ def get_meta(value):
 
     Args:
         value: The metadata variable to return a value for
-
-    Returns:
-        THe corresponding value from the init file
     """
 
     init_path = _file_dir / 'app' / '__init__.py'
@@ -67,7 +68,7 @@ setup(
         notifier=app.main:Application.execute
     """,
     install_requires=get_requirements(_pkg_requirements_path),
-    extras_require=get_extras(),
+    extras_require=get_extras(docs=_doc_requirements_path),
     author=get_meta('author'),
     keywords='disk usage quota notify email',
     long_description=get_long_description(),
