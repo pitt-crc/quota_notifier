@@ -27,3 +27,19 @@ class ShellCmd:
         out, err = Popen(split(cmd), stdout=PIPE, stderr=PIPE).communicate()
         self.out = out.decode("utf-8").strip()
         self.err = err.decode("utf-8").strip()
+
+
+class User:
+    """Fetch identifying information for a given username
+
+    Attributes:
+        username: The user's username
+        group:  The user's primary group name
+        uid: The user identifier
+        gid: The primary group identifier
+    """
+
+    username: str
+    group: str
+    uid: int
+    gid: int

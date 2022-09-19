@@ -1,8 +1,11 @@
 """Commandline interface and entrypoint for the parent package"""
 
 from argparse import ArgumentParser
+from pathlib import Path
 
 from . import __version__
+from .disk_utils import AbstractQuota, BeegfsQuota, GenericQuota, IhomeQuota
+from .shell import User
 
 
 class Parser(ArgumentParser):
@@ -25,6 +28,28 @@ class Parser(ArgumentParser):
 
 class Application:
     """Entry point for instantiating and executing the application from the command line"""
+
+    @staticmethod
+    def _get_user_quotas(user: User) -> tuple[AbstractQuota]:
+        """Return a tuple of quotas assigned to a given user
+
+        Args:
+            user: The user to fetch quotas for
+
+        Returns:
+            A (possibly empty) tuple of quota objects
+        """
+
+        ihome_quota = IhomeQuota.from_uid('ihome', user.uid)
+        zfs1_quota = GenericQuota.from_path('zfs1', Path(f'/zfs1/{user.group}'))
+        zfs2_quota = GenericQuota.from_path('zfs2', Path(f'/zfs2/{user.group}'))
+        bgfs_quota = BeegfsQuota.from_group('beegfs', user.group)
+        ix_quota = GenericQuota.from_path('ix', Path(f'/ix/{user.group}'))
+        ix1_quota = GenericQuota.from_path('ix1', Path(f'/ix1/{user.group}'))
+
+        # Only return quotas that exist for the given group (i.e., objects that are not None)
+        all_quotas = (ihome_quota, zfs1_quota, zfs2_quota, bgfs_quota, ix_quota, ix1_quota)
+        return tuple(filter(None, all_quotas))
 
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold
