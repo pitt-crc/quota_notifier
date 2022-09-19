@@ -1,6 +1,7 @@
 """Tests for the ``EmailTemplate`` class."""
 
 from unittest import TestCase
+from unittest.mock import patch
 
 from app.disk_utils import GenericQuota
 from app.email import EmailTemplate
@@ -10,11 +11,11 @@ class TemplateFormatting(TestCase):
     """Test the formatting of the email template with quota information"""
 
     @classmethod
-    def setUpClass(self) -> None:
+    def setUpClass(cls) -> None:
         """Create a formatted email template"""
 
-        self.quota = GenericQuota('testquota', size_used=10, size_limit=100)
-        self.template = EmailTemplate([self.quota])
+        cls.quota = GenericQuota('testquota', size_used=10, size_limit=100)
+        cls.template = EmailTemplate([cls.quota])
 
     def test_starts_with_header(self) -> None:
         """Test the formatted message starts with the template header"""
@@ -29,3 +30,26 @@ class TemplateFormatting(TestCase):
         self.assertTrue(
             self.template.message.endswith(EmailTemplate.footer),
             'Email message does not end with template footer.')
+
+
+class MessageSending(TestCase):
+    """Tests for sending emails via an SMTP server"""
+
+    def setUp(self) -> None:
+        self.quota = GenericQuota('testquota', size_used=10, size_limit=100)
+        self.template = EmailTemplate([self.quota])
+
+    @patch('smtplib.SMTP')
+    def test_fields_are_set(self, mock_smtp) -> None:
+        from_address = 'fake_sender@fake_domain.com'
+        to_address = 'fake_recipient@fake_domain.com'
+        subject = 'Subject line'
+        sent_message = self.template.send(to_address, from_address, subject, mock_smtp)
+
+        # The rstrip removes a newline character that is added automatically in the sent message
+        body = sent_message.get_body().get_content().rstrip()
+        self.assertEqual(self.template.message, body)
+
+        self.assertEqual(to_address, sent_message['To'])
+        self.assertEqual(from_address, sent_message['From'])
+        self.assertEqual(subject, sent_message['Subject'])

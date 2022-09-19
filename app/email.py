@@ -27,13 +27,14 @@ class EmailTemplate:
 
         self.send(to=f'{user}@pitt.edu', from_=from_, subject=subject)
 
-    def send(self, to, from_, subject) -> None:
+    def send(self, to, from_, subject, smtp) -> EmailMessage:
         """Send the formatted email to the given email address
 
         Args:
             to: Destination address
             from_: Sender address
             subject: Email subject line
+            smtp: Optionally use a custom SMTP server
         """
 
         email = EmailMessage()
@@ -42,5 +43,7 @@ class EmailTemplate:
         email["From"] = from_
         email["To"] = to
 
-        with SMTP("localhost") as smtp:
-            smtp.send_message(email)
+        with  smtp or SMTP("localhost") as smtp_server:
+            smtp_server.send_message(email)
+
+        return email
