@@ -22,7 +22,7 @@ class EmailTemplate:
     def send_to_user(
             self,
             user: str,
-            ffrom: str = "no-reply@crc.pitt.edu",
+            address_from: str = "no-reply@crc.pitt.edu",
             subject: str = "CRC Disk Usage Update",
             smtp: Optional[SMTP] = None
     ) -> EmailMessage:
@@ -30,19 +30,19 @@ class EmailTemplate:
 
         Args:
             user: Name of the user to send to
-            ffrom: Sender address
+            address_from: Sender address
             subject: Email subject line
             smtp: Optionally use a custom SMTP server
         """
 
-        return self.send(to=f'{user}@pitt.edu', ffrom=ffrom, subject=subject, smtp=smtp)
+        return self.send(address_to=f'{user}@pitt.edu', address_from=address_from, subject=subject, smtp=smtp)
 
-    def send(self, to: str, ffrom: str, subject: str, smtp: Optional[SMTP] = None) -> EmailMessage:
+    def send(self, address_to: str, address_from: str, subject: str, smtp: Optional[SMTP] = None) -> EmailMessage:
         """Send the formatted email to the given email address
 
         Args:
-            to: Destination address
-            ffrom: Sender address
+            address_to: Destination address
+            address_from: Sender address
             subject: Email subject line
             smtp: Optionally use a custom SMTP server
         """
@@ -50,8 +50,8 @@ class EmailTemplate:
         email = EmailMessage()
         email.set_content(self.message)
         email["Subject"] = subject
-        email["From"] = ffrom
-        email["To"] = to
+        email["From"] = address_from
+        email["To"] = address_to
 
         with smtp or SMTP("localhost") as smtp_server:
             smtp_server.send_message(email)
