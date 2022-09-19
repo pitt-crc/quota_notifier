@@ -1,7 +1,7 @@
 """Tests for the ``EmailTemplate`` class."""
 
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from app.disk_utils import GenericQuota
 from app.email import EmailTemplate
@@ -53,3 +53,15 @@ class MessageSending(TestCase):
         self.assertEqual(to_address, sent_message['To'])
         self.assertEqual(from_address, sent_message['From'])
         self.assertEqual(subject, sent_message['Subject'])
+
+    @patch('smtplib.SMTP')
+    def test_message_is_sent(self, mock_smtp) -> None:
+        """Test the smtp server is given the email message to send"""
+
+        email_message = self.template.send('to@address.com', 'from@address.com', 'subject', mock_smtp)
+
+        # Note that one of expected calls is ``call()`` from the __enter__ context manager
+        self.assertEqual(
+            mock_smtp.__enter__.mock_calls,
+            [call(), call().send_message(email_message)]
+        )
