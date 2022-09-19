@@ -25,7 +25,7 @@ class Parser(ArgumentParser):
 class Application:
     """Entry point for instantiating and executing the application from the command line"""
 
-    def process_notifications(self) -> None:
+    def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold
 
         Emails are only sent for a given user and threshold if a previous email
@@ -35,7 +35,9 @@ class Application:
         raise NotImplementedError
 
     @classmethod
-    def execute(cls):
+    def execute(cls) -> None:
         """Parse arguments and execute the application"""
 
-        print('Hello World')
+        args = vars(Parser().parse_args())
+        app = Application()
+        args.pop('action')(app, **args)
