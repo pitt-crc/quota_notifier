@@ -1,7 +1,4 @@
-"""Temporary file so the test suite CI has something to run.
-
-Delete after real tests are written
-"""
+"""Tests for the ``Parser`` class."""
 
 from unittest import TestCase
 
