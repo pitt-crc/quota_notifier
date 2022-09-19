@@ -39,6 +39,18 @@ class Application:
 
         raise NotImplementedError
 
+    def _get_next_threshold(self, quota: AbstractQuota) -> int:
+        """Return the next threshold a user should be notified for
+
+        Args:
+            quota: The quota to get a threshold for
+
+        Returns:
+            A notification threshold between 0 and 100 (inclusive)
+        """
+
+        raise NotImplementedError
+
     @staticmethod
     def _get_user_quotas(user: User) -> tuple[AbstractQuota]:
         """Return a tuple of quotas assigned to a given user
