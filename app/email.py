@@ -7,14 +7,14 @@ from smtplib import SMTP
 class EmailTemplate:
     """Formattable email template to notify users about their quota"""
 
+    header = "This is an email header"
+    footer = "This is a footer"
+
     def __init__(self, quotas):
         """Generate a formatted instance of the email template"""
 
-        header = "This is an email header"
-        footer = "This is a footer"
-
         quota_str = '\n'.join(map(str, quotas))
-        self.message = '\n\n'.join((header, quota_str, footer))
+        self.message = '\n\n'.join((self.header, quota_str, self.footer))
 
     def send_to_user(self, user, from_="no-reply@crc.pitt.edu", subject="CRC Disk Usage Update"):
         """Send the formatted email to the given username
