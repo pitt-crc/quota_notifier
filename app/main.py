@@ -83,7 +83,7 @@ class Application:
 
         pending_notifications = []
         for quota in self._get_user_quotas(user):
-            next_threshold = self._get_next_threshold((quota)
+            next_threshold = self._get_next_threshold(quota)
             usage = (quota.size_used * 100) // quota.size_limit
             if usage >= next_threshold:
                 pending_notifications.append(quota)
