@@ -19,7 +19,7 @@ class Parser(ArgumentParser):
         self.add_argument('-v', '--version', action='version', version=__version__)
 
         notify = self.subparsers.add_parser('notify', help='Send emails to users with pending notifications')
-        notify.set_defaults(action=Application.process_notifications)
+        notify.set_defaults(action=Application.send_notifications)
 
 
 class Application:
