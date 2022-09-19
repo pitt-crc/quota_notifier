@@ -39,7 +39,14 @@ class User:
         gid: The primary group identifier
     """
 
-    username: str
-    group: str
-    uid: int
-    gid: int
+    def __init__(self, username: str) -> None:
+        """Fetch identifying information for the given username
+
+        Args:
+            username: The name of the user
+        """
+
+        self.username = username
+        self.group = ShellCmd(f"id -gn {username}").out
+        self.uid = ShellCmd(f"id -u {username}").out
+        self.gid = ShellCmd(f"id -g {username}").out
