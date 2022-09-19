@@ -16,6 +16,17 @@ class EmailTemplate:
         quota_str = '\n'.join(map(str, quotas))
         self.message = '\n\n'.join((header, quota_str, footer))
 
+    def send_to_user(self, user, from_="no-reply@crc.pitt.edu", subject="CRC Disk Usage Update"):
+        """Send the formatted email to the given username
+
+        Args:
+            user: Name of the user to send to
+            from_: Sender address
+            subject: Email subject line
+        """
+
+        self.send(to=f'{user}@pitt.edu', from_=from_, subject=subject)
+
     def send(self, to, from_, subject) -> None:
         """Send the formatted email to the given email address
 
