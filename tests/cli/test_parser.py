@@ -8,6 +8,15 @@ from unittest import TestCase
 from app.main import Application, Parser
 
 
+class ParserHelpData(TestCase):
+    """Test the parser is configured with help data"""
+
+    def test_custom_prog_name(self) -> None:
+        """Test the application name is configured as ``notifier``"""
+
+        self.assertEqual('notifier', Parser().prog)
+
+
 class SubparsersRequired(TestCase):
     """Test a subparser is required by the commandline parser"""
 
