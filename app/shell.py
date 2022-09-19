@@ -27,3 +27,26 @@ class ShellCmd:
         out, err = Popen(split(cmd), stdout=PIPE, stderr=PIPE).communicate()
         self.out = out.decode("utf-8").strip()
         self.err = err.decode("utf-8").strip()
+
+
+class User:
+    """Fetch identifying information for a given username
+
+    Attributes:
+        username: The user's username
+        group:  The user's primary group name
+        uid: The user identifier
+        gid: The primary group identifier
+    """
+
+    def __init__(self, username: str) -> None:
+        """Fetch identifying information for the given username
+
+        Args:
+            username: The name of the user
+        """
+
+        self.username = username
+        self.group = ShellCmd(f"id -gn {username}").out
+        self.uid = ShellCmd(f"id -u {username}").out
+        self.gid = ShellCmd(f"id -g {username}").out
