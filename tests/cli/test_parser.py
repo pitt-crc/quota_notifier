@@ -5,7 +5,7 @@ Delete after real tests are written
 
 from unittest import TestCase
 
-from app.main import Parser
+from app.main import Application, Parser
 
 
 class SubparsersRequired(TestCase):
@@ -16,3 +16,13 @@ class SubparsersRequired(TestCase):
 
         parser = Parser()
         self.assertTrue(parser.subparsers.required)
+
+
+class SubparserMapping(TestCase):
+    """Test the mapping of subparsers to executable functions"""
+
+    def test_notify_subparser(self) -> None:
+        """Test the ``notify`` parser maps to the ``send_notifications`` function"""
+
+        args = Parser().parse_args(['notify'])
+        self.assertEqual(args.action, Application.send_notifications)
