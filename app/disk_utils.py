@@ -1,4 +1,13 @@
-"""Utilities for fetching disk quota information."""
+"""Utilities for fetching disk quota information.
+
+Different quota objects are provided for different file system structures.
+The ``GenericQuota`` is generally applicable to any file system whose
+quota can be determined using the ``df`` commandline utility.
+
+Quota classes may provide factory methods to facilitate creating instances
+based on simple user data. In all cases, these methods will return ``None``
+if a quota is not found for the user.
+"""
 
 from __future__ import annotations
 
