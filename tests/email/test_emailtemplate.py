@@ -36,11 +36,15 @@ class MessageSending(TestCase):
     """Tests for sending emails via an SMTP server"""
 
     def setUp(self) -> None:
+        """Create a formatted email template"""
+
         self.quota = GenericQuota('testquota', size_used=10, size_limit=100)
         self.template = EmailTemplate([self.quota])
 
     @patch('smtplib.SMTP')
     def test_fields_are_set(self, mock_smtp) -> None:
+        """Test email fields (to, from, subject, body) are set in the sent email"""
+
         from_address = 'fake_sender@fake_domain.com'
         to_address = 'fake_recipient@fake_domain.com'
         subject = 'Subject line'
