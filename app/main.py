@@ -30,6 +30,16 @@ class Application:
     """Entry point for instantiating and executing the application from the command line"""
 
     @staticmethod
+    def _get_users() -> tuple[User]:
+        """Return a collection of users to check quotas for
+
+        Returns:
+            A tuple of ``User`` objects
+        """
+
+        raise NotImplementedError
+
+    @staticmethod
     def _get_user_quotas(user: User) -> tuple[AbstractQuota]:
         """Return a tuple of quotas assigned to a given user
 
@@ -51,14 +61,28 @@ class Application:
         all_quotas = (ihome_quota, zfs1_quota, zfs2_quota, bgfs_quota, ix_quota, ix1_quota)
         return tuple(filter(None, all_quotas))
 
-    def send_notifications(self) -> None:
-        """Send email notifications to any users who have exceeded a notification threshold
+    def _notify_user(self, user: User) -> None:
+        """Send email notifications to a single user
 
-        Emails are only sent for a given user and threshold if a previous email
-        has not already been issued.
+        Args:
+            user: The user to send a notification for
         """
 
-        raise NotImplementedError
+        pending_notifications = []
+        for quota in self._get_user_quotas(user):
+            next_threshold = get_next_threshold(quota)
+            usage = (quota.size_used * 100) // quota.size_limit
+            if usage >= next_threshold:
+                pending_notifications.append(quota)
+
+        if pending_notifications:
+            EmailTemplate(pending_notifications).send_to_user(user)
+
+    def send_notifications(self) -> None:
+        """Send email notifications to any users who have exceeded a notification threshold"""
+
+        for user in self._get_users():
+            self._notify_user(user)
 
     @classmethod
     def execute(cls) -> None:
