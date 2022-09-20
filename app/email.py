@@ -6,6 +6,8 @@ from email.message import EmailMessage
 from smtplib import SMTP
 from typing import Optional
 
+from app.shell import User
+
 
 class EmailTemplate:
     """Formattable email template to notify users about their quota"""
@@ -21,7 +23,7 @@ class EmailTemplate:
 
     def send_to_user(
             self,
-            user: str,
+            user: User,
             address_from: str = "no-reply@crc.pitt.edu",
             subject: str = "CRC Disk Usage Update",
             smtp: Optional[SMTP] = None
@@ -35,7 +37,7 @@ class EmailTemplate:
             smtp: Optionally use a custom SMTP server
         """
 
-        return self.send(address_to=f'{user}@pitt.edu', address_from=address_from, subject=subject, smtp=smtp)
+        return self.send(address_to=f'{user.username}@pitt.edu', address_from=address_from, subject=subject, smtp=smtp)
 
     def send(self, address_to: str, address_from: str, subject: str, smtp: Optional[SMTP] = None) -> EmailMessage:
         """Send the formatted email to the given email address
