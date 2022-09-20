@@ -4,8 +4,9 @@ By default, emails are sent via the SMTP server running on localhost.
 
 from email.message import EmailMessage
 from smtplib import SMTP
-from typing import Optional
+from typing import Collection, Optional
 
+from app.disk_utils import AbstractQuota
 from app.settings import app_settings
 from app.shell import User
 
@@ -18,7 +19,7 @@ class EmailTemplate:
     header = app_settings.email_header
     footer = app_settings.email_footer
 
-    def __init__(self, quotas):
+    def __init__(self, quotas: Collection[AbstractQuota]) -> None:
         """Generate a formatted instance of the email template"""
 
         quota_str = '\n'.join(map(str, quotas))
