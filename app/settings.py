@@ -22,5 +22,10 @@ class Settings(BaseSettings):
     file_systems: Optional[tuple[FileSystem, ...]]
     blacklist: Optional[set[str]]
 
+    # Ldap settings
+    ldap_server: str = 'localhost'
+    ldap_port: int = 389
+    ldap_password: str = None
+
 
 app_settings = Settings()

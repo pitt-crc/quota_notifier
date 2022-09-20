@@ -2,6 +2,8 @@
 
 from argparse import ArgumentParser
 
+from ldap3 import Connection, Server
+
 from . import __version__
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
@@ -38,10 +40,15 @@ class Application:
             A tuple of ``User`` objects
         """
 
-        # When implementing this function remember to drop names from the blacklist
-        # app_settings.blacklist
+        pitt_ad_server = Server(app_settings.ldap_server, port=app_settings.ldap_port)
+        with Connection(pitt_ad_server, password=app_settings.ldap_password) as conn:
+            conn.search(
+                "dc=univ,dc=pitt,dc=edu", "(&(objectClass=user))"
+            )
 
-        raise NotImplementedError
+            users = set(conn.entries) - app_settings.blacklis
+
+        return tuple(User(username) for username in users)
 
     def _get_next_threshold(self, quota: AbstractQuota) -> int:
         """Return the next threshold a user should be notified for
