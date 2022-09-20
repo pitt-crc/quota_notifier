@@ -1,6 +1,7 @@
 """Commandline interface and entrypoint for the parent package"""
 
 from argparse import ArgumentParser
+from typing import Iterable
 
 from ldap3 import Connection, Server
 
@@ -33,7 +34,7 @@ class Application:
     """Entry point for instantiating and executing the application from the command line"""
 
     @staticmethod
-    def _get_users() -> tuple[User]:
+    def _get_users() -> Iterable[User]:
         """Return a collection of users to check quotas for
 
         Returns:
@@ -50,7 +51,7 @@ class Application:
             conn.search("dc=univ,dc=pitt,dc=edu", "(&(objectClass=user))", attributes=['name'])
             users = set(entry.name for entry in conn.entries) - app_settings.blacklist
 
-        return tuple(User(username) for username in users)
+        return map(User, users)
 
     def _get_next_threshold(self, quota: AbstractQuota) -> int:
         """Return the next threshold a user should be notified for
@@ -65,7 +66,7 @@ class Application:
         raise NotImplementedError
 
     @staticmethod
-    def _get_user_quotas(user: User) -> tuple[AbstractQuota]:
+    def _get_user_quotas(user: User) -> Iterable[AbstractQuota]:
         """Return a tuple of quotas assigned to a given user
 
         Args:
@@ -75,8 +76,7 @@ class Application:
             A (possibly empty) tuple of quota objects
         """
 
-        all_quotas = (QuotaFactory(**quota_definition, user=user) for quota_definition in app_settings)
-        return tuple(filter(None, all_quotas))
+        return filter(None, (QuotaFactory(**fsys, user=user) for fsys in app_settings.file_systems))
 
     def _notify_user(self, user: User) -> None:
         """Send email notifications to a single user
