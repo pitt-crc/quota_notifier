@@ -29,7 +29,11 @@ class Settings(BaseSettings):
         "One or more of your quotas have surpassed a usage threshold triggering an automated notification. "
         "Your storage usage is as follows:")
 
-    email_footer = "If you need additional storage, please submit a request via the CRC ticketing system."
+    email_footer = (
+        "If you need additional storage, please submit a request via the CRC ticketing system.\n\n"
+        "Sincerely,\n"
+        "The CRC Quota Bot"
+    )
 
 
 app_settings = Settings()
