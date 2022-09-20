@@ -23,4 +23,4 @@ class Settings(BaseSettings):
     blacklist: Optional[set[str]]
 
 
-app_settings = Settings()
+app_settings = Settings().parse_file('/etc/quota_notifier/config.json')
