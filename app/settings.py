@@ -9,9 +9,6 @@ from pydantic import BaseSettings
 class FileSystem(BaseSettings):
     """Settings for an individual file system"""
 
-    class Config:
-        allow_mutation = False
-
     name: str
     path: str
     type: str
