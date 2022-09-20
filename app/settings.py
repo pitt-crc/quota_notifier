@@ -23,9 +23,11 @@ class Settings(BaseSettings):
     blacklist: Optional[set[str]]
 
     # Ldap settings
-    ldap_server: str = 'localhost'
+    # Authentication values default to anonymous session
+    ldap_server: str = 'pittad.univ.pitt.edu'
     ldap_port: int = 389
-    ldap_password: str = None
+    ldap_user: Optional[str] = None
+    ldap_password: Optional[str] = None
 
 
 app_settings = Settings()

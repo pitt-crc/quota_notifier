@@ -40,13 +40,15 @@ class Application:
             A tuple of ``User`` objects
         """
 
-        pitt_ad_server = Server(app_settings.ldap_server, port=app_settings.ldap_port)
-        with Connection(pitt_ad_server, password=app_settings.ldap_password) as conn:
-            conn.search(
-                "dc=univ,dc=pitt,dc=edu", "(&(objectClass=user))"
-            )
-
-            users = set(conn.entries) - app_settings.blacklis
+        ldap_server = Server(app_settings.ldap_server, port=389)
+        with Connection(
+            ldap_server,
+            user=app_settings.ldap_user,
+            password=app_settings.ldap_password,
+            auto_bind=True
+        ) as conn:
+            conn.search("dc=univ,dc=pitt,dc=edu", "(&(objectClass=user))", attributes=['name'])
+            users = set(entry.name for entry in conn.entries) - app_settings.blacklist
 
         return tuple(User(username) for username in users)
 
