@@ -21,5 +21,11 @@ class Settings(BaseSettings):
     thresholds: tuple[int, ...] = (75, 100)
     file_systems: Optional[tuple[FileSystem, ...]]
 
+    # Email notification settings
+    email_from: str = 'no-reply@crc.pitt.edu'
+    email_subject: str = "CRC Disk Usage Update"
+    email_header = "This is an email header"
+    email_footer = "This is a footer"
+
 
 app_settings = Settings()
