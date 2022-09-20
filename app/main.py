@@ -38,6 +38,9 @@ class Application:
             A tuple of ``User`` objects
         """
 
+        # When implementing this function remember to drop names from the blacklist
+        # app_settings.blacklist
+
         raise NotImplementedError
 
     def _get_next_threshold(self, quota: AbstractQuota) -> int:

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     ihome_quota_path: Path = Path('/ihome/crc/scripts/ihome_quota.json')
     thresholds: tuple[int, ...] = (75, 100)
     file_systems: Optional[tuple[FileSystem, ...]]
+    blacklist: Optional[set[str]]
 
 
 app_settings = Settings()
