@@ -5,6 +5,7 @@ from unittest.mock import call, patch
 
 from app.disk_utils import GenericQuota
 from app.email import EmailTemplate
+from app.shell import User
 
 
 class TemplateFormatting(TestCase):
@@ -14,7 +15,7 @@ class TemplateFormatting(TestCase):
     def setUpClass(cls) -> None:
         """Create a formatted email template"""
 
-        cls.quota = GenericQuota('testquota', size_used=10, size_limit=100)
+        cls.quota = GenericQuota('testquota', User('test_user'), size_used=10, size_limit=100)
         cls.template = EmailTemplate([cls.quota])
 
     def test_starts_with_header(self) -> None:
@@ -38,7 +39,7 @@ class MessageSending(TestCase):
     def setUp(self) -> None:
         """Create a formatted email template"""
 
-        self.quota = GenericQuota('testquota', size_used=10, size_limit=100)
+        self.quota = GenericQuota('testquota', User('test_user'), size_used=10, size_limit=100)
         self.template = EmailTemplate([self.quota])
 
     @patch('smtplib.SMTP')
