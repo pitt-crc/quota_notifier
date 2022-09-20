@@ -5,6 +5,8 @@ from typing import Optional
 
 from pydantic import BaseSettings
 
+SETTINGS_PATH = Path('/etc/quota_notifier/config.json')
+
 
 class FileSystem(BaseSettings):
     """Settings for an individual file system"""
@@ -23,4 +25,8 @@ class Settings(BaseSettings):
     blacklist: Optional[set[str]]
 
 
-app_settings = Settings().parse_file('/etc/quota_notifier/config.json')
+if SETTINGS_PATH.exists():
+    app_settings = Settings.parse_file(SETTINGS_PATH)
+
+else:
+    app_settings = Settings()
