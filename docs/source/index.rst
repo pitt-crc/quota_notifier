@@ -1,20 +1,16 @@
-.. Quota Notifier documentation master file, created by
-   sphinx-quickstart on Mon Sep 19 16:54:56 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Quota Notifier's documentation!
-==========================================
+Quota Notification Utility
+==========================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
+   Overview<self>
+   install
+   usage
 
+.. toctree::
+   :hidden:
+   :caption: API
+   :glob:
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   autoapi/app/**/*
