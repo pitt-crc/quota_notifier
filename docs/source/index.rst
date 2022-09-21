@@ -5,12 +5,13 @@ Quota Notification Utility
    :hidden:
 
    Overview<self>
-   install
-   usage
+   overview/install
+   overview/usage
 
 .. toctree::
    :hidden:
    :caption: API
    :glob:
 
-   autoapi/app/**/*
+   api/main
+   api/*
