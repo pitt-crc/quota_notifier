@@ -14,7 +14,7 @@ sys.path.insert(0, str(project_root))
 
 from app import __version__, __author__
 
-project = 'CRC Wrapper Applications'
+project = 'Quota Notification Utility'
 author = __author__
 release = __version__
 
