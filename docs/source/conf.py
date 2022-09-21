@@ -28,6 +28,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx_copybutton',
+    'sphinxarg.ext',
 ]
 
 # Don't include code prompts when copying python code

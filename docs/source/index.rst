@@ -12,7 +12,7 @@ Quota Notification Utility
 
 .. toctree::
    :hidden:
-   :caption: API
+   :caption: Source Docs
    :glob:
 
    .. Put the most important modules towards the top.
