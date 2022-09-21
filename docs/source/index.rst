@@ -1,6 +1,8 @@
 Quota Notification Utility
 ==========================
 
+.. automodule:: app
+
 .. toctree::
    :hidden:
 
@@ -13,5 +15,10 @@ Quota Notification Utility
    :caption: API
    :glob:
 
+   .. Put the most important modules towards the top.
+      The rest are picked up by glob.
+
    api/main
+   api/settings
+   api/disk_utils
    api/*
