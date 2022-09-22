@@ -12,13 +12,13 @@ Quota Notification Utility
 
 .. toctree::
    :hidden:
-   :caption: Source Docs
+   :caption: Module Docs
    :glob:
 
    .. Put the most important modules towards the top.
       The rest are picked up by glob.
 
-   api/main
-   api/settings
-   api/disk_utils
-   api/*
+   modules/main
+   modules/settings
+   modules/disk_utils
+   modules/*
