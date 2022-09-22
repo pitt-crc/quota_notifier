@@ -31,6 +31,14 @@ extensions = [
     'sphinxarg.ext',
 ]
 
+# Customize default options for the sphinx autodoc utility
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'special-members': '__init__',
+    'undoc-members': True
+}
+
 # Don't include code prompts when copying python code
 copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
 copybutton_prompt_is_regexp = True
