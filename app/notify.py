@@ -5,9 +5,8 @@ Module Contents
 ---------------
 """
 
+import pwd
 from typing import Iterable
-
-from ldap3 import Connection, Server
 
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
@@ -26,17 +25,7 @@ class UserNotifier:
             A tuple of ``User`` objects
         """
 
-        ldap_server = Server(app_settings.ldap_server, port=389)
-        with Connection(
-            ldap_server,
-            user=app_settings.ldap_user,
-            password=app_settings.ldap_password,
-            auto_bind=True
-        ) as conn:
-            conn.search("dc=univ,dc=pitt,dc=edu", "(&(objectClass=user))", attributes=['name'])
-            users = set(entry.name for entry in conn.entries) - app_settings.blacklist
-
-        return map(User, users)
+        return (User(entry.pw_name) for entry in pwd.getpwall())
 
     def _get_next_threshold(self, quota: AbstractQuota) -> int:
         """Return the next threshold a user should be notified for
