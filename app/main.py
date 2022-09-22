@@ -1,4 +1,11 @@
-"""Commandline interface and entrypoint for the parent package"""
+"""The ``main`` module defines the application's command line interface and
+serves as the primary entrypoint for executing the parent package.
+It is responsible for displaying help text, parsing arguments, and
+instantiating/executing the underlying application logic.
+
+Module Contents
+---------------
+"""
 
 from argparse import ArgumentParser
 
