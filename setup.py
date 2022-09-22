@@ -40,7 +40,7 @@ def get_extras(**paths):
         extras[extra_name] = get_requirements(path)
 
     for packages in extras.values():
-        extras['all'].extend(packages)
+        extras['all'].update(packages)
 
     return extras
 

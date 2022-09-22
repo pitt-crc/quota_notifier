@@ -14,7 +14,8 @@ If you are working as a developer, installation options are provided for extra d
 
 .. code-block:: bash
 
-   pipx install quota_notifier.[all]
+    git clone https://github.com/pitt-crc/quota_notifier
+    pip install quota_notifier.[all]
 
 To install a specific subset of extras, chose from the following options:
 
