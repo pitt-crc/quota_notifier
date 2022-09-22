@@ -69,7 +69,7 @@ setup(
     python_requires='>=3.9',
     entry_points="""
         [console_scripts]
-        notifier=app.main:Application.execute
+        notifier=app.cli:Application.execute
     """,
     install_requires=get_requirements(_pkg_requirements_path),
     extras_require=get_extras(docs=_doc_requirements_path),
