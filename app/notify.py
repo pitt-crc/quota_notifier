@@ -1,37 +1,28 @@
-"""Commandline interface and entrypoint for the parent package"""
+"""The ``notify`` module contains the primary application logic for checking
+disk quotas and issuing pending notifications.
 
+<<<<<<< HEAD:app/main.py
 from argparse import ArgumentParser
 from typing import Iterable
 
 from ldap3 import Connection, Server
+=======
+Module Contents
+---------------
+"""
 
-from . import __version__
+from typing import Iterable
+
+from ldap3 import Connection, Server
+
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
 from .settings import app_settings
 from .shell import User
 
 
-class Parser(ArgumentParser):
-    """Responsible for defining the commandline interface and parsing commandline arguments"""
-
-    def __init__(self, *args, **kwargs) -> None:
-        """Define arguments for the command line interface"""
-
-        super().__init__(*args, **kwargs)
-        self.subparsers = self.add_subparsers(parser_class=ArgumentParser, dest='action')
-        self.subparsers.required = True
-
-        self.prog = 'notifier'
-        self.description = 'Notify users when their disk usage passes predefined thresholds'
-        self.add_argument('-v', '--version', action='version', version=__version__)
-
-        notify = self.subparsers.add_parser('notify', help='Send emails to users with pending notifications')
-        notify.set_defaults(action=Application.send_notifications)
-
-
-class Application:
-    """Entry point for instantiating and executing the application from the command line"""
+class UserNotifier:
+    """Issue and manage user disk quota notifications"""
 
     @staticmethod
     def _get_users() -> Iterable[User]:
@@ -78,7 +69,7 @@ class Application:
 
         return filter(None, (QuotaFactory(**fsys, user=user) for fsys in app_settings.file_systems))
 
-    def _notify_user(self, user: User) -> None:
+    def notify_user(self, user: User) -> None:
         """Send email notifications to a single user
 
         Args:
@@ -99,12 +90,4 @@ class Application:
         """Send email notifications to any users who have exceeded a notification threshold"""
 
         for user in self._get_users():
-            self._notify_user(user)
-
-    @classmethod
-    def execute(cls) -> None:
-        """Parse arguments and execute the application"""
-
-        args = vars(Parser().parse_args())
-        app = Application()
-        args.pop('action')(app, **args)
+            self.notify_user(user)

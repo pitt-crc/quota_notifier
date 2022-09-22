@@ -2,7 +2,8 @@
 
 from unittest import TestCase
 
-from app.main import Application, Parser
+from app.cli import Application, Parser
+from app.notify import UserNotifier
 
 
 class ParserHelpData(TestCase):
@@ -31,4 +32,4 @@ class SubparserMapping(TestCase):
         """Test the ``notify`` parser maps to the ``send_notifications`` function"""
 
         args = Parser().parse_args(['notify'])
-        self.assertEqual(args.action, Application.send_notifications)
+        self.assertEqual(args.action, UserNotifier.send_notifications)

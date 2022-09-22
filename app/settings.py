@@ -1,9 +1,16 @@
-"""Load and manage settings for the parent application"""
+"""The ``settings`` module is responsible for managing application settings.
+Class definitions directly reflect the settings file schema.
+
+Module Contents
+---------------
+"""
 
 from pathlib import Path
 from typing import Optional
 
 from pydantic import BaseSettings
+
+path = Path(__file__).parent / 'app_data.db'
 
 
 class FileSystem(BaseSettings):
@@ -28,6 +35,9 @@ class Settings(BaseSettings):
     ldap_port: int = 389
     ldap_user: Optional[str] = None
     ldap_password: Optional[str] = None
+
+    # Settings for database connections
+    db_url: str = f'sqlite:///{path.resolve()}'
 
 
 app_settings = Settings()
