@@ -31,4 +31,4 @@ To install a specific subset of extras, chose from the following options:
 Configuration
 -------------
 
-.. todo
+Todo: Add a configuration example
