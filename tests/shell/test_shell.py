@@ -1,5 +1,5 @@
 """Tests for the ``Shell`` class"""
-
+import subprocess
 from unittest import TestCase
 
 from app.shell import ShellCmd
@@ -39,3 +39,19 @@ class FileDescriptors(TestCase):
         cmd = ShellCmd('echo hello world')
         self.assertIsInstance(cmd.out, str)
         self.assertIsInstance(cmd.err, str)
+
+
+class Timeout(TestCase):
+    """Test the timeout argument is enforced"""
+
+    def test_timeout_zero(self) -> None:
+        """Test the command times out immediately when passed zero seconds"""
+
+        with self.assertRaises(subprocess.TimeoutExpired):
+            ShellCmd('echo', timeout=0)
+
+    def test_command_times_out(self) -> None:
+        """Test the command times out"""
+
+        with self.assertRaises(subprocess.TimeoutExpired):
+            ShellCmd('sleep 5', timeout=2)
