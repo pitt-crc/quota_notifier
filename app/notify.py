@@ -1,12 +1,6 @@
 """The ``notify`` module contains the primary application logic for checking
 disk quotas and issuing pending notifications.
 
-<<<<<<< HEAD:app/main.py
-from argparse import ArgumentParser
-from typing import Iterable
-
-from ldap3 import Connection, Server
-=======
 Module Contents
 ---------------
 """
@@ -25,7 +19,7 @@ class UserNotifier:
     """Issue and manage user disk quota notifications"""
 
     @staticmethod
-    def _get_users() -> Iterable[User]:
+    def get_users() -> Iterable[User]:
         """Return a collection of users to check quotas for
 
         Returns:
@@ -89,5 +83,5 @@ class UserNotifier:
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
 
-        for user in self._get_users():
+        for user in self.get_users():
             self.notify_user(user)
