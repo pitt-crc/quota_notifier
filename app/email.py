@@ -1,5 +1,9 @@
-"""Formattable email template for sending quota notifications to users.
-By default, emails are sent via the SMTP server running on localhost.
+"""The ``email`` module provides a formattable email template used to send
+quota notifications to users. By default, emails are sent via the SMTP server
+running on localhost.
+
+Module Contents
+---------------
 """
 
 from email.message import EmailMessage
@@ -37,9 +41,18 @@ class EmailTemplate:
             smtp: Optionally use a custom SMTP server
         """
 
-        return self.send(address_to=f'{user.username}@pitt.edu', address_from=address_from, subject=subject, smtp=smtp)
+        return self.send(
+            address_to=f'{user.username}@pitt.edu',
+            address_from=address_from,
+            subject=subject, smtp=smtp)
 
-    def send(self, address_to: str, address_from: str, subject: str, smtp: Optional[SMTP] = None) -> EmailMessage:
+    def send(
+            self,
+            address_to: str,
+            address_from: str,
+            subject: str,
+            smtp: Optional[SMTP] = None
+    ) -> EmailMessage:
         """Send the formatted email to the given email address
 
         Args:
