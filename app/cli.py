@@ -27,7 +27,7 @@ class Parser(ArgumentParser):
         self.description = 'Notify users when their disk usage passes predefined thresholds'
         self.add_argument('-v', '--version', action='version', version=__version__)
 
-        notify = self.subparsers.add_parser('notify', help='Send emails to users with pending notifications')
+        notify = self.subparsers.add_parser('notify', help='send emails to users with pending notifications')
         notify.set_defaults(action=UserNotifier.send_notifications)
 
 

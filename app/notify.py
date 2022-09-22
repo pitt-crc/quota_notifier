@@ -4,9 +4,11 @@ disk quotas and issuing pending notifications.
 Module Contents
 ---------------
 """
+from typing import Optional
 
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
+from .orm import DBConnection
 from .settings import app_settings
 from .shell import User
 
@@ -15,7 +17,7 @@ class UserNotifier:
     """Issue and manage user disk quota notifications"""
 
     @staticmethod
-    def _get_users() -> tuple[User]:
+    def get_users() -> tuple[User]:
         """Return a collection of users to check quotas for
 
         Returns:
@@ -27,7 +29,7 @@ class UserNotifier:
 
         raise NotImplementedError
 
-    def _get_next_threshold(self, quota: AbstractQuota) -> int:
+    def get_next_threshold(self, quota: AbstractQuota) -> Optional[int]:
         """Return the next threshold a user should be notified for
 
         Args:
@@ -37,7 +39,13 @@ class UserNotifier:
             A notification threshold between 0 and 100 (inclusive)
         """
 
-        raise NotImplementedError
+        with DBConnection.session() as session:
+            ...
+            # Get notification history for user
+            # If usage has dropped below threshold, update the record and return none
+            # If there is a next threshold, return it
+
+        # return none
 
     @staticmethod
     def get_user_quotas(user: User) -> tuple[AbstractQuota]:
@@ -62,9 +70,9 @@ class UserNotifier:
 
         pending_notifications = []
         for quota in self.get_user_quotas(user):
-            next_threshold = self._get_next_threshold(quota)
+            next_threshold = self.get_next_threshold(quota)
             usage = (quota.size_used * 100) // quota.size_limit
-            if usage >= next_threshold:
+            if next_threshold and usage >= next_threshold:
                 pending_notifications.append(quota)
 
         if pending_notifications:
@@ -73,5 +81,5 @@ class UserNotifier:
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
 
-        for user in self._get_users():
+        for user in self.get_users():
             self.notify_user(user)
