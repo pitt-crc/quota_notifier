@@ -1,4 +1,9 @@
-"""Load and manage settings for the parent application"""
+"""The ``settings`` module is responsible for managing application settings.
+Class definitions directly reflect the settings file schema.
+
+Module Contents
+---------------
+"""
 
 from pathlib import Path
 from typing import Optional
