@@ -35,9 +35,12 @@ def get_extras(**paths):
     Values for `tests` and `all` are generated automatically
     """
 
-    extras = {'tests': ['coverage'], }
+    extras = {'all': set(), 'tests': ['coverage'], }
     for extra_name, path in paths.items():
         extras[extra_name] = get_requirements(path)
+
+    for packages in extras.values():
+        extras['all'].extend(packages)
 
     return extras
 
