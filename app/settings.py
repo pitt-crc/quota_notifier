@@ -10,6 +10,8 @@ from typing import Optional
 
 from pydantic import BaseSettings
 
+path = Path(__file__).parent / 'app_data.db'
+
 
 class FileSystem(BaseSettings):
     """Settings for an individual file system"""
@@ -26,6 +28,9 @@ class Settings(BaseSettings):
     thresholds: tuple[int, ...] = (75, 100)
     file_systems: Optional[tuple[FileSystem, ...]]
     blacklist: Optional[set[str]]
+
+    # Settings for database connections
+    db_url: str = f'sqlite:///{path.resolve()}'
 
 
 app_settings = Settings()
