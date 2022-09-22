@@ -26,7 +26,7 @@ class Notification(Base):
       - username    (String): Unique account name
       - datetime  (DateTime): Datetime of the last user notification
       - threshold  (Integer): Disk usage threshold that triggered the notification
-      - file_system (String):
+      - file_system (String): Name of the file system triggering the notification
     """
 
     __tablename__ = 'notification'

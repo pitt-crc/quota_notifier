@@ -30,3 +30,20 @@ class ThresholdValidation(TestCase):
         for threshold in (0, 100):
             notification = Notification(threshold=threshold)
             self.assertEqual(threshold, notification.threshold)
+
+
+class RequiredFields(TestCase):
+    """Test required fields are not nullable"""
+
+    required_columns = (
+        Notification.username,
+        Notification.datetime,
+        Notification.threshold,
+        Notification.file_system,
+    )
+
+    def test_not_nullable(self) -> None:
+        """Test required columns are not nullable"""
+
+        for column in self.required_columns:
+            self.assertFalse(column.nullable, f'Column {column} should not be nullable')
