@@ -1,10 +1,8 @@
 """Tests for the ``DBConnection`` class"""
 
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
-import app
 from app.orm import DBConnection
 
 
