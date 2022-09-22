@@ -1,5 +1,4 @@
-shell
------
+app.shell
+---------
 
 .. automodule:: app.shell
-   :members:

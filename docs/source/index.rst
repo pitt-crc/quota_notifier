@@ -10,15 +10,16 @@ Quota Notification Utility
    overview/install
    overview/usage
 
+.. Put the most important modules towards the top.
+   The rest are picked up by glob.
+
 .. toctree::
    :hidden:
    :caption: Module Docs
    :glob:
 
-   .. Put the most important modules towards the top.
-      The rest are picked up by glob.
-
    modules/main
+   modules/notify
    modules/settings
    modules/disk_utils
    modules/*
