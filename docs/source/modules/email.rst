@@ -1,5 +1,4 @@
-email
------
+app.email
+---------
 
 .. automodule:: app.email
-   :members:

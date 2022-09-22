@@ -1,5 +1,4 @@
-settings
---------
+app.settings
+------------
 
 .. automodule:: app.settings
-   :members:
