@@ -10,7 +10,7 @@ from typing import Optional
 
 from pydantic import BaseSettings
 
-SETTINGS_PATH = Path('/etc/quota_notifier/config.json')
+SETTINGS_PATH = Path('/etc/notifier/config.json')
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
 
