@@ -104,7 +104,7 @@ class GenericQuota(AbstractQuota):
         """
 
         df_command = f"df {path}"
-        quota_info_list = ShellCmd(df_command).out.splitlines()
+        quota_info_list = ShellCmd(df_command, timeout=app_settings.disk_timeout).out.splitlines()
         if not quota_info_list:
             return None
 
@@ -129,7 +129,8 @@ class BeegfsQuota(AbstractQuota):
             An instance of the parent class or None if the allocation does not exist
         """
 
-        quota_info_cmd = ShellCmd(f"beegfs-ctl --getquota --gid {user.group} --csv --storagepoolid={storage_pool}")
+        beegfs_command = f"beegfs-ctl --getquota --gid {user.group} --csv --storagepoolid={storage_pool}"
+        quota_info_cmd = ShellCmd(beegfs_command, timeout=app_settings.disk_timeout)
         if quota_info_cmd.err:
             return None
 

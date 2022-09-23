@@ -6,6 +6,7 @@ Module Contents
 
 from shlex import split
 from subprocess import PIPE, Popen
+from typing import Optional
 
 
 class ShellCmd:
@@ -15,20 +16,22 @@ class ShellCmd:
     attributes respectively.
     """
 
-    def __init__(self, cmd: str) -> None:
+    def __init__(self, cmd: str, timeout: Optional[int] = None) -> None:
         """Execute the given command in the underlying shell
 
         Args:
             cmd: The command to run
+            timeout: Timeout if command does not exit in given number of seconds
 
         Raises:
             ValueError: When the ``cmd`` argument is empty
+            TimeoutExpired: If the command times out
         """
 
         if not cmd:
             raise ValueError('Command string cannot be empty')
 
-        out, err = Popen(split(cmd), stdout=PIPE, stderr=PIPE).communicate()
+        out, err = Popen(split(cmd), stdout=PIPE, stderr=PIPE).communicate(timeout=timeout)
         self.out = out.decode("utf-8").strip()
         self.err = err.decode("utf-8").strip()
 
