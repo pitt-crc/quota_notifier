@@ -32,5 +32,20 @@ class Settings(BaseSettings):
     # Settings for database connections
     db_url: str = f'sqlite:///{path.resolve()}'
 
+    # Email notification settings
+    email_from: str = 'no-reply@crc.pitt.edu'
+    email_subject: str = 'CRC Disk Usage Alert'
+    email_header = (
+        "This is an automated notification concerning your storage quota on H2P. "
+        "One or more of your quotas have surpassed a usage threshold triggering an automated notification. "
+        "Your storage usage is as follows:")
+
+    email_footer = (
+        "If you need additional storage, please submit a request via the CRC ticketing system. "
+        "Our storage policies are described in https://crc.pitt.edu/user-support/data-storage-guidelines.\n\n"
+        "Sincerely,\n"
+        "The CRC Quota Bot"
+    )
+
 
 app_settings = Settings()
