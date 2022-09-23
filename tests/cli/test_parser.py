@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from app.cli import Application, Parser
+from app.cli import Parser
 from app.notify import UserNotifier
 
 
