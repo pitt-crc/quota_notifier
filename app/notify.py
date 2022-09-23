@@ -105,31 +105,35 @@ class UserNotifier:
                 # Usage is below the lowest threshold
                 # Clean up the DB and continue
                 if next_threshold is None:
-                    query = delete(Notification).where(
-                        Notification.username == user.username,
-                        Notification.file_system == quota.name
+                    session.execute(
+                        delete(Notification).where(
+                            Notification.username == user.username,
+                            Notification.file_system == quota.name
+                        )
                     )
 
                 # There was no previous notification
                 # Mark the quota as needing a notification and create a DB record
-                if last_threshold is None:
+                elif last_threshold is None:
                     quotas_to_notify.append(quota)
-                    query = insert(Notification).values(
-                        username=user.username,
-                        file_system=quota.name,
-                        threshold=next_threshold
+                    session.execute(
+                        insert(Notification).values(
+                            username=user.username,
+                            file_system=quota.name,
+                            threshold=next_threshold
+                        )
                     )
 
                 # Quota usage dropped to a lower threshold
                 # Update the DB and do not issue a notification
-                if next_threshold <= last_threshold:
-                    query = insert(Notification(
-                        Notification.username == user.username,
-                        Notification.file_system == quota.name,
-                        threshold=next_threshold
-                    ))
-
-                session.execute(query)
+                elif next_threshold <= last_threshold:
+                    session.execute(
+                        insert(Notification).values(
+                            username=user.username,
+                            file_system=quota.name,
+                            threshold=next_threshold
+                        )
+                    )
 
             # Issue email notification if necessary
         if quotas_to_notify:
