@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     thresholds: tuple[int, ...] = (75, 100)
     file_systems: Optional[tuple[FileSystem, ...]]
     blacklist: Optional[set[str]]
-    disk_timeout: int = 60
+    disk_timeout: int = 30
 
 
 app_settings = Settings()
