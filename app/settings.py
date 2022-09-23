@@ -29,13 +29,6 @@ class Settings(BaseSettings):
     file_systems: Optional[tuple[FileSystem, ...]]
     blacklist: Optional[set[str]]
 
-    # Ldap settings
-    # Authentication values default to anonymous session
-    ldap_server: str = 'pittad.univ.pitt.edu'
-    ldap_port: int = 389
-    ldap_user: Optional[str] = None
-    ldap_password: Optional[str] = None
-
     # Settings for database connections
     db_url: str = f'sqlite:///{path.resolve()}'
 
