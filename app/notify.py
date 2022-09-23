@@ -81,12 +81,12 @@ class UserNotifier:
             The largest notification threshold that is less than the current usage or None
         """
 
-        current_threshold = None
+        next_threshold = None
         if quota.percentage >= min(app_settings.thresholds):
             index = bisect_right(app_settings.thresholds, quota.percentage)
-            current_threshold = app_settings.thresholds[index - 1]
+            next_threshold = app_settings.thresholds[index - 1]
 
-        return current_threshold
+        return next_threshold
 
     def notify_user(self, user: User) -> None:
         """Send email notifications to a single user
