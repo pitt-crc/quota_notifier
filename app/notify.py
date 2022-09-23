@@ -5,7 +5,7 @@ Module Contents
 ---------------
 """
 
-from bisect import bisect_left
+from bisect import bisect_right
 from typing import Optional
 
 from sqlalchemy import delete, insert, select
@@ -83,7 +83,7 @@ class UserNotifier:
 
         current_threshold = None
         if quota.percentage >= min(app_settings.thresholds):
-            index = bisect_left(app_settings.thresholds, quota.percentage)
+            index = bisect_right(app_settings.thresholds, quota.percentage)
             current_threshold = app_settings.thresholds[index - 1]
 
         return current_threshold
