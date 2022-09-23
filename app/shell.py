@@ -1,4 +1,8 @@
-"""Tools for running commands and fetching user data from the underlying system shell."""
+"""Tools for running commands and fetching user data from the underlying system shell.
+
+Module Contents
+---------------
+"""
 
 from shlex import split
 from subprocess import PIPE, Popen

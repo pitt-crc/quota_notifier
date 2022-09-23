@@ -1,9 +1,16 @@
-"""Load and manage settings for the parent application"""
+"""The ``settings`` module is responsible for managing application settings.
+Class definitions directly reflect the settings file schema.
+
+Module Contents
+---------------
+"""
 
 from pathlib import Path
 from typing import Optional
 
 from pydantic import BaseSettings
+
+path = Path(__file__).parent / 'app_data.db'
 
 
 class FileSystem(BaseSettings):
@@ -20,6 +27,10 @@ class Settings(BaseSettings):
     ihome_quota_path: Path = Path('/ihome/crc/scripts/ihome_quota.json')
     thresholds: tuple[int, ...] = (75, 100)
     file_systems: Optional[tuple[FileSystem, ...]]
+    blacklist: Optional[set[str]]
+
+    # Settings for database connections
+    db_url: str = f'sqlite:///{path.resolve()}'
 
     # Email notification settings
     email_from: str = 'no-reply@crc.pitt.edu'

@@ -1,4 +1,5 @@
 """Package installation logic"""
+
 import re
 from pathlib import Path
 
@@ -35,9 +36,12 @@ def get_extras(**paths):
     Values for `tests` and `all` are generated automatically
     """
 
-    extras = {'tests': ['coverage'], }
+    extras = {'all': set(), 'tests': ['coverage'], }
     for extra_name, path in paths.items():
         extras[extra_name] = get_requirements(path)
+
+    for packages in extras.values():
+        extras['all'].update(packages)
 
     return extras
 
@@ -65,7 +69,7 @@ setup(
     python_requires='>=3.9',
     entry_points="""
         [console_scripts]
-        notifier=app.main:Application.execute
+        notifier=app.cli:Application.execute
     """,
     install_requires=get_requirements(_pkg_requirements_path),
     extras_require=get_extras(docs=_doc_requirements_path),
