@@ -94,7 +94,7 @@ class UserNotifier:
                         Notification.file_system == quota.name
                     )
 
-                # There has been no previous notification
+                # There was no previous notification
                 # Mark the quota as needing a notification and create a DB record
                 if last_threshold is None:
                     quotas_to_notify.append(quota)
@@ -116,11 +116,11 @@ class UserNotifier:
                 session.execute(query)
 
             # Issue email notification if necessary
-            if quotas_to_notify:
-                EmailTemplate(quotas_to_notify).send_to_user(user)
+        if quotas_to_notify:
+            EmailTemplate(quotas_to_notify).send_to_user(user)
 
-            # Wait to commit until email sends
-            session.commit()
+        # Wait to commit until the email sends
+        session.commit()
 
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
