@@ -36,7 +36,7 @@ class Notification(Base):
     username = Column(String, nullable=False)
     file_system = Column(String, nullable=False)
     threshold = Column(Integer, nullable=False)
-    last_update = Column(DateTime(timezone=True), nullable=False, onupdate=func.now())
+    last_update = Column(DateTime, nullable=False, onupdate=func.now(), server_default=func.now())
 
     @validates('threshold')
     def validate_percent(self, key: str, value: int) -> int:
