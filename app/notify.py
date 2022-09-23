@@ -57,7 +57,7 @@ class UserNotifier:
             quota: The quota to get a threshold for
 
         Returns:
-            - The last notification or None if there was no notification
+            The last notification or None if there was no notification
         """
 
         query = select(Notification).where(
@@ -78,7 +78,7 @@ class UserNotifier:
             quota: The quota to get a threshold for
 
         Returns:
-            - The largest notification threshold that is less than the current usage or None
+            The largest notification threshold that is less than the current usage or None
         """
 
         current_threshold = None
