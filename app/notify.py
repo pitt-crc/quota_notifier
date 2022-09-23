@@ -82,8 +82,9 @@ class UserNotifier:
         """
 
         current_threshold = None
-        if quota.percentage > min(app_settings.thresholds):
-            current_threshold = bisect_left(app_settings.thresholds, quota.percentage)
+        if quota.percentage >= min(app_settings.thresholds):
+            index = bisect_left(app_settings.thresholds, quota.percentage)
+            current_threshold = app_settings.thresholds[index - 1]
 
         return current_threshold
 
