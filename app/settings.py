@@ -10,7 +10,8 @@ from typing import Optional
 
 from pydantic import BaseSettings
 
-path = Path(__file__).parent / 'app_data.db'
+SETTINGS_PATH = Path('/etc/notifier/config.json')
+DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
 
 class FileSystem(BaseSettings):
@@ -31,7 +32,7 @@ class Settings(BaseSettings):
     disk_timeout: int = 30
 
     # Settings for database connections
-    db_url: str = f'sqlite:///{path.resolve()}'
+    db_url: str = f'sqlite:///{DEFAULT_DB_PATH}'
 
     # Email notification settings
     email_from: str = 'no-reply@crc.pitt.edu'
@@ -49,4 +50,8 @@ class Settings(BaseSettings):
     )
 
 
-app_settings = Settings()
+if SETTINGS_PATH.exists():
+    app_settings = Settings.parse_file(SETTINGS_PATH)
+
+else:
+    app_settings = Settings()
