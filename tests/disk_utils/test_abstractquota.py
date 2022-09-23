@@ -1,11 +1,26 @@
 """Tests for the ``AbstractFileSystemUsage`` class"""
 
-import unittest
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Optional
+from unittest import TestCase
 
 from app.disk_utils import AbstractQuota
+from app.shell import User
 
 
-class BytesToString(unittest.TestCase):
+class DummyQuotaObj(AbstractQuota):
+    """Subclass of an abstract parent to use in testing"""
+
+    @classmethod
+    def get_quota(cls, name: str, path: Path, user: User) -> Optional[DummyQuotaObj]:
+        """Return an instance of the parent class"""
+
+        return DummyQuotaObj(name=name, user=user, size_used=10, size_limit=100)
+
+
+class BytesToString(TestCase):
     """Test the conversion of bytes into human-readable strings"""
 
     def test_zero_bytes(self) -> None:
@@ -30,3 +45,15 @@ class BytesToString(unittest.TestCase):
 
         for inp, oup in zip(inputs, outputs):
             self.assertEqual(oup, AbstractQuota.bytes_to_str(inp))
+
+
+class StringRepresentation(TestCase):
+    """Test the representation of quota objects as a string"""
+
+    def test_string_matches_expectation(self) -> None:
+        """Test string casting matches an expected string"""
+
+        quota = DummyQuotaObj.get_quota('dummy_system', Path('/'), User('root'))
+
+        # Manually define the expected string using the same values used when defining DummyQuotaObj
+        self.assertEqual("dummy_system: 10.0 B / 100.0 B (10%)", str(quota))
