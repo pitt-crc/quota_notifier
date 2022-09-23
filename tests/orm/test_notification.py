@@ -37,7 +37,7 @@ class RequiredFields(TestCase):
 
     required_columns = (
         Notification.username,
-        Notification.datetime,
+        Notification.last_update,
         Notification.threshold,
         Notification.file_system,
     )
