@@ -6,11 +6,10 @@ Module Contents
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseSettings
 
-SETTINGS_PATH = Path('/etc/notifier/config.json')
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
 
@@ -50,8 +49,12 @@ class Settings(BaseSettings):
     )
 
 
-if SETTINGS_PATH.exists():
-    app_settings = Settings.parse_file(SETTINGS_PATH)
+class ApplicationSettings:
+    _parsed_settings: Settings = Settings()
 
-else:
-    app_settings = Settings()
+    @classmethod
+    def configure(cls, path: Path) -> None:
+        cls._parsed_settings = Settings.parse_file(path)
+
+    def __getattribute__(self, item: str) -> Any:
+        return getattr(self._parsed_settings, item)

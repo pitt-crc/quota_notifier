@@ -8,27 +8,28 @@ Module Contents
 """
 
 from argparse import ArgumentParser
+from pathlib import Path
 
 from . import __version__
 from .notify import UserNotifier
+from .orm import DBConnection
+from .settings import ApplicationSettings
 
 
 class Parser(ArgumentParser):
     """Responsible for defining the commandline interface and parsing commandline arguments"""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(
+            self, *args,
+            prog='notifier',
+            description='Notify users when their disk usage passes predefined thresholds',
+            **kwargs
+    ) -> None:
         """Define arguments for the command line interface"""
 
-        super().__init__(*args, **kwargs)
-        self.subparsers = self.add_subparsers(parser_class=ArgumentParser, dest='action')
-        self.subparsers.required = True
-
-        self.prog = 'notifier'
-        self.description = 'Notify users when their disk usage passes predefined thresholds'
+        super().__init__(*args, prog=prog, description=description, **kwargs)
         self.add_argument('-v', '--version', action='version', version=__version__)
-
-        notify = self.subparsers.add_parser('notify', help='Send emails to users with pending notifications')
-        notify.set_defaults(action=UserNotifier.send_notifications)
+        self.add_argument('-c', '--configure', required=False, type=Path, help='path to application settings file')
 
 
 class Application:
@@ -38,5 +39,7 @@ class Application:
     def execute(cls) -> None:
         """Parse arguments and execute the application"""
 
-        args = vars(Parser().parse_args())
-        args.pop('action')(UserNotifier(), **args)
+        args = Parser().parse_args()
+        ApplicationSettings.configure(args.configure)
+        DBConnection.configure()
+        UserNotifier().send_notifications()

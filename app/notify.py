@@ -7,7 +7,7 @@ Module Contents
 
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
-from .settings import app_settings
+from .settings import ApplicationSettings
 from .shell import User
 
 
@@ -50,7 +50,7 @@ class UserNotifier:
             A (possibly empty) tuple of quota objects
         """
 
-        all_quotas = (QuotaFactory(**quota_definition, user=user) for quota_definition in app_settings)
+        all_quotas = (QuotaFactory(**quota_definition, user=user) for quota_definition in ApplicationSettings.file_systems)
         return tuple(filter(None, all_quotas))
 
     def notify_user(self, user: User) -> None:
