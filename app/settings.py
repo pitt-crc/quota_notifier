@@ -6,11 +6,10 @@ Module Contents
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseSettings
 
-SETTINGS_PATH = Path('/etc/notifier/config.json')
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
 
@@ -22,8 +21,8 @@ class FileSystem(BaseSettings):
     type: str
 
 
-class Settings(BaseSettings):
-    """Top level settings object for the parent application"""
+class SettingsSchema(BaseSettings):
+    """Defines the schema and default values for top level application settings"""
 
     ihome_quota_path: Path = Path('/ihome/crc/scripts/ihome_quota.json')
     thresholds: tuple[int, ...] = (75, 100)
@@ -50,8 +49,26 @@ class Settings(BaseSettings):
     )
 
 
-if SETTINGS_PATH.exists():
-    app_settings = Settings.parse_file(SETTINGS_PATH)
+class ApplicationSettings:
+    """Configurable application settings object
 
-else:
-    app_settings = Settings()
+    Application settings can be fetched (but not set) from the class instance
+    via dictionary style indexing.
+
+    Use the ``configure_from_file`` method to load settings from a settings file.
+    """
+
+    _parsed_settings: SettingsSchema = SettingsSchema()
+
+    @classmethod
+    def configure_from_file(cls, path: Path) -> None:
+        """Update application settings using values from a given file path
+
+        Args:
+            path: Path to load settings from
+        """
+
+        cls._parsed_settings = SettingsSchema.parse_file(path)
+
+    def __class_getitem__(cls, item) -> Any:
+        return getattr(cls._parsed_settings, item)
