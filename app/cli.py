@@ -40,6 +40,6 @@ class Application:
         """Parse arguments and execute the application"""
 
         args = Parser().parse_args()
-        ApplicationSettings.configure(args.configure)
+        ApplicationSettings.configure_from_file(args.configure)
         DBConnection.configure()
         UserNotifier().send_notifications()

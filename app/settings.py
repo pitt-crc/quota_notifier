@@ -22,7 +22,7 @@ class FileSystem(BaseSettings):
 
 
 class SettingsSchema(BaseSettings):
-    """Top level settings object for the parent application"""
+    """Defines the schema and default values for top level application settings"""
 
     ihome_quota_path: Path = Path('/ihome/crc/scripts/ihome_quota.json')
     thresholds: tuple[int, ...] = (75, 100)
@@ -50,10 +50,24 @@ class SettingsSchema(BaseSettings):
 
 
 class ApplicationSettings:
+    """Configurable application settings object
+
+    Application settings can be fetched (but not set) from the class instance
+    via dictionary style indexing.
+
+    Use the ``configure_from_file`` method to load settings from a settings file.
+    """
+
     _parsed_settings: SettingsSchema = SettingsSchema()
 
     @classmethod
-    def configure(cls, path: Path) -> None:
+    def configure_from_file(cls, path: Path) -> None:
+        """Update application settings using values from a given file path
+
+        Args:
+            path: Path to load settings from
+        """
+
         cls._parsed_settings = SettingsSchema.parse_file(path)
 
     def __class_getitem__(cls, item) -> Any:

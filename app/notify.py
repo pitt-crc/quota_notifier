@@ -4,6 +4,7 @@ disk quotas and issuing pending notifications.
 Module Contents
 ---------------
 """
+from typing import Iterable
 
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
@@ -40,7 +41,7 @@ class UserNotifier:
         raise NotImplementedError
 
     @staticmethod
-    def get_user_quotas(user: User) -> tuple[AbstractQuota]:
+    def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
         """Return a tuple of quotas assigned to a given user
 
         Args:
@@ -50,8 +51,8 @@ class UserNotifier:
             A (possibly empty) tuple of quota objects
         """
 
-        all_quotas = (QuotaFactory(**quota_definition, user=user) for quota_definition in ApplicationSettings['file_systems'])
-        return tuple(filter(None, all_quotas))
+        all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings['file_systems'])
+        return filter(None, all_quotas)
 
     def notify_user(self, user: User) -> None:
         """Send email notifications to a single user
