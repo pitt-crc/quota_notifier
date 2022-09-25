@@ -21,7 +21,7 @@ class FileSystem(BaseSettings):
     type: str
 
 
-class Settings(BaseSettings):
+class SettingsSchema(BaseSettings):
     """Top level settings object for the parent application"""
 
     ihome_quota_path: Path = Path('/ihome/crc/scripts/ihome_quota.json')
@@ -50,11 +50,11 @@ class Settings(BaseSettings):
 
 
 class ApplicationSettings:
-    _parsed_settings: Settings = Settings()
+    _parsed_settings: SettingsSchema = SettingsSchema()
 
     @classmethod
     def configure(cls, path: Path) -> None:
-        cls._parsed_settings = Settings.parse_file(path)
+        cls._parsed_settings = SettingsSchema.parse_file(path)
 
-    def __getattribute__(self, item: str) -> Any:
-        return getattr(self._parsed_settings, item)
+    def __class_getitem__(cls, item) -> Any:
+        return getattr(cls._parsed_settings, item)

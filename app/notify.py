@@ -50,7 +50,7 @@ class UserNotifier:
             A (possibly empty) tuple of quota objects
         """
 
-        all_quotas = (QuotaFactory(**quota_definition, user=user) for quota_definition in ApplicationSettings.file_systems)
+        all_quotas = (QuotaFactory(**quota_definition, user=user) for quota_definition in ApplicationSettings['file_systems'])
         return tuple(filter(None, all_quotas))
 
     def notify_user(self, user: User) -> None:

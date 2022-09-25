@@ -71,7 +71,7 @@ class DBConnection:
     session: Callable[[], Session] = None
 
     @classmethod
-    def configure(cls, url: str = ApplicationSettings.db_url) -> None:
+    def configure(cls, url: str = ApplicationSettings['db_url']) -> None:
         """Update the connection information for the underlying database
 
         Changes made here will affect the entire running application
