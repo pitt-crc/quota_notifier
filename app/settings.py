@@ -89,6 +89,13 @@ class SettingsSchema(BaseSettings):
         default='CRC Disk Usage Alert',
         description='Subject line for automatically generated emails.')
 
+    email_domain: str = Field(
+        title='User Email Address Domain',
+        type=str,
+        default='@pitt.edu',
+        description=('String to append to usernames when generating user email addresses. '
+                     'The leading `@` is optional.'))
+
     email_header: str = Field(
         title='Email Header Text',
         type=str,
