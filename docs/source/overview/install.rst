@@ -61,4 +61,4 @@ Running at least once per day is recommended.
 
 .. code-block::
 
-   0 9 * * 0-6 notifier
+   0 9 * * 0-6 notifier notify
