@@ -5,6 +5,7 @@ from unittest.mock import call, patch
 
 from app.disk_utils import GenericQuota
 from app.email import EmailTemplate
+from app.settings import ApplicationSettings
 from app.shell import User
 
 
@@ -68,3 +69,17 @@ class MessageSending(TestCase):
             mock_smtp.__enter__.mock_calls,
             [call(), call().send_message(email_message)]
         )
+
+
+class SendingViaUsername(TestCase):
+    """Test sending emails via username instead of address"""
+
+    @patch('smtplib.SMTP')
+    def test_domain_matches_settings(self, mock_smtp) -> None:
+        """Test the generated destination address matches application settings"""
+
+        user = User('myuser')
+        sent_message = EmailTemplate([]).send_to_user(user, mock_smtp)
+        username, domain = sent_message['To'].split('@')
+        self.assertEqual(user.username, username)
+        self.assertEqual(domain, ApplicationSettings.get('email_domain'))
