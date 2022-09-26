@@ -46,24 +46,22 @@ class MessageSending(TestCase):
     def test_fields_are_set(self, mock_smtp) -> None:
         """Test email fields (to, from, subject, body) are set in the sent email"""
 
-        from_address = 'fake_sender@fake_domain.com'
         to_address = 'fake_recipient@fake_domain.com'
-        subject = 'Subject line'
-        sent_message = self.template.send(to_address, from_address, subject, mock_smtp)
+        sent_message = self.template.send(to_address, mock_smtp)
 
         # The rstrip removes a newline character that is added automatically in the sent message
         body = sent_message.get_body().get_content().rstrip()
         self.assertEqual(self.template.message, body)
 
         self.assertEqual(to_address, sent_message['To'])
-        self.assertEqual(from_address, sent_message['From'])
-        self.assertEqual(subject, sent_message['Subject'])
+        self.assertEqual(EmailTemplate.email_from, sent_message['From'])
+        self.assertEqual(EmailTemplate.email_subject, sent_message['Subject'])
 
     @patch('smtplib.SMTP')
     def test_message_is_sent(self, mock_smtp) -> None:
         """Test the smtp server is given the email message to send"""
 
-        email_message = self.template.send('to@address.com', 'from@address.com', 'subject', mock_smtp)
+        email_message = self.template.send('to@address.com', mock_smtp)
 
         # Note that one of expected calls is ``call()`` from the __enter__ context manager
         self.assertEqual(

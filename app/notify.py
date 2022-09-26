@@ -10,7 +10,7 @@ from typing import Iterable
 
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
-from .settings import app_settings
+from .settings import ApplicationSettings
 from .shell import User
 
 
@@ -40,7 +40,7 @@ class UserNotifier:
         raise NotImplementedError
 
     @staticmethod
-    def _get_user_quotas(user: User) -> Iterable[AbstractQuota]:
+    def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
         """Return a tuple of quotas assigned to a given user
 
         Args:
@@ -50,7 +50,8 @@ class UserNotifier:
             A (possibly empty) tuple of quota objects
         """
 
-        return filter(None, (QuotaFactory(**fsys, user=user) for fsys in app_settings.file_systems))
+        all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings['file_systems'])
+        return filter(None, all_quotas)
 
     def notify_user(self, user: User) -> None:
         """Send email notifications to a single user
@@ -60,7 +61,7 @@ class UserNotifier:
         """
 
         pending_notifications = []
-        for quota in self._get_user_quotas(user):
+        for quota in self.get_user_quotas(user):
             next_threshold = self._get_next_threshold(quota)
             usage = (quota.size_used * 100) // quota.size_limit
             if usage >= next_threshold:

@@ -23,7 +23,7 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Optional
 
-from .settings import app_settings
+from .settings import ApplicationSettings
 from .shell import ShellCmd, User
 
 
@@ -104,7 +104,7 @@ class GenericQuota(AbstractQuota):
         """
 
         df_command = f"df {path}"
-        quota_info_list = ShellCmd(df_command).out.splitlines()
+        quota_info_list = ShellCmd(df_command, timeout=ApplicationSettings['disk_timeout']).out.splitlines()
         if not quota_info_list:
             return None
 
@@ -129,7 +129,8 @@ class BeegfsQuota(AbstractQuota):
             An instance of the parent class or None if the allocation does not exist
         """
 
-        quota_info_cmd = ShellCmd(f"beegfs-ctl --getquota --gid {user.group} --csv --storagepoolid={storage_pool}")
+        beegfs_command = f"beegfs-ctl --getquota --gid {user.group} --csv --storagepoolid={storage_pool}"
+        quota_info_cmd = ShellCmd(beegfs_command, timeout=ApplicationSettings['disk_timeout'])
         if quota_info_cmd.err:
             return None
 
@@ -154,7 +155,7 @@ class IhomeQuota(AbstractQuota):
         """
 
         # Get the information from Isilon
-        with app_settings.ihome_quota_path.open('r') as infile:
+        with ApplicationSettings['ihome_quota_path'].open('r') as infile:
             data = json.load(infile)
 
         persona = f"UID:{user.uid}"
