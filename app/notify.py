@@ -6,10 +6,15 @@ Module Contents
 """
 
 import pwd
-from typing import Iterable
+from bisect import bisect_right
+from typing import Iterable, Optional
+
+from sqlalchemy import delete, insert, select
+from sqlalchemy.orm import Session
 
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
+from .orm import DBConnection, Notification
 from .settings import ApplicationSettings
 from .shell import User
 
@@ -27,18 +32,6 @@ class UserNotifier:
 
         return (User(entry.pw_name) for entry in pwd.getpwall())
 
-    def _get_next_threshold(self, quota: AbstractQuota) -> int:
-        """Return the next threshold a user should be notified for
-
-        Args:
-            quota: The quota to get a threshold for
-
-        Returns:
-            A notification threshold between 0 and 100 (inclusive)
-        """
-
-        raise NotImplementedError
-
     @staticmethod
     def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
         """Return a tuple of quotas assigned to a given user
@@ -53,6 +46,47 @@ class UserNotifier:
         all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings['file_systems'])
         return filter(None, all_quotas)
 
+    @staticmethod
+    def _get_last_threshold(session: Session, quota: AbstractQuota) -> Optional[int]:
+        """Return the last threshold a user was notified for
+
+        Args:
+            session: Active database session for performing select queries
+            quota: The quota to get a threshold for
+
+        Returns:
+            The last notification or None if there was no notification
+        """
+
+        query = select(Notification).where(
+            Notification.username == quota.user.username,
+            Notification.file_system == quota.name)
+
+        last_notification = None
+        if db_entry := session.execute(query).scalars().first():
+            last_notification = db_entry.threshold
+
+        return last_notification
+
+    @staticmethod
+    def _get_next_threshold(quota: AbstractQuota) -> Optional[int]:
+        """Return the next threshold a user should be notified for
+
+        Args:
+            quota: The quota to get a threshold for
+
+        Returns:
+            The largest notification threshold that is less than the current usage or None
+        """
+
+        next_threshold = None
+        thresholds: list[int] = ApplicationSettings['thresholds']
+        if quota.percentage >= min(thresholds):
+            index = bisect_right(thresholds, quota.percentage)
+            next_threshold = thresholds[index - 1]
+
+        return next_threshold
+
     def notify_user(self, user: User) -> None:
         """Send email notifications to a single user
 
@@ -60,15 +94,52 @@ class UserNotifier:
             user: The user to send a notification to
         """
 
-        pending_notifications = []
-        for quota in self.get_user_quotas(user):
-            next_threshold = self._get_next_threshold(quota)
-            usage = (quota.size_used * 100) // quota.size_limit
-            if usage >= next_threshold:
-                pending_notifications.append(quota)
+        quotas_to_notify = []  # Track which quotas need email notifications
 
-        if pending_notifications:
-            EmailTemplate(pending_notifications).send_to_user(user)
+        with DBConnection.session() as session:
+            for quota in self.get_user_quotas(user):
+                last_threshold = self._get_last_threshold(session, quota)
+                next_threshold = self._get_next_threshold(quota)
+
+                # Usage is below the lowest threshold
+                # Clean up the DB and continue
+                if next_threshold is None:
+                    session.execute(
+                        delete(Notification).where(
+                            Notification.username == user.username,
+                            Notification.file_system == quota.name
+                        )
+                    )
+
+                # There was no previous notification
+                # Mark the quota as needing a notification and create a DB record
+                elif last_threshold is None:
+                    quotas_to_notify.append(quota)
+                    session.execute(
+                        insert(Notification).values(
+                            username=user.username,
+                            file_system=quota.name,
+                            threshold=next_threshold
+                        )
+                    )
+
+                # Quota usage dropped to a lower threshold
+                # Update the DB and do not issue a notification
+                elif next_threshold <= last_threshold:
+                    session.execute(
+                        insert(Notification).values(
+                            username=user.username,
+                            file_system=quota.name,
+                            threshold=next_threshold
+                        )
+                    )
+
+            # Issue email notification if necessary
+        if quotas_to_notify:
+            EmailTemplate(quotas_to_notify).send_to_user(user)
+
+        # Wait to commit until the email sends
+        session.commit()
 
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""

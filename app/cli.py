@@ -28,8 +28,14 @@ class Parser(ArgumentParser):
         """Define arguments for the command line interface"""
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
+        self.subparsers = self.add_subparsers(parser_class=ArgumentParser, dest='action')
+        self.subparsers.required = True
+
         self.add_argument('-v', '--version', action='version', version=__version__)
         self.add_argument('-c', '--configure', required=False, type=Path, help='path to application settings file')
+
+        notify = self.subparsers.add_parser('notify', help='send emails to users with pending notifications')
+        notify.set_defaults(action=UserNotifier.send_notifications)
 
 
 class Application:
@@ -39,7 +45,8 @@ class Application:
     def execute(cls) -> None:
         """Parse arguments and execute the application"""
 
-        args = Parser().parse_args()
-        ApplicationSettings.configure_from_file(args.configure)
+        args = vars(Parser().parse_args())
+        ApplicationSettings.configure_from_file(args['configure'])
         DBConnection.configure()
-        UserNotifier().send_notifications()
+
+        args.pop('action')(UserNotifier(), **args)

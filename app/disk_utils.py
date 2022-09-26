@@ -45,6 +45,12 @@ class AbstractQuota(object):
         self.size_used = size_used
         self.size_limit = size_limit
 
+    @property
+    def percentage(self) -> int:
+        """The current quota utilization as an integer percentage"""
+
+        return (self.size_used * 100) // self.size_limit
+
     @classmethod
     @abstractmethod
     def get_quota(cls, name: str, path: Path, user: User) -> Optional[AbstractQuota]:
@@ -83,8 +89,7 @@ class AbstractQuota(object):
     def __str__(self) -> str:
         used_str = self.bytes_to_str(self.size_used)
         limit_str = self.bytes_to_str(self.size_limit)
-        percentage = (self.size_used * 100) // self.size_limit
-        return f"{self.name}: {used_str} / {limit_str} ({percentage}%)"
+        return f"{self.name}: {used_str} / {limit_str} ({self.percentage}%)"
 
 
 class GenericQuota(AbstractQuota):

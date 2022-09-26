@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from sqlalchemy import Column, DateTime, Integer, MetaData, String, create_engine, func
+from sqlalchemy import Column, DateTime, Integer, MetaData, String, UniqueConstraint, create_engine, func
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 
@@ -30,12 +30,13 @@ class Notification(Base):
     """
 
     __tablename__ = 'notification'
+    __table_args__ = (UniqueConstraint('username', 'file_system', sqlite_on_conflict='REPLACE'),)
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, nullable=False)
-    datetime = Column(DateTime(timezone=True), nullable=False, onupdate=func.now())
-    threshold = Column(Integer, nullable=False)
     file_system = Column(String, nullable=False)
+    threshold = Column(Integer, nullable=False)
+    last_update = Column(DateTime, nullable=False, onupdate=func.now(), server_default=func.now())
 
     @validates('threshold')
     def validate_percent(self, key: str, value: int) -> int:
