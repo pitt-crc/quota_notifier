@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from app.cli import DEFAULT_SETTINGS_PATH, Parser
+from app.cli import DEFAULT_SETTINGS, Parser
 
 
 class ParserHelpData(TestCase):
@@ -29,7 +29,7 @@ class ParserDefaults(TestCase):
     def test_default_config_path(self) -> None:
         """Test the default settings path matches globally defined values"""
 
-        self.assertEqual(DEFAULT_SETTINGS_PATH, self.args.settings)
+        self.assertEqual(DEFAULT_SETTINGS, self.args.settings)
 
     def test_check_flag_false(self) -> None:
         """Test the ``check`` flag defaults to ``False``"""

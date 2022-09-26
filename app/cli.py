@@ -15,7 +15,7 @@ from .notify import UserNotifier
 from .orm import DBConnection
 from .settings import ApplicationSettings
 
-DEFAULT_SETTINGS_PATH = Path('/etc/notifier/settings.json')
+DEFAULT_SETTINGS = Path('/etc/notifier/settings.json')
 
 
 class Parser(ArgumentParser):
@@ -31,7 +31,7 @@ class Parser(ArgumentParser):
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
         self.add_argument('-v', '--version', action='version', version=__version__)
-        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH, help='path to application settings file')
+        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS, help='path to application settings')
         self.add_argument('--check', action='store_true', help='validate the application settings file')
 
 
@@ -54,7 +54,7 @@ class Application:
             ApplicationSettings.configure_from_file(args.settings)
 
         # Error if only checking the schema and no custom settings file exists
-        elif args.check and args.settings != DEFAULT_SETTINGS_PATH:
+        elif args.check and args.settings != DEFAULT_SETTINGS:
             raise FileNotFoundError(f'No settings file at {args.settings}')
 
         if not args.check:
@@ -74,5 +74,5 @@ class Application:
         try:
             cls.run(args)
 
-        except Exception as e:
-            parser.error(str(e))
+        except Exception as caught:
+            parser.error(str(caught))

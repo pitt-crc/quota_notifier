@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
-from app.cli import Application, DEFAULT_SETTINGS_PATH
+from app.cli import Application, DEFAULT_SETTINGS
 
 
 class SettingsValidation(TestCase):
@@ -30,5 +30,5 @@ class SettingsValidation(TestCase):
     def test_no_error_on_defaults() -> None:
         """Test no error is raised when validating default application settings"""
 
-        args = Namespace(check=True, settings=DEFAULT_SETTINGS_PATH)
+        args = Namespace(check=True, settings=DEFAULT_SETTINGS)
         Application.run(args)
