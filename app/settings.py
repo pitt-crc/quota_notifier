@@ -112,9 +112,7 @@ class SettingsSchema(BaseSettings):
 class ApplicationSettings:
     """Configurable application settings object
 
-    Application settings can be fetched (but not set) from the class instance
-    via dictionary style indexing.
-
+    Application settings can be fetched but not set from the class instance.
     Use the ``configure_from_file`` method to load settings from a settings file.
     """
 
