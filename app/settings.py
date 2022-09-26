@@ -73,7 +73,8 @@ class SettingsSchema(BaseSettings):
         title='Database Path',
         type=str,
         default=f'sqlite:///{DEFAULT_DB_PATH}',
-        description='Path to the application database. Default value varies by installed system but is always in the installation directory.')
+        description=('Path to the application database. '
+                     'Default value varies by installed system but is always in the installation directory.'))
 
     # Email notification settings
     email_from: str = Field(
