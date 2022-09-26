@@ -7,7 +7,7 @@ Module Contents
 ---------------
 """
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 from . import __version__
@@ -38,18 +38,41 @@ class Parser(ArgumentParser):
 class Application:
     """Entry point for instantiating and executing the application from the command line"""
 
-    @classmethod
-    def execute(cls) -> None:
-        """Parse arguments and execute the application"""
+    @staticmethod
+    def run(args: Namespace) -> None:
+        """Run the application using parsed commandline arguments
 
-        parser = Parser()
-        args = parser.parse_args()
+        Args:
+            args: Parsed commandline arguments
+
+        Raises:
+            FileNotFoundError: When the application settings file cannot be found
+        """
+
+        # Load application settings from disk and error on an invalid settings schema
         if args.settings.exists():
             ApplicationSettings.configure_from_file(args.settings)
 
-        elif args.check:
-            parser.error(f'FILE NOT FOUND: {args.settings}')
+        # Error if only checking the schema and no custom settings file exists
+        elif args.check and args.settings != DEFAULT_SETTINGS_PATH:
+            raise FileNotFoundError(f'No settings file at {args.settings}')
 
         if not args.check:
             DBConnection.configure()
-            args.pop('action')(UserNotifier(), **args)
+            UserNotifier().send_notifications()
+
+    @classmethod
+    def execute(cls) -> None:
+        """Parse arguments and execute the application
+
+        Raised exceptions are passed to STDERR via the argument parser.
+        """
+
+        parser = Parser()
+        args = parser.parse_args()
+
+        try:
+            cls.run(args)
+
+        except Exception as e:
+            parser.error(str(e))
