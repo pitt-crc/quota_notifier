@@ -5,9 +5,9 @@ Module Contents
 ---------------
 """
 
-
+import pwd
 from bisect import bisect_right
-from typing import Optional
+from typing import Iterable, Optional
 
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
@@ -15,15 +15,7 @@ from sqlalchemy.orm import Session
 from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
 from .orm import DBConnection, Notification
-from .settings import app_settings
-
-import pwd
-from typing import Iterable
-
-from .disk_utils import AbstractQuota, QuotaFactory
-from .email import EmailTemplate
 from .settings import ApplicationSettings
-
 from .shell import User
 
 
@@ -88,9 +80,10 @@ class UserNotifier:
         """
 
         next_threshold = None
-        if quota.percentage >= min(app_settings.thresholds):
-            index = bisect_right(app_settings.thresholds, quota.percentage)
-            next_threshold = app_settings.thresholds[index - 1]
+        thresholds: list[int] = ApplicationSettings['thresholds']
+        if quota.percentage >= min(thresholds):
+            index = bisect_right(thresholds, quota.percentage)
+            next_threshold = thresholds[index - 1]
 
         return next_threshold
 
