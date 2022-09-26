@@ -81,5 +81,6 @@ class SendingViaUsername(TestCase):
         user = User('myuser')
         sent_message = EmailTemplate([]).send_to_user(user, mock_smtp)
         username, domain = sent_message['To'].split('@')
+
         self.assertEqual(user.username, username)
-        self.assertEqual(domain, ApplicationSettings.get('email_domain'))
+        self.assertEqual('@' + domain, ApplicationSettings.get('email_domain'))

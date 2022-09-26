@@ -93,7 +93,8 @@ class SettingsSchema(BaseSettings):
         title='User Email Address Domain',
         type=str,
         default='@pitt.edu',
-        description='String to append to usernames when generating user email addresses.')
+        description=('String to append to usernames when generating user email addresses. '
+                     'The leading `@` is optional.'))
 
     email_header: str = Field(
         title='Email Header Text',

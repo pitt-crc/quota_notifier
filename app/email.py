@@ -37,7 +37,7 @@ class EmailTemplate:
             smtp: Optionally use a custom SMTP server
         """
 
-        domain = ApplicationSettings.get('email_domain')
+        domain = ApplicationSettings.get('email_domain').lstrip('@')
         return self.send(address=f'{user.username}@{domain}', smtp=smtp)
 
     def send(self, address: str, smtp: Optional[SMTP] = None) -> EmailMessage:
