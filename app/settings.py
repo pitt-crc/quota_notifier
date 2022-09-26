@@ -6,9 +6,9 @@ Module Contents
 """
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, Field
 
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
@@ -24,29 +24,74 @@ class FileSystemSchema(BaseSettings):
 class SettingsSchema(BaseSettings):
     """Defines the schema and default values for top level application settings"""
 
-    ihome_quota_path: Path = Path('/ihome/crc/scripts/ihome_quota.json')
-    thresholds: list[int, ...] = [75, 100]
-    file_systems: Optional[list[FileSystemSchema, ...]]
-    blacklist: Optional[set[str]]
-    disk_timeout: int = 30
+    ihome_quota_path = Field(
+        title='Ihome Quota Path',
+        type=Path,
+        default=Path('/ihome/crc/scripts/ihome_quota.json'),
+        description='Path to ihome storage information.')
+
+    thresholds = Field(
+        title='Notification Thresholds',
+        type=list[int],
+        default=[98, 100],
+        description='Usage percentages to issue notifications for.')
+
+    file_systems = Field(
+        title='Monitored File Systems',
+        type=list[FileSystemSchema],
+        default=list(),
+        description='List of additional settings that define which file systems to examine.')
+
+    blacklist = Field(
+        title='Blacklisted Users',
+        type=set[str],
+        default=set(),
+        description='Do not notify usernames in this list.')
+
+    disk_timeout = Field(
+        title='File System Timeout',
+        type=str,
+        default=30,
+        description='Give up on checking a file system after the given number of seconds.')
 
     # Settings for database connections
-    db_url: str = f'sqlite:///{DEFAULT_DB_PATH}'
+    db_url = Field(
+        title='Database Path',
+        type=str,
+        default=f'sqlite:///{DEFAULT_DB_PATH}',
+        description='Path to the application database. Default value varies by installed system but is always in the installation directory.')
 
     # Email notification settings
-    email_from: str = 'no-reply@crc.pitt.edu'
-    email_subject: str = 'CRC Disk Usage Alert'
-    email_header = (
-        "This is an automated notification concerning your storage quota on H2P. "
-        "One or more of your quotas have surpassed a usage threshold triggering an automated notification. "
-        "Your storage usage is as follows:")
+    email_from = Field(
+        title='Email From Address',
+        type=str,
+        default='no-reply@crc.pitt.edu',
+        description='From address for automatically generated emails.')
 
-    email_footer = (
-        "If you need additional storage, please submit a request via the CRC ticketing system. "
-        "Our storage policies are described in https://crc.pitt.edu/user-support/data-storage-guidelines.\n\n"
-        "Sincerely,\n"
-        "The CRC Quota Bot"
-    )
+    email_subject = Field(
+        title='Email Subject Line',
+        type=str,
+        default='CRC Disk Usage Alert',
+        description='Subject line for automatically generated emails.')
+
+    email_header = Field(
+        title='Email Header Text',
+        type=str,
+        description='Opening email paragraph(s) displayed before the automated quota summary.',
+        default=("This is an automated notification concerning your storage quota on H2P. "
+                 "One or more of your quotas have surpassed a usage threshold triggering an automated notification. "
+                 "Your storage usage is as follows:"))
+
+    email_footer = Field(
+        title='Email Footer Text',
+        type=str,
+        description='Ending email paragraph(s) displayed after the automated quota summary.',
+        default=(
+            "If you need additional storage, please submit a request via the CRC ticketing system. "
+            "Our storage policies are described in https://crc.pitt.edu/user-support/data-storage-guidelines.\n\n"
+            "Sincerely,\n"
+            "The CRC Quota Bot"
+        ))
 
 
 class ApplicationSettings:
