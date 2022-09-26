@@ -7,6 +7,6 @@ Commandline Interface
 ---------------------
 
 .. argparse::
-   :ref: app.main.Parser
+   :ref: app.cli.Parser
    :prog: notifier
 
