@@ -8,6 +8,7 @@ Quota Notification Utility
 
    Overview<self>
    overview/install
+   overview/settings
    overview/usage
 
 .. Put the most important modules towards the top.
