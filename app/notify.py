@@ -4,6 +4,8 @@ disk quotas and issuing pending notifications.
 Module Contents
 ---------------
 """
+
+import pwd
 from typing import Iterable
 
 from .disk_utils import AbstractQuota, QuotaFactory
@@ -16,17 +18,14 @@ class UserNotifier:
     """Issue and manage user disk quota notifications"""
 
     @staticmethod
-    def _get_users() -> tuple[User]:
+    def get_users() -> Iterable[User]:
         """Return a collection of users to check quotas for
 
         Returns:
             A tuple of ``User`` objects
         """
 
-        # When implementing this function remember to drop names from the blacklist
-        # app_settings.blacklist
-
-        raise NotImplementedError
+        return (User(entry.pw_name) for entry in pwd.getpwall())
 
     def _get_next_threshold(self, quota: AbstractQuota) -> int:
         """Return the next threshold a user should be notified for
@@ -74,5 +73,5 @@ class UserNotifier:
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
 
-        for user in self._get_users():
+        for user in self.get_users():
             self.notify_user(user)
