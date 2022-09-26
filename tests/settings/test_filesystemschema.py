@@ -13,15 +13,14 @@ class PathValidation(TestCase):
     def test_path_exists(self) -> None:
         """Test existing file paths do not raise errors"""
 
-        test_path = '/'
-        expected_return = Path(test_path)
-        self.assertEqual(expected_return, FileSystemSchema.validate_path(test_path))
+        test_path = Path('/')
+        self.assertEqual(test_path, FileSystemSchema.validate_path(test_path))
 
     def test_nonexistent_path(self) -> None:
         """Test a ``ValueError`` is raised for non-existant paths"""
 
         with self.assertRaises(ValueError):
-            FileSystemSchema.validate_path('/fake/path')
+            FileSystemSchema.validate_path(Path('/fake/path'))
 
 
 class TypeValidation(TestCase):

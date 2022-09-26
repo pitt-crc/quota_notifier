@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest import TestCase
 
 import app
-from app.settings import SettingsSchema
+from app.settings import FileSystemSchema, SettingsSchema
 
 
 class DefaultDBUrl(TestCase):
@@ -22,3 +22,17 @@ class DefaultDBUrl(TestCase):
         db_path = Path(SettingsSchema().db_url.replace('sqlite:///', ''))
         self.assertTrue(db_path.is_absolute(), msg='Database path is not absolute')
         self.assertEqual(app_path.parent, db_path.parent)
+
+
+class FileSystemValidation(TestCase):
+    """Test validation for the ``file_systmes`` field"""
+
+    def test_error_on_duplicate(self) -> None:
+        """Test a ``ValueError`` is raised when passed duplicate file systems"""
+
+        # Test objects have different names but the same path
+        system_1 = FileSystemSchema(name='name1', path=Path('/'), type='generic')
+        system_2 = FileSystemSchema(name='name2', path=system_1.path, type='generic')
+
+        with self.assertRaises(ValueError):
+            SettingsSchema.validate_file_systems([system_1, system_2])

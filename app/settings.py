@@ -22,10 +22,10 @@ class FileSystemSchema(BaseSettings):
         type=str,
         description='Human readable name for the file system')
 
-    path: str = Field(
+    path: Path = Field(
         ...,
         title='System Path',
-        type=str,
+        type=Path,
         description='Absolute path to the mounted file system')
 
     type: str = Field(
@@ -33,12 +33,13 @@ class FileSystemSchema(BaseSettings):
         title='System Type',
         type=str,
         description='Type of the file system')
+
     @validator('type')
     def validate_type(cls, value: str) -> str:
         """Ensure the given system type is a valid quota object
 
         Args:
-            value: The value to check
+            value: The value to validate
         """
 
         from .disk_utils import QuotaFactory
@@ -50,18 +51,17 @@ class FileSystemSchema(BaseSettings):
         return value
 
     @validator('path')
-    def validate_path(cls, value: str) -> Path:
+    def validate_path(cls, value: Path) -> Path:
         """Ensure the given system path exists
 
         Args:
-            value: The path value to check
+            value: The path value to validate
         """
 
-        path_obj = Path(value)
-        if not path_obj.exists():
+        if not value.exists():
             raise ValueError(f'File system does not exist {value}')
 
-        return path_obj
+        return value
 
 
 class SettingsSchema(BaseSettings):
@@ -143,6 +143,21 @@ class SettingsSchema(BaseSettings):
             "Sincerely,\n"
             "The CRC Quota Bot"
         ))
+
+    @validator('file_systems')
+    def validate_file_systems(cls, value: list[FileSystemSchema]) -> list[FileSystemSchema]:
+        """Ensure the given system path exists
+
+        Args:
+            value: The file systems to validate
+        """
+
+        paths = [fs.path for fs in value]
+        unique_paths = set(paths)
+        if len(unique_paths) != len(paths):
+            raise ValueError('File systems are do not have unique paths')
+
+        return value
 
 
 class ApplicationSettings:
