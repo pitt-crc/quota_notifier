@@ -24,7 +24,7 @@ class GetLastThreshold(TestCase):
 
         test_user = User('user1')
         test_filesystem = 'filesystem1'
-        test_threshold = ApplicationSettings['thresholds'][0]
+        test_threshold = ApplicationSettings.get('thresholds')[0]
 
         DBConnection.configure(url='sqlite:///:memory:')
         with DBConnection.session() as session:
@@ -52,23 +52,26 @@ class GetNextThreshold(TestCase):
     def test_usage_at_thresholds(self) -> None:
         """Test return matches a threshold when usage equals a threshold"""
 
-        quota = GenericQuota('filesystem1', User('user1'), ApplicationSettings['thresholds'][0], 100)
-        self.assertEqual(ApplicationSettings['thresholds'][0], UserNotifier.get_next_threshold(quota))
+        thresholds = ApplicationSettings.get('thresholds')
 
-        quota = GenericQuota('filesystem1', User('user1'), ApplicationSettings['thresholds'][-1], 100)
-        self.assertEqual(ApplicationSettings['thresholds'][-1], UserNotifier.get_next_threshold(quota))
+        quota = GenericQuota('filesystem1', User('user1'), thresholds[0], 100)
+        self.assertEqual(thresholds[0], UserNotifier.get_next_threshold(quota))
+
+        quota = GenericQuota('filesystem1', User('user1'), thresholds[-1], 100)
+        self.assertEqual(thresholds[-1], UserNotifier.get_next_threshold(quota))
 
     def test_usage_between_thresholds(self) -> None:
         """Test return is the lower threshold when usage is between two thresholds"""
 
-        usage = (ApplicationSettings['thresholds'][0] + ApplicationSettings['thresholds'][1]) // 2
+        thresholds = ApplicationSettings.get('thresholds')
+        usage = (thresholds[0] + thresholds[1]) // 2
         quota = GenericQuota('filesystem1', User('user1'), usage, 100)
-        self.assertEqual(ApplicationSettings['thresholds'][0], UserNotifier.get_next_threshold(quota))
+        self.assertEqual(thresholds[0], UserNotifier.get_next_threshold(quota))
 
     def test_usage_above_max_threshold(self) -> None:
         """Test return is the maximum threshold when usage exceeds the maximum threshold"""
 
-        max_threshold = max(ApplicationSettings['thresholds'])
+        max_threshold = max(ApplicationSettings.get('thresholds'))
         usage = max_threshold + 1
         quota = GenericQuota('filesystem1', User('user1'), usage, 100)
         self.assertEqual(max_threshold, UserNotifier.get_next_threshold(quota))

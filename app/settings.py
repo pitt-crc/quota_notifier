@@ -62,9 +62,9 @@ class SettingsSchema(BaseSettings):
         default=set(),
         description='Do not notify usernames in this list.')
 
-    disk_timeout: str = Field(
+    disk_timeout: int = Field(
         title='File System Timeout',
-        type=str,
+        type=int,
         default=30,
         description='Give up on checking a file system after the given number of seconds.')
 
@@ -130,5 +130,12 @@ class ApplicationSettings:
 
         cls._parsed_settings = SettingsSchema.parse_file(path)
 
-    def __class_getitem__(cls, item) -> Any:
+    @classmethod
+    def get(cls, item: str) -> Any:
+        """Return a value from application settings
+
+        Args:
+            item: The name of the settings value to retrieve
+        """
+
         return getattr(cls._parsed_settings, item)
