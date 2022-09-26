@@ -16,7 +16,7 @@ class GetLastThreshold(TestCase):
         """Test the first return value is ``None`` for a missing notification history"""
 
         quota = GenericQuota(name='fake', user=User('fake'), size_used=0, size_limit=100)
-        threshold = UserNotifier._get_next_threshold(quota)
+        threshold = UserNotifier.get_next_threshold(quota)
         self.assertIsNone(threshold)
 
     def test_matches_notification_history(self) -> None:
@@ -36,7 +36,7 @@ class GetLastThreshold(TestCase):
             session.commit()
 
         quota = GenericQuota(test_filesystem, test_user, 0, 100)
-        threshold = UserNotifier._get_last_threshold(session, quota)
+        threshold = UserNotifier.get_last_threshold(session, quota)
         self.assertEqual(test_threshold, threshold)
 
 
@@ -47,23 +47,23 @@ class GetNextThreshold(TestCase):
         """Test return is ``None`` when usage is below the minimum threshold"""
 
         quota = GenericQuota('filesystem1', User('user1'), 0, 100)
-        self.assertIsNone(UserNotifier._get_next_threshold(quota))
+        self.assertIsNone(UserNotifier.get_next_threshold(quota))
 
     def test_usage_at_thresholds(self) -> None:
         """Test return matches a threshold when usage equals a threshold"""
 
         quota = GenericQuota('filesystem1', User('user1'), ApplicationSettings['thresholds'][0], 100)
-        self.assertEqual(ApplicationSettings['thresholds'][0], UserNotifier._get_next_threshold(quota))
+        self.assertEqual(ApplicationSettings['thresholds'][0], UserNotifier.get_next_threshold(quota))
 
         quota = GenericQuota('filesystem1', User('user1'), ApplicationSettings['thresholds'][-1], 100)
-        self.assertEqual(ApplicationSettings['thresholds'][-1], UserNotifier._get_next_threshold(quota))
+        self.assertEqual(ApplicationSettings['thresholds'][-1], UserNotifier.get_next_threshold(quota))
 
     def test_usage_between_thresholds(self) -> None:
         """Test return is the lower threshold when usage is between two thresholds"""
 
         usage = (ApplicationSettings['thresholds'][0] + ApplicationSettings['thresholds'][1]) // 2
         quota = GenericQuota('filesystem1', User('user1'), usage, 100)
-        self.assertEqual(ApplicationSettings['thresholds'][0], UserNotifier._get_next_threshold(quota))
+        self.assertEqual(ApplicationSettings['thresholds'][0], UserNotifier.get_next_threshold(quota))
 
     def test_usage_above_max_threshold(self) -> None:
         """Test return is the maximum threshold when usage exceeds the maximum threshold"""
@@ -71,4 +71,4 @@ class GetNextThreshold(TestCase):
         max_threshold = max(ApplicationSettings['thresholds'])
         usage = max_threshold + 1
         quota = GenericQuota('filesystem1', User('user1'), usage, 100)
-        self.assertEqual(max_threshold, UserNotifier._get_next_threshold(quota))
+        self.assertEqual(max_threshold, UserNotifier.get_next_threshold(quota))

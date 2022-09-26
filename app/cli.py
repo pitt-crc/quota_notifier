@@ -15,6 +15,8 @@ from .notify import UserNotifier
 from .orm import DBConnection
 from .settings import ApplicationSettings
 
+DEFAULT_SETTINGS_PATH = Path('/etc/notifier/settings.json')
+
 
 class Parser(ArgumentParser):
     """Responsible for defining the commandline interface and parsing commandline arguments"""
@@ -28,14 +30,9 @@ class Parser(ArgumentParser):
         """Define arguments for the command line interface"""
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
-        self.subparsers = self.add_subparsers(parser_class=ArgumentParser, dest='action')
-        self.subparsers.required = True
-
         self.add_argument('-v', '--version', action='version', version=__version__)
-        self.add_argument('-c', '--configure', required=False, type=Path, help='path to application settings file')
-
-        notify = self.subparsers.add_parser('notify', help='send emails to users with pending notifications')
-        notify.set_defaults(action=UserNotifier.send_notifications)
+        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH, help='path to application settings file')
+        self.add_argument('--check', action='store_true', help='validate the application settings file')
 
 
 class Application:
@@ -45,8 +42,14 @@ class Application:
     def execute(cls) -> None:
         """Parse arguments and execute the application"""
 
-        args = vars(Parser().parse_args())
-        ApplicationSettings.configure_from_file(args['configure'])
-        DBConnection.configure()
+        parser = Parser()
+        args = parser.parse_args()
+        if args.settings.exists():
+            ApplicationSettings.configure_from_file(args.settings)
 
-        args.pop('action')(UserNotifier(), **args)
+        elif args.check:
+            parser.error(f'FILE NOT FOUND: {args.settings}')
+
+        if not args.check:
+            DBConnection.configure()
+            args.pop('action')(UserNotifier(), **args)

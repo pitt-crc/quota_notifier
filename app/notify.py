@@ -47,7 +47,7 @@ class UserNotifier:
         return filter(None, all_quotas)
 
     @staticmethod
-    def _get_last_threshold(session: Session, quota: AbstractQuota) -> Optional[int]:
+    def get_last_threshold(session: Session, quota: AbstractQuota) -> Optional[int]:
         """Return the last threshold a user was notified for
 
         Args:
@@ -69,7 +69,7 @@ class UserNotifier:
         return last_notification
 
     @staticmethod
-    def _get_next_threshold(quota: AbstractQuota) -> Optional[int]:
+    def get_next_threshold(quota: AbstractQuota) -> Optional[int]:
         """Return the next threshold a user should be notified for
 
         Args:
@@ -88,7 +88,7 @@ class UserNotifier:
         return next_threshold
 
     def notify_user(self, user: User) -> None:
-        """Send email notifications to a single user
+        """Send any pending email notifications the given user
 
         Args:
             user: The user to send a notification to
@@ -98,8 +98,8 @@ class UserNotifier:
 
         with DBConnection.session() as session:
             for quota in self.get_user_quotas(user):
-                last_threshold = self._get_last_threshold(session, quota)
-                next_threshold = self._get_next_threshold(quota)
+                last_threshold = self.get_last_threshold(session, quota)
+                next_threshold = self.get_next_threshold(quota)
 
                 # Usage is below the lowest threshold
                 # Clean up the DB and continue
