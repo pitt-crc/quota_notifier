@@ -16,65 +16,79 @@ DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 class FileSystemSchema(BaseSettings):
     """Defines the schema settings related to an individual file system"""
 
-    name: str
-    path: str
-    type: str
+    name: str = Field(
+        ...,
+        title='System Name',
+        type=str,
+        description='Human readable name for the file system')
+
+    path: str = Field(
+        ...,
+        title='System Path',
+        type=str,
+        description='Absolute path to the mounted file system')
+
+    type: str = Field(
+        ...,
+        title='System Type',
+        type=str,
+        description='Type of the file system')
 
 
 class SettingsSchema(BaseSettings):
     """Defines the schema and default values for top level application settings"""
 
-    ihome_quota_path = Field(
+    ihome_quota_path: Path = Field(
         title='Ihome Quota Path',
         type=Path,
         default=Path('/ihome/crc/scripts/ihome_quota.json'),
         description='Path to ihome storage information.')
 
-    thresholds = Field(
+    thresholds: list[int] = Field(
         title='Notification Thresholds',
         type=list[int],
         default=[98, 100],
         description='Usage percentages to issue notifications for.')
 
-    file_systems = Field(
+    file_systems: list[FileSystemSchema] = Field(
         title='Monitored File Systems',
         type=list[FileSystemSchema],
         default=list(),
         description='List of additional settings that define which file systems to examine.')
 
-    blacklist = Field(
+    blacklist: set[str] = Field(
         title='Blacklisted Users',
         type=set[str],
         default=set(),
         description='Do not notify usernames in this list.')
 
-    disk_timeout = Field(
+    disk_timeout: str = Field(
         title='File System Timeout',
         type=str,
         default=30,
         description='Give up on checking a file system after the given number of seconds.')
 
     # Settings for database connections
-    db_url = Field(
+    db_url: str = Field(
         title='Database Path',
         type=str,
         default=f'sqlite:///{DEFAULT_DB_PATH}',
         description='Path to the application database. Default value varies by installed system but is always in the installation directory.')
 
     # Email notification settings
-    email_from = Field(
+    email_from: str = Field(
         title='Email From Address',
         type=str,
         default='no-reply@crc.pitt.edu',
         description='From address for automatically generated emails.')
 
-    email_subject = Field(
+    email_subject: str = Field(
         title='Email Subject Line',
         type=str,
         default='CRC Disk Usage Alert',
         description='Subject line for automatically generated emails.')
 
-    email_header = Field(
+    email_header: str = Field(
         title='Email Header Text',
         type=str,
         description='Opening email paragraph(s) displayed before the automated quota summary.',
@@ -82,7 +96,7 @@ class SettingsSchema(BaseSettings):
                  "One or more of your quotas have surpassed a usage threshold triggering an automated notification. "
                  "Your storage usage is as follows:"))
 
-    email_footer = Field(
+    email_footer: str = Field(
         title='Email Footer Text',
         type=str,
         description='Ending email paragraph(s) displayed after the automated quota summary.',
