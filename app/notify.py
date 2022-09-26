@@ -43,7 +43,7 @@ class UserNotifier:
             A (possibly empty) tuple of quota objects
         """
 
-        all_quotas = (QuotaFactory(**quota_definition, user=user) for quota_definition in app_settings)
+        all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings['file_systems'])
         return filter(None, all_quotas)
 
     @staticmethod
