@@ -5,6 +5,7 @@ Module Contents
 ---------------
 """
 
+
 from bisect import bisect_right
 from typing import Optional
 
@@ -15,6 +16,14 @@ from .disk_utils import AbstractQuota, QuotaFactory
 from .email import EmailTemplate
 from .orm import DBConnection, Notification
 from .settings import app_settings
+
+import pwd
+from typing import Iterable
+
+from .disk_utils import AbstractQuota, QuotaFactory
+from .email import EmailTemplate
+from .settings import ApplicationSettings
+
 from .shell import User
 
 
@@ -22,20 +31,17 @@ class UserNotifier:
     """Issue and manage user disk quota notifications"""
 
     @staticmethod
-    def get_users() -> tuple[User]:
+    def get_users() -> Iterable[User]:
         """Return a collection of users to check quotas for
 
         Returns:
             A tuple of ``User`` objects
         """
 
-        # When implementing this function remember to drop names from the blacklist
-        # app_settings.blacklist
-
-        raise NotImplementedError
+        return (User(entry.pw_name) for entry in pwd.getpwall())
 
     @staticmethod
-    def get_user_quotas(user: User) -> tuple[AbstractQuota]:
+    def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
         """Return a tuple of quotas assigned to a given user
 
         Args:
@@ -46,7 +52,7 @@ class UserNotifier:
         """
 
         all_quotas = (QuotaFactory(**quota_definition, user=user) for quota_definition in app_settings)
-        return tuple(filter(None, all_quotas))
+        return filter(None, all_quotas)
 
     @staticmethod
     def _get_last_threshold(session: Session, quota: AbstractQuota) -> Optional[int]:

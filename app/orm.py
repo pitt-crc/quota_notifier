@@ -13,7 +13,7 @@ from sqlalchemy import Column, DateTime, Integer, MetaData, String, UniqueConstr
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 
-from app.settings import app_settings
+from app.settings import ApplicationSettings
 
 Base = declarative_base()
 
@@ -72,7 +72,7 @@ class DBConnection:
     session: Callable[[], Session] = None
 
     @classmethod
-    def configure(cls, url: str = app_settings.db_url) -> None:
+    def configure(cls, url: str = ApplicationSettings['db_url']) -> None:
         """Update the connection information for the underlying database
 
         Changes made here will affect the entire running application
