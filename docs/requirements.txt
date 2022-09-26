@@ -1,4 +1,6 @@
 sphinx
 sphinx-argparse
 sphinx-copybutton
+sphinx-pydantic
 sphinx-rtd-theme
+sphinx-jsonschema==1.15
