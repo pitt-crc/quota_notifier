@@ -8,7 +8,7 @@ Module Contents
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
@@ -33,6 +33,35 @@ class FileSystemSchema(BaseSettings):
         title='System Type',
         type=str,
         description='Type of the file system')
+    @validator('type')
+    def validate_type(cls, value: str) -> str:
+        """Ensure the given system type is a valid quota object
+
+        Args:
+            value: The value to check
+        """
+
+        from .disk_utils import QuotaFactory
+
+        valid_types = list(QuotaFactory.quota_types.keys())
+        if value not in valid_types:
+            raise ValueError(f'File system types must be one of {valid_types}')
+
+        return value
+
+    @validator('path')
+    def validate_path(cls, value: str) -> Path:
+        """Ensure the given system path exists
+
+        Args:
+            value: The path value to check
+        """
+
+        path_obj = Path(value)
+        if not path_obj.exists():
+            raise ValueError(f'File system does not exist {value}')
+
+        return path_obj
 
 
 class SettingsSchema(BaseSettings):

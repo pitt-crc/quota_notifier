@@ -1,4 +1,4 @@
-"""Tests for the ``Settings`` class"""
+"""Tests for the ``SettingsSchema`` class"""
 
 from pathlib import Path
 from unittest import TestCase
