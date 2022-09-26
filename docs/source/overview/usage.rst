@@ -1,20 +1,26 @@
 Usage Example
 =============
 
+To send any pending email notifications, call ``notifier`` utility:
+
+.. code-block:: bash
+
+   notifier
+
+
+By default, the application looks for application settings at ``/etc/notifier/settings.json``.
+This path can be customized via the ``-s`` argument:
+
+.. code-block::
+
+      notifier -s [SETTINGS-PATH]
+
 The ``notifier`` utility will automatically validate the application settings file before issuing email notifications.
-However, the settings file can also be validated at will by running:
+However, the settings file can be validated without issuing email notifications by running:
 
 .. code-block:: bash
 
-   notifier -c [SETTINGS-PATH] check
-
-If the setting file path is not provided, the system defaults to the path ``/etc/notifier/settings.json``.
-
-To send any pending email notifications, use the ``notify`` command:
-
-.. code-block:: bash
-
-   notifier -c [SETTINGS-PATH] notify
+   notifier --check
 
 Full documentation for the commandline interface is provided below.
 
