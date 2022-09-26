@@ -43,7 +43,7 @@ class UserNotifier:
             A (possibly empty) tuple of quota objects
         """
 
-        all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings['file_systems'])
+        all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings.get('file_systems'))
         return filter(None, all_quotas)
 
     @staticmethod
@@ -80,7 +80,7 @@ class UserNotifier:
         """
 
         next_threshold = None
-        thresholds: list[int] = ApplicationSettings['thresholds']
+        thresholds: list[int] = ApplicationSettings.get('thresholds')
         if quota.percentage >= min(thresholds):
             index = bisect_right(thresholds, quota.percentage)
             next_threshold = thresholds[index - 1]

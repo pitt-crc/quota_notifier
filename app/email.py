@@ -18,10 +18,10 @@ from app.shell import User
 class EmailTemplate:
     """Formattable email template to notify users about their quota"""
 
-    email_subject = ApplicationSettings['email_subject']
-    email_from = ApplicationSettings['email_from']
-    header = ApplicationSettings['email_header']
-    footer = ApplicationSettings['email_footer']
+    email_subject = ApplicationSettings.get('email_subject')
+    email_from = ApplicationSettings.get('email_from')
+    header = ApplicationSettings.get('email_header')
+    footer = ApplicationSettings.get('email_footer')
 
     def __init__(self, quotas: Collection[AbstractQuota]) -> None:
         """Generate a formatted instance of the email template"""

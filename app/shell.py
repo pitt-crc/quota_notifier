@@ -8,6 +8,8 @@ from shlex import split
 from subprocess import PIPE, Popen
 from typing import Optional
 
+from app.settings import ApplicationSettings
+
 
 class ShellCmd:
     """Execute commands using the underlying shell
@@ -16,7 +18,7 @@ class ShellCmd:
     attributes respectively.
     """
 
-    def __init__(self, cmd: str, timeout: Optional[int] = None) -> None:
+    def __init__(self, cmd: str, timeout: Optional[int] = ApplicationSettings.get('disk_timeout')) -> None:
         """Execute the given command in the underlying shell
 
         Args:
