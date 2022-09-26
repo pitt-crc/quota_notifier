@@ -8,7 +8,7 @@ Module Contents
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
@@ -22,10 +22,10 @@ class FileSystemSchema(BaseSettings):
         type=str,
         description='Human readable name for the file system')
 
-    path: str = Field(
+    path: Path = Field(
         ...,
         title='System Path',
-        type=str,
+        type=Path,
         description='Absolute path to the mounted file system')
 
     type: str = Field(
@@ -33,6 +33,35 @@ class FileSystemSchema(BaseSettings):
         title='System Type',
         type=str,
         description='Type of the file system')
+
+    @validator('type')
+    def validate_type(cls, value: str) -> str:
+        """Ensure the given system type is a valid quota object
+
+        Args:
+            value: The value to validate
+        """
+
+        from .disk_utils import QuotaFactory
+
+        valid_types = list(QuotaFactory.quota_types.keys())
+        if value not in valid_types:
+            raise ValueError(f'File system types must be one of {valid_types}')
+
+        return value
+
+    @validator('path')
+    def validate_path(cls, value: Path) -> Path:
+        """Ensure the given system path exists
+
+        Args:
+            value: The path value to validate
+        """
+
+        if not value.exists():
+            raise ValueError(f'File system does not exist {value}')
+
+        return value
 
 
 class SettingsSchema(BaseSettings):
@@ -114,6 +143,21 @@ class SettingsSchema(BaseSettings):
             "Sincerely,\n"
             "The CRC Quota Bot"
         ))
+
+    @validator('file_systems')
+    def validate_file_systems(cls, value: list[FileSystemSchema]) -> list[FileSystemSchema]:
+        """Ensure the given system path exists
+
+        Args:
+            value: The file systems to validate
+        """
+
+        paths = [fs.path for fs in value]
+        unique_paths = set(paths)
+        if len(unique_paths) != len(paths):
+            raise ValueError('File systems are do not have unique paths')
+
+        return value
 
 
 class ApplicationSettings:
