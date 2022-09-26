@@ -50,7 +50,7 @@ Once the application has been configured, you can check the configuration file i
 
 .. code-block:: bash
 
-   notifier check
+   notifier --check
 
 Issuing Automated Notifications
 -------------------------------
@@ -61,4 +61,4 @@ Running at least once per day is recommended.
 
 .. code-block::
 
-   0 9 * * 0-6 notifier notify
+   0 9 * * 0-6 notifier

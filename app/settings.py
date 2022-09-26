@@ -13,8 +13,8 @@ from pydantic import BaseSettings
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
 
-class FileSystem(BaseSettings):
-    """Settings for an individual file system"""
+class FileSystemSchema(BaseSettings):
+    """Defines the schema settings related to an individual file system"""
 
     name: str
     path: str
@@ -25,8 +25,8 @@ class SettingsSchema(BaseSettings):
     """Defines the schema and default values for top level application settings"""
 
     ihome_quota_path: Path = Path('/ihome/crc/scripts/ihome_quota.json')
-    thresholds: tuple[int, ...] = (75, 100)
-    file_systems: Optional[tuple[FileSystem, ...]]
+    thresholds: list[int, ...] = [75, 100]
+    file_systems: Optional[list[FileSystemSchema, ...]]
     blacklist: Optional[set[str]]
     disk_timeout: int = 30
 

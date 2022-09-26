@@ -7,13 +7,15 @@ Module Contents
 ---------------
 """
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 from . import __version__
 from .notify import UserNotifier
 from .orm import DBConnection
 from .settings import ApplicationSettings
+
+DEFAULT_SETTINGS = Path('/etc/notifier/settings.json')
 
 
 class Parser(ArgumentParser):
@@ -28,25 +30,49 @@ class Parser(ArgumentParser):
         """Define arguments for the command line interface"""
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
-        self.subparsers = self.add_subparsers(parser_class=ArgumentParser, dest='action')
-        self.subparsers.required = True
-
         self.add_argument('-v', '--version', action='version', version=__version__)
-        self.add_argument('-c', '--configure', required=False, type=Path, help='path to application settings file')
-
-        notify = self.subparsers.add_parser('notify', help='send emails to users with pending notifications')
-        notify.set_defaults(action=UserNotifier.send_notifications)
+        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS, help='path to application settings')
+        self.add_argument('--check', action='store_true', help='validate the application settings file')
 
 
 class Application:
     """Entry point for instantiating and executing the application from the command line"""
 
+    @staticmethod
+    def run(args: Namespace) -> None:
+        """Run the application using parsed commandline arguments
+
+        Args:
+            args: Parsed commandline arguments
+
+        Raises:
+            FileNotFoundError: When the application settings file cannot be found
+        """
+
+        # Load application settings from disk and error on an invalid settings schema
+        if args.settings.exists():
+            ApplicationSettings.configure_from_file(args.settings)
+
+        # Error if only checking the schema and no custom settings file exists
+        elif args.check and args.settings != DEFAULT_SETTINGS:
+            raise FileNotFoundError(f'No settings file at {args.settings}')
+
+        if not args.check:
+            DBConnection.configure()
+            UserNotifier().send_notifications()
+
     @classmethod
     def execute(cls) -> None:
-        """Parse arguments and execute the application"""
+        """Parse arguments and execute the application
 
-        args = vars(Parser().parse_args())
-        ApplicationSettings.configure_from_file(args['configure'])
-        DBConnection.configure()
+        Raised exceptions are passed to STDERR via the argument parser.
+        """
 
-        args.pop('action')(UserNotifier(), **args)
+        parser = Parser()
+        args = parser.parse_args()
+
+        try:
+            cls.run(args)
+
+        except Exception as caught:
+            parser.error(str(caught))
