@@ -1,13 +1,13 @@
-name: Deploy Documentation
+name: Test/Deploy Documentation
 
 on:
-  workflow_dispatch:
+  pull_request:
   push:
     branches: [ main ]
 
 jobs:
   Build:
-    name: Deploy Documentation
+    name: Build Documentation
     runs-on: ubuntu-latest
     
     steps:
@@ -30,6 +30,7 @@ jobs:
           documentation_path: docs/source
 
       - name: Push changes
+        if: github.event_name == 'push'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
