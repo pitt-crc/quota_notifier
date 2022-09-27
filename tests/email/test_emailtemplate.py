@@ -10,7 +10,11 @@ from app.shell import User
 
 
 class TemplateFormatting(TestCase):
-    """Test the formatting of the email template with quota information"""
+    """Test the formatting of the email template with quota information
+
+    These tests don't enforce the overall formatting of the template, but do
+    ensure all the necessary content is present.
+    """
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -32,6 +36,11 @@ class TemplateFormatting(TestCase):
         self.assertTrue(
             self.template.message.endswith(EmailTemplate.footer),
             'Email message does not end with template footer.')
+
+    def test_includes_quota_information(self) -> None:
+        """Test the formatted message include quota information"""
+
+        self.assertIn(str(self.quota), self.template.message)
 
 
 class MessageSending(TestCase):

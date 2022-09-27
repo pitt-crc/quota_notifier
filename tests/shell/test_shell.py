@@ -1,4 +1,5 @@
 """Tests for the ``Shell`` class"""
+
 import subprocess
 from unittest import TestCase
 
@@ -16,10 +17,10 @@ class EmptyCommandError(TestCase):
 
 
 class FileDescriptors(TestCase):
-    """Test STDOUT and STDERR are captured and returned"""
+    """Test STDOUT and STDERR are captured as attributes"""
 
     def test_capture_on_success(self) -> None:
-        """Test for command writing to STDOUT"""
+        """Test STDOUT is captured in the ``.out`` attribute"""
 
         test_message = 'hello world'
         cmd = ShellCmd(f"echo '{test_message}'")
@@ -27,7 +28,7 @@ class FileDescriptors(TestCase):
         self.assertFalse(cmd.err)
 
     def test_capture_on_err(self) -> None:
-        """Test for command writing to STDERR"""
+        """Test STDERR is captured in the ``.err`` attribute"""
 
         cmd = ShellCmd("ls fake_dr")
         self.assertFalse(cmd.out)
