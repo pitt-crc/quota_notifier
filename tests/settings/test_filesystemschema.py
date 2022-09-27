@@ -1,4 +1,4 @@
-"""Tests for the ``SettingsSchema`` class"""
+"""Tests for the ``FileSystemSchema`` class"""
 
 from pathlib import Path
 from unittest import TestCase
