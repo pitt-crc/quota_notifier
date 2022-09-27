@@ -54,7 +54,10 @@ class EmailTemplate:
         email["From"] = self.email_from
         email["To"] = address
 
-        with smtp or SMTP("localhost") as smtp_server:
+        with smtp or SMTP(
+                host=ApplicationSettings.get('smtp_host'),
+                port=ApplicationSettings.get('smtp_port')
+        ) as smtp_server:
             smtp_server.send_message(email)
 
         return email

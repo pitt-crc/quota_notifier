@@ -103,6 +103,21 @@ class SettingsSchema(BaseSettings):
         default=30,
         description='Give up on checking a file system after the given number of seconds.')
 
+    # Settings for the smtp port
+    smtp_server: str = Field(
+        title='SMTP Server Host Name',
+        type=str,
+        default='localhost',
+        description='Name of the remote SMTP host'
+    )
+
+    smtp_port: int = Field(
+        title='SMTP Port Number',
+        type=int,
+        default=0,
+        description='Port for the SMTP server'
+    )
+
     # Settings for database connections
     db_url: str = Field(
         title='Database Path',
