@@ -39,14 +39,7 @@ class ShellCmd:
 
 
 class User:
-    """Fetch identifying information for a given username
-
-    Attributes:
-        username: The user's username
-        group:  The user's primary group name
-        uid: The user identifier
-        gid: The primary group identifier
-    """
+    """Fetch identifying information for a given username"""
 
     def __init__(self, username: str) -> None:
         """Fetch identifying information for the given username
@@ -55,7 +48,20 @@ class User:
             username: The name of the user
         """
 
-        self.username = username
-        self.group = ShellCmd(f"id -gn {username}").out
-        self.uid = ShellCmd(f"id -u {username}").out
-        self.gid = ShellCmd(f"id -g {username}").out
+        self._username = username
+
+    @property
+    def username(self) -> str:
+        return self._username
+
+    @property
+    def group(self) -> str:
+        return ShellCmd(f"id -gn {self._username}").out
+
+    @property
+    def uid(self) -> int:
+        return int(ShellCmd(f"id -u {self._username}").out)
+
+    @property
+    def gid(self) -> int:
+        return int(ShellCmd(f"id -g {self._username}").out)
