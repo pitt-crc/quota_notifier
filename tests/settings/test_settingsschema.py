@@ -1,5 +1,5 @@
 """Tests for the ``SettingsSchema`` class"""
-
+import tempfile
 from pathlib import Path
 from unittest import TestCase
 
@@ -27,12 +27,23 @@ class DefaultDBUrl(TestCase):
 class FileSystemValidation(TestCase):
     """Test validation for the ``file_systmes`` field"""
 
-    def test_error_on_duplicate(self) -> None:
-        """Test a ``ValueError`` is raised when passed duplicate file systems"""
+    def test_error_on_duplicate_path(self) -> None:
+        """Test a ``ValueError`` is raised when file systems have duplicate paths"""
 
         # Test objects have different names but the same path
         system_1 = FileSystemSchema(name='name1', path=Path('/'), type='generic')
         system_2 = FileSystemSchema(name='name2', path=system_1.path, type='generic')
 
-        with self.assertRaises(ValueError):
-            SettingsSchema.validate_file_systems([system_1, system_2])
+        with self.assertRaisesRegex(ValueError, 'File systems do not have unique paths'):
+            SettingsSchema.validate_unique_file_systems([system_1, system_2])
+
+    def test_error_on_duplicate_name(self) -> None:
+        """Test a ``ValueError`` is raised when file systems have duplicate names"""
+
+        with tempfile.TemporaryDirectory() as tempdir1, tempfile.TemporaryDirectory() as tempdir2:
+            # Test objects have different names but the same path
+            system_1 = FileSystemSchema(name='name', path=Path(tempdir1), type='generic')
+            system_2 = FileSystemSchema(name=system_1.name, path=Path(tempdir2), type='generic')
+
+            with self.assertRaisesRegex(ValueError, 'File systems do not have unique names'):
+                SettingsSchema.validate_unique_file_systems([system_1, system_2])
