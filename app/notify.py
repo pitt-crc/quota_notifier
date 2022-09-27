@@ -30,7 +30,8 @@ class UserNotifier:
             A tuple of ``User`` objects
         """
 
-        return (User(entry.pw_name) for entry in pwd.getpwall())
+        blacklist = ApplicationSettings.get('blacklist')
+        return (User(entry.pw_name) for entry in pwd.getpwall() if entry.pw_name not in blacklist)
 
     @staticmethod
     def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
