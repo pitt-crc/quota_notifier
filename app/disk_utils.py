@@ -197,4 +197,4 @@ class QuotaFactory:
         if quota_type not in cls.quota_types:
             raise ValueError(f'Unknown quota type {quota_type}')
 
-        return cls.quota_types[quota_type](name, path, user, **kwargs)
+        return cls.quota_types[quota_type].get_quota(name, path, user, **kwargs)
