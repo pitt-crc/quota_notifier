@@ -106,7 +106,7 @@ class GetNextThreshold(TestCase):
         self.assertEqual(max_threshold, UserNotifier.get_next_threshold(quota))
 
 
-@patch('smtplib.SMTP')
+@patch('app.email.SMTP')
 class NotificationHistory(TestCase):
     """Test database updates when calling ``notify_user``"""
 
