@@ -1,6 +1,7 @@
 """Tests for the ``UserNotifier`` class"""
 
 from unittest import TestCase
+from unittest.mock import patch
 
 from app.disk_utils import GenericQuota
 from app.notify import UserNotifier
@@ -75,3 +76,29 @@ class GetNextThreshold(TestCase):
         usage = max_threshold + 1
         quota = GenericQuota('filesystem1', User('user1'), usage, 100)
         self.assertEqual(max_threshold, UserNotifier.get_next_threshold(quota))
+
+
+@patch('smtplib.SMTP')
+class NotificationHistory(TestCase):
+    """Test database updates when calling ``notify_user``"""
+
+    def setUp(self) -> None:
+        """Set up a mock user and mock DB"""
+
+        self.mock_user = User('mock')
+        DBConnection.configure('sqlite:///:memory:')
+
+    def test_old_notifications_deleted(self, *args) -> None:
+        """Test old notifications are deleted from the database"""
+
+        raise NotImplementedError
+
+    def test_notification_history_saved(self, *args) -> None:
+        """Test new notifications are recorded in the database"""
+
+        raise NotImplementedError
+
+    def test_reduced_quotas_updated(self, *args) -> None:
+        """Test records are updated for quotas that have dropped to a new threshold"""
+
+        raise NotImplementedError

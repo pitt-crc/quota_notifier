@@ -98,12 +98,9 @@ class UserNotifier:
 
         with DBConnection.session() as session:
             for quota in self.get_user_quotas(user):
-                last_threshold = self.get_last_threshold(session, quota)
-                next_threshold = self.get_next_threshold(quota)
-
                 # Usage is below the lowest threshold
                 # Clean up the DB and continue
-                if next_threshold is None:
+                if next_threshold := self.get_next_threshold(quota) is None:
                     session.execute(
                         delete(Notification).where(
                             Notification.username == user.username,
@@ -113,7 +110,7 @@ class UserNotifier:
 
                 # There was no previous notification
                 # Mark the quota as needing a notification and create a DB record
-                elif last_threshold is None:
+                elif last_threshold := self.get_last_threshold(session, quota) is None:
                     quotas_to_notify.append(quota)
                     session.execute(
                         insert(Notification).values(
@@ -134,7 +131,7 @@ class UserNotifier:
                         )
                     )
 
-            # Issue email notification if necessary
+        # Issue email notification if necessary
         if quotas_to_notify:
             EmailTemplate(quotas_to_notify).send_to_user(user)
 
