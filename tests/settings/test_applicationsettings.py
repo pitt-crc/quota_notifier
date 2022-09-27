@@ -9,11 +9,11 @@ class Configure(TestCase):
     """Test the modification of settings via the ``configure`` method"""
 
     def test_setting_are_modified(self) -> None:
-        """Test testtings values are overwritten/reset by the ``configure`` method"""
+        """Test settings values are overwritten/reset by the ``configure`` method"""
 
         # Check settings are overwritten
-        ApplicationSettings.configure(blacklist=['fakeusername'])
-        self.assertListEqual(['fakeusername'], ApplicationSettings.get('blacklist'))
+        ApplicationSettings.configure(blacklist=['fake_username'])
+        self.assertListEqual(['fake_username'], ApplicationSettings.get('blacklist'))
 
         # Test settings are restored
         ApplicationSettings.configure()
