@@ -40,6 +40,9 @@ class FileSystemSchema(BaseSettings):
 
         Args:
             value: The value to validate
+
+        Returns:
+            The validated file system type
         """
 
         from .disk_utils import QuotaFactory
@@ -56,6 +59,9 @@ class FileSystemSchema(BaseSettings):
 
         Args:
             value: The path value to validate
+
+        Returns:
+            The validated system path
         """
 
         if not value.exists():
@@ -145,17 +151,23 @@ class SettingsSchema(BaseSettings):
         ))
 
     @validator('file_systems')
-    def validate_file_systems(cls, value: list[FileSystemSchema]) -> list[FileSystemSchema]:
-        """Ensure the given system path exists
+    def validate_unique_file_systems(cls, value: list[FileSystemSchema]) -> list[FileSystemSchema]:
+        """Ensure file systems have unique names/paths
 
         Args:
             value: The file systems to validate
+
+        Returns:
+            The validated file systems
         """
 
         paths = [fs.path for fs in value]
-        unique_paths = set(paths)
-        if len(unique_paths) != len(paths):
-            raise ValueError('File systems are do not have unique paths')
+        if len(set(paths)) != len(paths):
+            raise ValueError('File systems do not have unique paths')
+
+        names = [fs.name for fs in value]
+        if len(set(names)) != len(names):
+            raise ValueError('File systems do not have unique names')
 
         return value
 
