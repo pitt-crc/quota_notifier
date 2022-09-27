@@ -3,6 +3,8 @@
 from unittest import TestCase
 from unittest.mock import patch
 
+from sqlalchemy import select
+
 from app.disk_utils import GenericQuota
 from app.notify import UserNotifier
 from app.orm import DBConnection, Notification
@@ -86,17 +88,41 @@ class NotificationHistory(TestCase):
         """Set up a mock user and mock DB"""
 
         self.mock_user = User('mock')
+        self.mock_file_system = 'fs1'
+
         DBConnection.configure('sqlite:///:memory:')
+        with DBConnection.session() as session:
+            session.add(Notification(
+                username=self.mock_user.username,
+                file_system=self.mock_file_system,
+                threshold=ApplicationSettings.get('thresholds')[0]
+            ))
+            session.commit()
 
     def test_old_notifications_deleted(self, *args) -> None:
         """Test old notifications are deleted from the database"""
 
-        raise NotImplementedError
+        test_quota = GenericQuota(name=self.mock_file_system, user=self.mock_user, size_used=0, size_limit=100)
+        with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
+            UserNotifier().notify_user(self.mock_user)
 
-    def test_notification_history_saved(self, *args) -> None:
+        query = select(Notification).where(Notification.username == self.mock_user.username)
+        with DBConnection.session() as session:
+            db_records = session.execute(query).scalars().all()
+            self.assertListEqual([], db_records)
+
+    def test_new_notification_saved(self, *args) -> None:
         """Test new notifications are recorded in the database"""
 
-        raise NotImplementedError
+        size_used = ApplicationSettings.get('thresholds')[-1]
+        test_quota = GenericQuota(name=self.mock_file_system, user=self.mock_user, size_used=size_used, size_limit=100)
+        with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
+            UserNotifier().notify_user(self.mock_user)
+
+        query = select(Notification).where(Notification.username == self.mock_user.username)
+        with DBConnection.session() as session:
+            record = session.execute(query).scalars().first()
+            self.assertEqual(size_used, record.threshold)
 
     def test_reduced_quotas_updated(self, *args) -> None:
         """Test records are updated for quotas that have dropped to a new threshold"""
