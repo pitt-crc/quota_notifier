@@ -104,7 +104,7 @@ class SettingsSchema(BaseSettings):
         description='Give up on checking a file system after the given number of seconds.')
 
     # Settings for the smtp port
-    smtp_server: str = Field(
+    smtp_host: str = Field(
         title='SMTP Server Host Name',
         type=str,
         default='localhost',
