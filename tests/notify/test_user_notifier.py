@@ -1,5 +1,5 @@
 """Tests for the ``UserNotifier`` class"""
-
+import pwd
 from unittest import TestCase
 
 from app.disk_utils import GenericQuota
@@ -7,6 +7,32 @@ from app.notify import UserNotifier
 from app.orm import DBConnection, Notification
 from app.settings import ApplicationSettings
 from app.shell import User
+
+
+class GetUsers(TestCase):
+    """Test the fetching of usernames to notify"""
+
+    def tearDown(self) -> None:
+        """Reset any modifications to application settings after each test"""
+
+        ApplicationSettings.configure()
+
+    def test_includes_all_users(self) -> None:
+        """Test all users are returned by default"""
+
+        returned_users = [user.username for user in UserNotifier().get_users()]
+        all_users = [user.pw_name for user in pwd.getpwall()]
+        self.assertListEqual(all_users, returned_users)
+
+    def test_blacklisted_users_excluded(self) -> None:
+        """"""
+
+        all_users = [user.pw_name for user in pwd.getpwall()]
+        self.assertIn('root', all_users)
+
+        ApplicationSettings.configure(blacklist=['root'])
+        returned_users = [user.username for user in UserNotifier().get_users()]
+        self.assertNotIn('root', returned_users)
 
 
 class GetLastThreshold(TestCase):

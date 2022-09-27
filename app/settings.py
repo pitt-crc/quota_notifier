@@ -190,7 +190,7 @@ class SettingsSchema(BaseSettings):
 class ApplicationSettings:
     """Configurable application settings object
 
-    Application settings can be fetched but not set from the class instance.
+    Use the ``configure`` method to override individual default settings.
     Use the ``configure_from_file`` method to load settings from a settings file.
     """
 
@@ -205,6 +205,17 @@ class ApplicationSettings:
         """
 
         cls._parsed_settings = SettingsSchema.parse_file(path)
+
+    @classmethod
+    def configure(cls, **kwargs) -> None:
+        """Reset settings to default values
+
+        Use keyword arguments to override individual defaults
+        """
+
+        cls._parsed_settings = SettingsSchema()
+        for key, value in kwargs.items():
+            setattr(cls._parsed_settings, key, value)
 
     @classmethod
     def get(cls, item: str) -> Any:
