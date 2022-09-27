@@ -25,7 +25,7 @@ class GetUsers(TestCase):
         self.assertListEqual(all_users, returned_users)
 
     def test_blacklisted_users_excluded(self) -> None:
-        """"""
+        """Test blacklisted users are not included in returned values"""
 
         all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertIn('root', all_users)
