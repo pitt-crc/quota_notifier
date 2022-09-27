@@ -27,7 +27,7 @@ class UserNotifier:
         """Return a collection of users to check quotas for
 
         Returns:
-            A tuple of ``User`` objects
+            A iterable collection of ``User`` objects
         """
 
         blacklist = ApplicationSettings.get('blacklist')
@@ -41,7 +41,7 @@ class UserNotifier:
             user: The user to fetch quotas for
 
         Returns:
-            A (possibly empty) tuple of quota objects
+            An iterable collection of quota objects
         """
 
         all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings.get('file_systems'))
