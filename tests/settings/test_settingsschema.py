@@ -25,7 +25,7 @@ class DefaultDBUrl(TestCase):
 
 
 class FileSystemValidation(TestCase):
-    """Test validation for the ``file_systmes`` field"""
+    """Test validation for the ``file_systems`` field"""
 
     def test_error_on_duplicate_path(self) -> None:
         """Test a ``ValueError`` is raised when file systems have duplicate paths"""
@@ -47,3 +47,10 @@ class FileSystemValidation(TestCase):
 
             with self.assertRaisesRegex(ValueError, 'File systems do not have unique names'):
                 SettingsSchema.validate_unique_file_systems([system_1, system_2])
+
+    def test_valid_values_returned(self) -> None:
+        """Test valid values are returned by the validator"""
+
+        valid_input = [FileSystemSchema(name='name1', path=Path('/'), type='generic')]
+        returned_value = SettingsSchema.validate_unique_file_systems(valid_input)
+        self.assertEqual(valid_input, returned_value)
