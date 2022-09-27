@@ -27,7 +27,7 @@ class UserNotifier:
         """Return a collection of users to check quotas for
 
         Returns:
-            A tuple of ``User`` objects
+            A iterable collection of ``User`` objects
         """
 
         blacklist = ApplicationSettings.get('blacklist')
@@ -41,7 +41,7 @@ class UserNotifier:
             user: The user to fetch quotas for
 
         Returns:
-            A (possibly empty) tuple of quota objects
+            An iterable collection of quota objects
         """
 
         all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings.get('file_systems'))
@@ -99,8 +99,8 @@ class UserNotifier:
 
         with DBConnection.session() as session:
             for quota in self.get_user_quotas(user):
-                last_threshold = self.get_last_threshold(session, quota)
                 next_threshold = self.get_next_threshold(quota)
+                last_threshold = self.get_last_threshold(session, quota)
 
                 # Usage is below the lowest threshold
                 # Clean up the DB and continue
@@ -111,10 +111,9 @@ class UserNotifier:
                             Notification.file_system == quota.name
                         )
                     )
-
                 # There was no previous notification
                 # Mark the quota as needing a notification and create a DB record
-                elif last_threshold is None:
+                elif last_threshold is None or next_threshold > last_threshold:
                     quotas_to_notify.append(quota)
                     session.execute(
                         insert(Notification).values(
@@ -136,11 +135,11 @@ class UserNotifier:
                     )
 
             # Issue email notification if necessary
-        if quotas_to_notify:
-            EmailTemplate(quotas_to_notify).send_to_user(user)
+            if quotas_to_notify:
+                EmailTemplate(quotas_to_notify).send_to_user(user)
 
-        # Wait to commit until the email sends
-        session.commit()
+            # Wait to commit until the email sends
+            session.commit()
 
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
