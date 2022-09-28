@@ -32,7 +32,7 @@ class Parser(ArgumentParser):
         super().__init__(*args, prog=prog, description=description, **kwargs)
         self.add_argument('-v', '--version', action='version', version=__version__)
         self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS, help='path to application settings')
-        self.add_argument('--check', action='store_true', help='validate the application settings file without sending notifications')
+        self.add_argument('--check', action='store_true', help='validate app settings without sending notifications')
 
 
 class Application:
