@@ -161,7 +161,7 @@ class NotificationHistory(TestCase):
 
         # Process a new notification for a higher threshold
         highest_threshold = ApplicationSettings.get('thresholds')[-1]
-        test_quota = GenericQuota(name=self.mock_file_system, user=self.mock_user, size_used=highest_threshold, size_limit=100)
+        test_quota = GenericQuota(self.mock_file_system, self.mock_user, size_used=highest_threshold, size_limit=100)
         with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
             UserNotifier().notify_user(self.mock_user)
 
@@ -180,7 +180,7 @@ class NotificationHistory(TestCase):
 
         # Process a new notification for a lower threshold
         lowest_threshold = ApplicationSettings.get('thresholds')[0]
-        test_quota = GenericQuota(name=self.mock_file_system, user=self.mock_user, size_used=lowest_threshold, size_limit=100)
+        test_quota = GenericQuota(self.mock_file_system, self.mock_user, size_used=lowest_threshold, size_limit=100)
         with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
             UserNotifier().notify_user(self.mock_user)
 
