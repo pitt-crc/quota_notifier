@@ -5,6 +5,9 @@ on:
   push:
     branches: [ main ]
 
+env:
+  SPHINXOPTS: "-W"
+
 jobs:
   Build:
     name: Build Documentation
@@ -25,7 +28,7 @@ jobs:
         run: pip install .[docs]
 
       - name: Build and commit
-        uses: sphinx-notes/pages@master
+        uses: sphinx-notes/pages@v2
         with:
           documentation_path: docs/source
 
