@@ -52,16 +52,24 @@ class User:
 
     @property
     def username(self) -> str:
+        """Return the instance username"""
+
         return self._username
 
     @property
     def group(self) -> str:
+        """Fetch and return the users group name"""
+
         return ShellCmd(f"id -gn {self._username}").out
 
     @property
     def uid(self) -> int:
+        """Fetch and return the users user id"""
+
         return int(ShellCmd(f"id -u {self._username}").out)
 
     @property
     def gid(self) -> int:
+        """Fetch and return the users group id"""
+
         return int(ShellCmd(f"id -g {self._username}").out)

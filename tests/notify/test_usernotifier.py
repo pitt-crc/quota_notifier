@@ -116,6 +116,7 @@ class NotificationHistory(TestCase):
 
         self.mock_user = User('mock')
         self.mock_file_system = 'fs1'
+        self.query = select(Notification).where(Notification.username == self.mock_user.username)
 
         DBConnection.configure('sqlite:///:memory:')
 
@@ -134,6 +135,17 @@ class NotificationHistory(TestCase):
             ))
             session.commit()
 
+    def run_application(self, usage):
+        """Run the ``UserNotifier().notify_user`` method as if the user has utilized the given usage
+
+        Args:
+            usage: Storage quota usage between 0 and 100
+        """
+
+        test_quota = GenericQuota(self.mock_file_system, self.mock_user, size_used=usage, size_limit=100)
+        with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
+            UserNotifier().notify_user(self.mock_user)
+
     def test_old_notifications_deleted(self, *args) -> None:
         """Test old notifications are deleted from the database"""
 
@@ -142,14 +154,11 @@ class NotificationHistory(TestCase):
         self.create_db_entry(lowest_threshold)
 
         # Process a new notification for a usage below the minimum threshold
-        test_quota = GenericQuota(name=self.mock_file_system, user=self.mock_user, size_used=0, size_limit=100)
-        with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
-            UserNotifier().notify_user(self.mock_user)
+        self.run_application(usage=0)
 
         # Check the notification history was deleted
-        query = select(Notification).where(Notification.username == self.mock_user.username)
         with DBConnection.session() as session:
-            db_records = session.execute(query).scalars().all()
+            db_records = session.execute(self.query).scalars().all()
             self.assertListEqual([], db_records)
 
     def test_new_notification_saved(self, *args) -> None:
@@ -161,15 +170,12 @@ class NotificationHistory(TestCase):
 
         # Process a new notification for a higher threshold
         highest_threshold = ApplicationSettings.get('thresholds')[-1]
-        test_quota = GenericQuota(name=self.mock_file_system, user=self.mock_user, size_used=highest_threshold, size_limit=100)
-        with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
-            UserNotifier().notify_user(self.mock_user)
+        self.run_application(usage=highest_threshold)
 
         # Check the notification history was updated
-        query = select(Notification).where(Notification.username == self.mock_user.username)
         with DBConnection.session() as session:
-            record = session.execute(query).scalars().first()
-            self.assertEqual(highest_threshold, record.threshold)
+            db_record = session.execute(self.query).scalars().first()
+            self.assertEqual(highest_threshold, db_record.threshold)
 
     def test_reduced_quotas_updated(self, *args) -> None:
         """Test records are updated for quotas that have dropped to a new threshold"""
@@ -180,12 +186,10 @@ class NotificationHistory(TestCase):
 
         # Process a new notification for a lower threshold
         lowest_threshold = ApplicationSettings.get('thresholds')[0]
-        test_quota = GenericQuota(name=self.mock_file_system, user=self.mock_user, size_used=lowest_threshold, size_limit=100)
-        with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
-            UserNotifier().notify_user(self.mock_user)
+        self.run_application(usage=lowest_threshold)
 
         # Check the notification history was updated
-        query = select(Notification).where(Notification.username == self.mock_user.username)
+
         with DBConnection.session() as session:
-            db_record = session.execute(query).scalars().first()
+            db_record = session.execute(self.query).scalars().first()
             self.assertEqual(lowest_threshold, db_record.threshold)
