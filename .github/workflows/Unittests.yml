@@ -28,7 +28,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           coverage run -m unittest discover 
-           coverage report --omit="tests/*"
+          coverage report --omit="tests/*"
           coverage xml --omit="tests/*" -o report_${{ matrix.python-version }}.xml
 
       # Report test coverage to codacy for the python version being tested
