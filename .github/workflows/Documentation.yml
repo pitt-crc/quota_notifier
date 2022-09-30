@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   build:
+    name: Build Documentation
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
@@ -35,7 +36,8 @@ jobs:
           path: docs/build/html
 
   deploy:
-    # if: github.event_name == 'push'
+    name: Publish Documentation
+    if: github.event_name == 'push'
     needs: [ build ]
 
     runs-on: ubuntu-latest
