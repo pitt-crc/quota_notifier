@@ -5,35 +5,34 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  Build:
-    name: Build Documentation
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v1
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+
+      - name: Build Docs
+        working-directory: docs
+        run: make html SPHINXOPTS="-W"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          python-version: 3.9
+          path: docs/build/html
 
-      - name: Checkout source
-        uses: actions/checkout@master
-        with:
-          fetch-depth: 0 # Otherwise, you will fail to push refs to destination repo
-
-      - name: Install dependencies
-        run: pip install .[docs]
-
-      - name: Build and commit
-        uses: sphinx-notes/pages@v2
-        with:
-          documentation_path: docs/source
-        env:
-          SPHINXOPTS: "-W"
-
-      - name: Push changes
+      - name: Deploy to GitHub Pages
         if: github.event_name == 'push'
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
+        uses: actions/deploy-pages@v1
