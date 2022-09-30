@@ -35,8 +35,10 @@ jobs:
           path: docs/build/html
 
   deploy:
+    # if: github.event_name == 'push'
+    needs: [ build ]
+
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
