@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
+"""Configuration file for building application documentation"""
 
 # -- Path setup --------------------------------------------------------------
 
 import sys
+from datetime import date
 
 from pathlib import Path
 
@@ -15,6 +16,7 @@ sys.path.insert(0, str(project_root))
 from app import __version__, __author__
 
 project = 'Quota Notification Utility'
+copyright = f'{date.today().year}, {__author__}'
 author = __author__
 release = __version__
 
