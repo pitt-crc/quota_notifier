@@ -142,6 +142,28 @@ class BeegfsQuota(AbstractQuota):
         result = quota_info_cmd.out.splitlines()[1].split(',')
         return cls(name, user, int(result[2]), int(result[3]))
 
+    @classmethod
+    def get_quota_range(
+        cls, name: str, path: Path, gid_start: int, gid_end: int, storage_pool: int = 1
+    ) -> list[BeegfsQuota]:
+        """Return quota objects for a range of group ids
+
+        Fetch quota information for multiple users with a bulk Beegfs query.
+        This is more efficient than several successive Beegfs queries.
+
+        Args:
+            name: Name of the file system
+            path: The file path for create a quota for
+            gid_start: Lower limit of the group ID range
+            gid_end: Upper limit of the group ID range
+            storage_pool: Beegfs storagepoolid to create a quota for
+
+        Returns:
+            A (possibly empty) list of BeegfsQuota objects
+        """
+
+        raise NotImplementedError
+
 
 class IhomeQuota(AbstractQuota):
     """Disk storage quota for the ihome file system"""
