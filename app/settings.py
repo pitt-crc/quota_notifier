@@ -219,6 +219,16 @@ class ApplicationSettings:
 
     @classmethod
     def set(cls, item: str, value: Any) -> None:
+        """Update a single value in the application settings
+
+        Args:
+            item: Name of the settings value to set
+            value: Value to set the settings item to
+
+        Raises:
+            ValueError: If the item name is not a valid setting
+        """
+
         if not hasattr(cls._parsed_settings, item):
             ValueError(f'Invalid settings option: {item}')
 
@@ -229,7 +239,7 @@ class ApplicationSettings:
         """Return a value from application settings
 
         Args:
-            item: The name of the settings value to retrieve
+            item: Name of the settings value to retrieve
         """
 
         return getattr(cls._parsed_settings, item)
