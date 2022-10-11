@@ -197,16 +197,6 @@ class ApplicationSettings:
     _parsed_settings: SettingsSchema = SettingsSchema()
 
     @classmethod
-    def configure_from_file(cls, path: Path) -> None:
-        """Update application settings using values from a given file path
-
-        Args:
-            path: Path to load settings from
-        """
-
-        cls._parsed_settings = SettingsSchema.parse_file(path)
-
-    @classmethod
     def configure(cls, **kwargs) -> None:
         """Reset settings to default values
 
@@ -215,7 +205,24 @@ class ApplicationSettings:
 
         cls._parsed_settings = SettingsSchema()
         for key, value in kwargs.items():
-            setattr(cls._parsed_settings, key, value)
+            cls.set(key, value)
+
+    @classmethod
+    def configure_from_file(cls, path: Path) -> None:
+        """Reset application settings using values from a given file path
+
+        Args:
+            path: Path to load settings from
+        """
+
+        cls._parsed_settings = SettingsSchema.parse_file(path)
+
+    @classmethod
+    def set(cls, item: str, value: Any) -> None:
+        if not hasattr(cls._parsed_settings, item):
+            ValueError(f'Invalid settings option: {item}')
+
+        setattr(cls._parsed_settings, item, value)
 
     @classmethod
     def get(cls, item: str) -> Any:
