@@ -4,6 +4,8 @@ Module Contents
 ---------------
 """
 
+import grp
+import pwd
 from shlex import split
 from subprocess import PIPE, Popen
 from typing import Optional
@@ -60,16 +62,16 @@ class User:
     def group(self) -> str:
         """Fetch and return the users group name"""
 
-        return ShellCmd(f"id -gn {self._username}").out
+        return grp.getgrgid(self.gid).gr_name
 
     @property
     def uid(self) -> int:
         """Fetch and return the users user id"""
 
-        return int(ShellCmd(f"id -u {self._username}").out)
+        return pwd.getpwnam(self._username).pw_uid
 
     @property
     def gid(self) -> int:
         """Fetch and return the users group id"""
 
-        return int(ShellCmd(f"id -g {self._username}").out)
+        return pwd.getpwnam(self._username).pw_gid

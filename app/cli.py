@@ -22,10 +22,10 @@ class Parser(ArgumentParser):
     """Responsible for defining the commandline interface and parsing commandline arguments"""
 
     def __init__(
-            self, *args,
-            prog='notifier',
-            description='Notify users when their disk usage passes predefined thresholds',
-            **kwargs
+        self, *args,
+        prog='notifier',
+        description='Notify users when their disk usage passes predefined thresholds',
+        **kwargs
     ) -> None:
         """Define arguments for the command line interface"""
 
@@ -39,24 +39,35 @@ class Application:
     """Entry point for instantiating and executing the application from the command line"""
 
     @staticmethod
-    def run(args: Namespace) -> None:
+    def load_settings(settings_path: Path, error_on_missing_file: bool = False) -> None:
+        """Load application settings from the given file path
+
+        Args:
+            settings_path: Path to the settings file
+            error_on_missing_file: Optionally raise an error if ``settings_path`` does not exist
+
+        Raises:
+            FileNotFoundError: When the ``settings_path`` argument does not exist
+        """
+
+        # Load and validate custom application settings from disk
+        # Implicitly raises an error if settings are invalid
+        if settings_path.exists():
+            ApplicationSettings.configure_from_file(settings_path)
+
+        # If asked to validate a custom settings file that does not exist
+        elif error_on_missing_file and settings_path != DEFAULT_SETTINGS:
+            raise FileNotFoundError(f'No settings file at {settings_path}')
+
+    @classmethod
+    def run(cls, args: Namespace) -> None:
         """Run the application using parsed commandline arguments
 
         Args:
             args: Parsed commandline arguments
-
-        Raises:
-            FileNotFoundError: When the application settings file cannot be found
         """
 
-        # Load application settings from disk and error on an invalid settings schema
-        if args.settings.exists():
-            ApplicationSettings.configure_from_file(args.settings)
-
-        # Error if only checking the schema and no custom settings file exists
-        elif args.check and args.settings != DEFAULT_SETTINGS:
-            raise FileNotFoundError(f'No settings file at {args.settings}')
-
+        cls.load_settings(args.settings, error_on_missing_file=args.check)
         if not args.check:
             DBConnection.configure()
             UserNotifier().send_notifications()
