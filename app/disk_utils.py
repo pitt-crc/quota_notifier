@@ -21,7 +21,7 @@ import json
 import math
 from abc import abstractmethod
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 
 from .settings import ApplicationSettings
 from .shell import ShellCmd, User
@@ -66,7 +66,7 @@ class AbstractQuota(object):
         """
 
     @staticmethod
-    def bytes_to_str(size: int) -> str:
+    def _bytes_to_str(size: int) -> str:
         """Convert the given number of bytes to a human-readable string
 
         Args:
@@ -87,8 +87,8 @@ class AbstractQuota(object):
         return f'{final_size} {size_units[base_2_power]}'
 
     def __str__(self) -> str:
-        used_str = self.bytes_to_str(self.size_used)
-        limit_str = self.bytes_to_str(self.size_limit)
+        used_str = self._bytes_to_str(self.size_used)
+        limit_str = self._bytes_to_str(self.size_limit)
         return f"{self.name}: {used_str} / {limit_str} ({self.percentage}%)"
 
 
@@ -128,13 +128,14 @@ class BeegfsQuota(AbstractQuota):
             name: Name of the file system
             path: The file path for create a quota for
             user: User that the quota is tied to
-            storage_pool: Beegfs storagepoolid to create a quota for
+            storage_pool: BeeGFS storagepoolid to create a quota for
 
         Returns:
             An instance of the parent class or None if the allocation does not exist
         """
 
-        beegfs_command = f"beegfs-ctl --getquota --gid {user.group} --csv --storagepoolid={storage_pool}"
+        beegfs_command = f"beegfs-ctl --getquota --csv --mount {path} --storagepoolid={storage_pool} --gid {user.group}"
+
         quota_info_cmd = ShellCmd(beegfs_command)
         if quota_info_cmd.err:
             return None
@@ -143,26 +144,34 @@ class BeegfsQuota(AbstractQuota):
         return cls(name, user, int(result[2]), int(result[3]))
 
     @classmethod
-    def get_quota_range(
-        cls, name: str, path: Path, gid_start: int, gid_end: int, storage_pool: int = 1
-    ) -> list[BeegfsQuota]:
-        """Return quota objects for a range of group ids
+    def get_quota_iter(
+        cls, name: str, path: Path, users: Iterable[User], storage_pool: int = 1
+    ) -> Iterable[BeegfsQuota]:
+        """Return a quota objects for multiple users
 
-        Fetch quota information for multiple users with a bulk Beegfs query.
-        This is more efficient than several successive Beegfs queries.
+        Fetch quota information for multiple users with a bulk BeeGFS query.
+        This is faster than querying each user individually.
 
         Args:
             name: Name of the file system
             path: The file path for create a quota for
-            gid_start: Lower limit of the group ID range
-            gid_end: Upper limit of the group ID range
-            storage_pool: Beegfs storagepoolid to create a quota for
+            users: List of users to query for
+            storage_pool: BeeGFS storagepoolid to create a quota for
 
-        Returns:
-            A (possibly empty) list of BeegfsQuota objects
+        Yield:
+            Quota objects for each user having a quota
         """
 
-        raise NotImplementedError
+        group_ids = ','.join(str(user.gid) for user in users)
+        cmd_str = f"beegfs-ctl --getquota  --csv --mount {path} --storagepoolid={storage_pool} --gid --list {group_ids}"
+
+        quota_info_cmd = ShellCmd(cmd_str)
+        if quota_info_cmd.err:
+            raise RuntimeError(quota_info_cmd.err)
+
+        for quota_data in quota_info_cmd.out.splitlines():
+            gid, group_name, used, avail, *_ = quota_data.split(',')
+            yield cls(name, group_name, int(used), int(avail))
 
 
 class IhomeQuota(AbstractQuota):
