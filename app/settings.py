@@ -47,9 +47,11 @@ class FileSystemSchema(BaseSettings):
 
         from .disk_utils import QuotaFactory
 
-        valid_types = list(QuotaFactory.quota_types.keys())
-        if value not in valid_types:
-            raise ValueError(f'File system types must be one of {valid_types}')
+        try:
+            QuotaFactory.QuotaType[value]
+
+        except KeyError as excep:
+            raise ValueError(f'File system types must be one of {list(QuotaFactory.QuotaType)}') from excep
 
         return value
 
@@ -197,16 +199,6 @@ class ApplicationSettings:
     _parsed_settings: SettingsSchema = SettingsSchema()
 
     @classmethod
-    def configure_from_file(cls, path: Path) -> None:
-        """Update application settings using values from a given file path
-
-        Args:
-            path: Path to load settings from
-        """
-
-        cls._parsed_settings = SettingsSchema.parse_file(path)
-
-    @classmethod
     def configure(cls, **kwargs) -> None:
         """Reset settings to default values
 
@@ -215,14 +207,41 @@ class ApplicationSettings:
 
         cls._parsed_settings = SettingsSchema()
         for key, value in kwargs.items():
-            setattr(cls._parsed_settings, key, value)
+            cls.set(key, value)
+
+    @classmethod
+    def configure_from_file(cls, path: Path) -> None:
+        """Reset application settings using values from a given file path
+
+        Args:
+            path: Path to load settings from
+        """
+
+        cls._parsed_settings = SettingsSchema.parse_file(path)
+
+    @classmethod
+    def set(cls, item: str, value: Any) -> None:
+        """Update a single value in the application settings
+
+        Args:
+            item: Name of the settings value to set
+            value: Value to set the settings item to
+
+        Raises:
+            ValueError: If the item name is not a valid setting
+        """
+
+        if not hasattr(cls._parsed_settings, item):
+            ValueError(f'Invalid settings option: {item}')
+
+        setattr(cls._parsed_settings, item, value)
 
     @classmethod
     def get(cls, item: str) -> Any:
         """Return a value from application settings
 
         Args:
-            item: The name of the settings value to retrieve
+            item: Name of the settings value to retrieve
         """
 
         return getattr(cls._parsed_settings, item)
