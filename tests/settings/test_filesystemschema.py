@@ -36,8 +36,9 @@ class TypeValidation(TestCase):
     def test_valid_types_pass(self) -> None:
         """Test valid types do not raise errors"""
 
-        for fs_type in QuotaFactory.quota_types:
-            self.assertEqual(fs_type, FileSystemSchema.validate_type(fs_type))
+        for fs_type in QuotaFactory.QuotaType:
+            fs_type_string = fs_type.name
+            self.assertEqual(fs_type, FileSystemSchema.validate_type(fs_type_string))
 
     def test_invalid_type_error(self) -> None:
         """Test a ``ValueError`` is raised for invalid types"""

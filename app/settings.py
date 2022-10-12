@@ -47,9 +47,11 @@ class FileSystemSchema(BaseSettings):
 
         from .disk_utils import QuotaFactory
 
-        valid_types = list(QuotaFactory.QuotaType)
-        if value not in valid_types:
-            raise ValueError(f'File system types must be one of {valid_types}')
+        try:
+            QuotaFactory.QuotaType[value]
+
+        except KeyError as excep:
+            raise ValueError(f'File system types must be one of {list(QuotaFactory.QuotaType)}') from excep
 
         return value
 
