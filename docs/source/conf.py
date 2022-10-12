@@ -13,11 +13,11 @@ sys.path.insert(0, str(project_root))
 
 # -- Project information -----------------------------------------------------
 
-from quota_notifier import __version__, __author__
+from quota_notifier import __version__
 
 project = 'Quota Notification Utility'
-copyright = f'{date.today().year}, {__author__}'
-author = __author__
+author = 'Pitt Center for Research Computing'
+copyright = f'{date.today().year}, {author}'
 release = __version__
 
 # -- General configuration ---------------------------------------------------

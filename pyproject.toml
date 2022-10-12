@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.2", ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quota-notifier"
+dynamic = ["version"]
+description = "Automatic email notification tool for disk quota usage."
+keywords = ["disk", "usage", "quota", "notify", "email", ]
+classifiers = ["Programming Language :: Python :: 3", ]
+requires-python = ">=3.9"
+dependencies = ["pydantic==1.10.2", "sqlalchemy==1.4.41", ]
+
+[[project.authors]]
+name = "Pitt Center for Research Computing"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.optional-dependencies]
+docs = ["sphinx==5.2.1", "sphinx-argparse==0.3.1", "sphinx-copybutton==0.5.0", "sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.0.0", "sphinx-jsonschema==1.15", ]
+tests = ["coverage", ]
+all = ["sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.0.0", "coverage", "sphinx-copybutton==0.5.0", "sphinx-jsonschema==1.15", "sphinx==5.2.1", "sphinx-argparse==0.3.1", ]
