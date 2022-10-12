@@ -20,9 +20,10 @@ from __future__ import annotations
 import json
 import math
 from abc import abstractmethod
+from copy import copy
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 
 from .settings import ApplicationSettings
 from .shell import ShellCmd, User
@@ -121,27 +122,67 @@ class GenericQuota(AbstractQuota):
 class BeegfsQuota(AbstractQuota):
     """Disk storage quota for a BeeGFS file system"""
 
+    # Map file system path to cached quota objects {file path: {group ID: quota object}}
+    _cached_quotas: dict[Path: dict[int: BeegfsQuota]] = dict()
+
     @classmethod
     def get_quota(cls, name: str, path: Path, user: User, storage_pool: int = 1) -> Optional[BeegfsQuota]:
         """Return a quota object for a given user and file path
 
         Args:
             name: Name of the file system
-            path: The file path for create a quota for
+            path: The mount location for the BeeGFS system
             user: User that the quota is tied to
-            storage_pool: Beegfs storagepoolid to create a quota for
+            storage_pool: BeeGFS storagepoolid to create a quota for
 
         Returns:
             An instance of the parent class or None if the allocation does not exist
         """
 
-        beegfs_command = f"beegfs-ctl --getquota --gid {user.group} --csv --storagepoolid={storage_pool}"
+        if cached_quota := cls._cached_quotas.get(path, dict()).get(user.gid, None):
+            quota = copy(cached_quota)
+            quota.user = user
+            return quota
+
+        beegfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.group}"
         quota_info_cmd = ShellCmd(beegfs_command)
         if quota_info_cmd.err:
             return None
 
         result = quota_info_cmd.out.splitlines()[1].split(',')
         return cls(name, user, int(result[2]), int(result[3]))
+
+    @classmethod
+    def cache_quotas(cls, name: str, path: Path, users: Iterable[User], storage_pool: int = 1) -> None:
+        """Cache quota information for multiple users
+
+        Fetch and cache quota information for multiple users with a bulk
+        BeeGFS query. Cached information is used to speed up future calls to
+        the ``get_quota`` method.
+
+        Args:
+            name: Name of the file system
+            path: The mount location for the BeeGFS system
+            users: List of users to query for
+            storage_pool: BeeGFS storagepoolid to create a quota for
+
+        Yield:
+            Quota objects for each user having a quota
+        """
+
+        group_ids = ','.join(map(str, set(user.gid for user in users)))  # CSV string of unique group IDs
+        cmd_str = f"beegfs-ctl --getquota  --csv --mount={path} --storagepoolid={storage_pool} --gid --list {group_ids}"
+
+        # Fetch quota data from BeeGFS via the underlying shell
+        quota_info_cmd = ShellCmd(cmd_str)
+        if quota_info_cmd.err:
+            raise RuntimeError(quota_info_cmd.err)
+
+        # Cache returned values for future use
+        cls._cached_quotas[path] = dict()
+        for quota_data in quota_info_cmd.out.splitlines()[1:]:
+            _, gid, used, avail, *_ = quota_data.split(',')
+            cls._cached_quotas[int(gid)] = cls(name, None, int(used), int(avail))
 
 
 class IhomeQuota(AbstractQuota):
