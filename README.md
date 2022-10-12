@@ -7,4 +7,4 @@
 
 Automatically notifier users by email when their disk usage hits a certain limit.
 
-See the [project documentation](crc-pages.pitt.edu/quota_notifier).
+See the [project documentation](https://crc-pages.pitt.edu/quota_notifier/).
