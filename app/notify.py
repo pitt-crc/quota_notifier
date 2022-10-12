@@ -12,10 +12,10 @@ from typing import Iterable, Optional
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
 
-from .disk_utils import AbstractQuota, QuotaFactory
+from .disk_utils import AbstractQuota, BeegfsQuota, QuotaFactory
 from .email import EmailTemplate
 from .orm import DBConnection, Notification
-from .settings import ApplicationSettings
+from .settings import ApplicationSettings, FileSystemSchema
 from .shell import User
 
 
@@ -144,5 +144,12 @@ class UserNotifier:
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
 
-        for user in self.get_users():
+        users = self.get_users()
+
+        # Cache queries for BeeGFS file systems
+        for file_system in ApplicationSettings.get('file_systems'):
+            if file_system.type == 'beegfs':
+                BeegfsQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
+
+        for user in users:
             self.notify_user(user)
