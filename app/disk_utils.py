@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import math
 from abc import abstractmethod
+from enum import Enum
 from pathlib import Path
 from typing import Optional
 
@@ -173,16 +174,15 @@ class IhomeQuota(AbstractQuota):
 class QuotaFactory:
     """Factory object for dynamically creating quota instances of different types"""
 
-    quota_types = dict(
-        generic=GenericQuota,
-        beegfs=BeegfsQuota,
-        ihome=IhomeQuota
-    )
+    class QuotaType(Enum):
+        generic = GenericQuota
+        beegfs = BeegfsQuota
+        ihome = IhomeQuota
 
     def __new__(cls, quota_type: str, name: str, path: Path, user: User, **kwargs) -> AbstractQuota:
         """Create a new quota instance
 
-        See the ``quota_types`` attribute for valid values to the ``quota_type`` argument.
+        See the ``QuotaType`` attribute for valid values to the ``quota_type`` argument.
 
         Args:
             quota_type: String representation of the return type object
@@ -194,7 +194,10 @@ class QuotaFactory:
               A quota instance of the specified type created using the given arguments
         """
 
-        if quota_type not in cls.quota_types:
+        try:
+            quota_class = cls.QuotaType[quota_type].value
+
+        except KeyError:
             raise ValueError(f'Unknown quota type {quota_type}')
 
-        return cls.quota_types[quota_type].get_quota(name, path, user, **kwargs)
+        return quota_class.get_quota(name, path, user, **kwargs)
