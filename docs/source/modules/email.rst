@@ -1,4 +1,4 @@
-app.email
----------
+quota_notifier.email
+--------------------
 
-.. automodule:: app.email
+.. automodule:: quota_notifier.email

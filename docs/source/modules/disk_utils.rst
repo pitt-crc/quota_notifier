@@ -1,4 +1,4 @@
-app.disk_utils
---------------
+quota_notifier.disk_utils
+-------------------------
 
-.. automodule:: app.disk_utils
+.. automodule:: quota_notifier.disk_utils

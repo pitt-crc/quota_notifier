@@ -1,4 +1,4 @@
-app.shell
----------
+quota_notifier.shell
+--------------------
 
-.. automodule:: app.shell
+.. automodule:: quota_notifier.shell

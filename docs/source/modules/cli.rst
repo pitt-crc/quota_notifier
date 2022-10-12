@@ -1,4 +1,4 @@
-app.cli
--------
+quota_notifier.cli
+------------------
 
-.. automodule:: app.cli
+.. automodule:: quota_notifier.cli

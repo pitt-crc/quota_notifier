@@ -28,6 +28,6 @@ Commandline Interface
 ---------------------
 
 .. argparse::
-   :ref: app.cli.Parser
+   :ref: quota_notifier.cli.Parser
    :prog: notifier
 

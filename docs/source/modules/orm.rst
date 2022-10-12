@@ -1,4 +1,4 @@
-app.orm
--------
+quota_notifier.orm
+------------------
 
-.. automodule:: app.orm
+.. automodule:: quota_notifier.orm
