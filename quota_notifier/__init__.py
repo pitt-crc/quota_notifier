@@ -36,5 +36,3 @@ a threshold before exceeding the threshold a second time.
 """
 
 __version__ = '0.0.1'
-__author__ = 'Pitt Center for Research Computing'
-__license__ = 'All rights reserved'
