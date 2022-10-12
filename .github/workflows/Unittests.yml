@@ -5,23 +5,9 @@ on:
   push:
 
 jobs:
-  package_tests:
-    name: Packaging Tests
+  python_tests:
+    name: Run Tests
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@master
-
-      - name: Install package
-        run: pip install .
-
-      - name: Verify CLI tool
-        run: notifier -v
-
-  unit_tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs: package_tests
     strategy:
       fail-fast: false
       matrix:
