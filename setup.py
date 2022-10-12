@@ -62,7 +62,7 @@ def get_meta(value):
         value: The metadata variable to return a value for
     """
 
-    init_path = _file_dir / 'app' / '__init__.py'
+    init_path = _file_dir / 'quota_notifier' / '__init__.py'
     init_text = init_path.read_text()
 
     regex = re.compile(f"__{value}__ = '(.*?)'")
@@ -78,7 +78,7 @@ setup(
     python_requires='>=3.9',
     entry_points="""
         [console_scripts]
-        notifier=app.cli:Application.execute
+        notifier=quota_notifier.cli:Application.execute
     """,
     install_requires=get_requirements(_pkg_requirements_path),
     extras_require=get_extras(docs=_doc_requirements_path, tests=['coverage']),

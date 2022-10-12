@@ -3,7 +3,7 @@
 import subprocess
 from unittest import TestCase
 
-from app.shell import ShellCmd
+from quota_notifier.shell import ShellCmd
 
 
 class EmptyCommandError(TestCase):

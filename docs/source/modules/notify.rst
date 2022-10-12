@@ -1,4 +1,4 @@
-app.notify
-----------
+quota_notifier.notify
+---------------------
 
-.. automodule:: app.notify
+.. automodule:: quota_notifier.notify

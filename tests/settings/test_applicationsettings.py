@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from app.settings import ApplicationSettings
+from quota_notifier.settings import ApplicationSettings
 
 
 class Configure(TestCase):

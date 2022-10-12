@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
-from app.cli import Application, DEFAULT_SETTINGS
+from quota_notifier.cli import Application, DEFAULT_SETTINGS
 
 
 class SettingsValidation(TestCase):

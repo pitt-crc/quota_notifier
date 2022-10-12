@@ -1,4 +1,4 @@
-app.settings
-------------
+quota_notifier.settings
+-----------------------
 
-.. automodule:: app.settings
+.. automodule:: quota_notifier.settings

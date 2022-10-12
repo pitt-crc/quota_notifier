@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Optional
 from unittest import TestCase
 
-from app.disk_utils import AbstractQuota
-from app.shell import User
+from quota_notifier.disk_utils import AbstractQuota
+from quota_notifier.shell import User
 
 
 class DummyQuotaObj(AbstractQuota):

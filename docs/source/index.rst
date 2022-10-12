@@ -1,7 +1,7 @@
 Quota Notification Utility
 ==========================
 
-.. automodule:: app
+.. automodule:: quota_notifier
 
 .. toctree::
    :hidden:

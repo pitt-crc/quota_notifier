@@ -6,11 +6,11 @@ from unittest.mock import patch
 
 from sqlalchemy import select
 
-from app.disk_utils import GenericQuota
-from app.notify import UserNotifier
-from app.orm import DBConnection, Notification
-from app.settings import ApplicationSettings
-from app.shell import User
+from quota_notifier.disk_utils import GenericQuota
+from quota_notifier.notify import UserNotifier
+from quota_notifier.orm import DBConnection, Notification
+from quota_notifier.settings import ApplicationSettings
+from quota_notifier.shell import User
 
 
 class GetUsers(TestCase):
@@ -107,7 +107,7 @@ class GetNextThreshold(TestCase):
         self.assertEqual(max_threshold, UserNotifier.get_next_threshold(quota))
 
 
-@patch('app.email.SMTP')
+@patch('quota_notifier.email.SMTP')
 class NotificationHistory(TestCase):
     """Test database updates when calling ``notify_user``"""
 
@@ -143,7 +143,7 @@ class NotificationHistory(TestCase):
         """
 
         test_quota = GenericQuota(self.mock_file_system, self.mock_user, size_used=usage, size_limit=100)
-        with patch('app.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
+        with patch('quota_notifier.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
             UserNotifier().notify_user(self.mock_user)
 
     def test_old_notifications_deleted(self, *args) -> None:

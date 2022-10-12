@@ -3,10 +3,10 @@
 from unittest import TestCase
 from unittest.mock import call, patch
 
-from app.disk_utils import GenericQuota
-from app.email import EmailTemplate
-from app.settings import ApplicationSettings
-from app.shell import User
+from quota_notifier.disk_utils import GenericQuota
+from quota_notifier.email import EmailTemplate
+from quota_notifier.settings import ApplicationSettings
+from quota_notifier.shell import User
 
 
 class TemplateFormatting(TestCase):

@@ -2,8 +2,8 @@
 from pathlib import Path
 from unittest import TestCase
 
-from app.disk_utils import GenericQuota, QuotaFactory
-from app.shell import User
+from quota_notifier.disk_utils import GenericQuota, QuotaFactory
+from quota_notifier.shell import User
 
 
 class ReturnedQuotaType(TestCase):

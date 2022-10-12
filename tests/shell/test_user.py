@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from app.shell import User
+from quota_notifier.shell import User
 
 
 class UserInfo(TestCase):

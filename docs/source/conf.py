@@ -13,7 +13,7 @@ sys.path.insert(0, str(project_root))
 
 # -- Project information -----------------------------------------------------
 
-from app import __version__, __author__
+from quota_notifier import __version__, __author__
 
 project = 'Quota Notification Utility'
 copyright = f'{date.today().year}, {__author__}'
