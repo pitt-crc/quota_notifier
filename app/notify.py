@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from .disk_utils import AbstractQuota, BeegfsQuota, QuotaFactory
 from .email import EmailTemplate
 from .orm import DBConnection, Notification
-from .settings import ApplicationSettings, FileSystemSchema
+from .settings import ApplicationSettings
 from .shell import User
 
 
