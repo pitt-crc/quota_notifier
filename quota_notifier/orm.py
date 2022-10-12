@@ -13,7 +13,7 @@ from sqlalchemy import Column, DateTime, Integer, MetaData, String, UniqueConstr
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 
-from app.settings import ApplicationSettings
+from quota_notifier.settings import ApplicationSettings
 
 Base = declarative_base()
 

@@ -4,8 +4,8 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-import app
-from app.settings import FileSystemSchema, SettingsSchema
+import quota_notifier
+from quota_notifier.settings import FileSystemSchema, SettingsSchema
 
 
 class DefaultDBUrl(TestCase):
@@ -19,7 +19,7 @@ class DefaultDBUrl(TestCase):
     def test_in_app_dir(self) -> None:
         """Test the default path is located inside the package directory"""
 
-        app_path = Path(app.__file__).resolve()
+        app_path = Path(quota_notifier.__file__).resolve()
         db_path = Path(SettingsSchema().db_url.replace('sqlite:///', ''))
         self.assertTrue(db_path.is_absolute(), msg='Database path is not absolute')
         self.assertEqual(app_path.parent, db_path.parent)

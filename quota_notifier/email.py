@@ -10,9 +10,9 @@ from email.message import EmailMessage
 from smtplib import SMTP
 from typing import Collection, Optional
 
-from app.disk_utils import AbstractQuota
-from app.settings import ApplicationSettings
-from app.shell import User
+from quota_notifier.disk_utils import AbstractQuota
+from quota_notifier.settings import ApplicationSettings
+from quota_notifier.shell import User
 
 
 class EmailTemplate:

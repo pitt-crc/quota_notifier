@@ -3,7 +3,7 @@
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
-from app.orm import DBConnection
+from quota_notifier.orm import DBConnection
 
 
 class DBConfiguration(TestCase):

@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from sqlalchemy import select
 
-from app.orm import DBConnection, Notification
+from quota_notifier.orm import DBConnection, Notification
 
 
 class ThresholdValidation(TestCase):

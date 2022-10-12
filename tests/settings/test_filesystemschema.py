@@ -3,8 +3,8 @@
 from pathlib import Path
 from unittest import TestCase
 
-from app.disk_utils import QuotaFactory
-from app.settings import FileSystemSchema
+from quota_notifier.disk_utils import QuotaFactory
+from quota_notifier.settings import FileSystemSchema
 
 
 class PathValidation(TestCase):
