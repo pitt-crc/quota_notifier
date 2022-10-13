@@ -7,7 +7,15 @@ name = "quota-notifier"
 dynamic = ["version"]
 description = "Automatic email notification tool for disk quota usage."
 keywords = ["disk", "usage", "quota", "notify", "email", ]
-classifiers = ["Programming Language :: Python :: 3", ]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: IRIX",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Filesystems",
+    "Topic :: System :: Monitoring"
+]
 requires-python = ">=3.9"
 dependencies = ["pydantic==1.10.2", "sqlalchemy==1.4.41", ]
 
@@ -22,3 +30,6 @@ content-type = "text/markdown"
 docs = ["sphinx==5.2.1", "sphinx-argparse==0.3.1", "sphinx-copybutton==0.5.0", "sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.0.0", "sphinx-jsonschema==1.15", ]
 tests = ["coverage", ]
 all = ["sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.0.0", "coverage", "sphinx-copybutton==0.5.0", "sphinx-jsonschema==1.15", "sphinx==5.2.1", "sphinx-argparse==0.3.1", ]
+
+[tool.setuptools.dynamic]
+version = {attr = "quota_notifier.__version__"}
