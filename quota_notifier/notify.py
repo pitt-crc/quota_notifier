@@ -7,7 +7,7 @@ Module Contents
 import logging
 import pwd
 from bisect import bisect_right
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple
 
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
@@ -23,15 +23,21 @@ class UserNotifier:
     """Issue and manage user disk quota notifications"""
 
     @staticmethod
-    def get_users() -> Iterable[User]:
+    def get_users() -> Tuple[User]:
         """Return a collection of users to check quotas for
 
         Returns:
             A iterable collection of ``User`` objects
         """
 
+        logging.info('Fetching user list...')
+
+        user_data = pwd.getpwall()
         blacklist = ApplicationSettings.get('blacklist')
-        return (User(entry.pw_name) for entry in pwd.getpwall() if entry.pw_name not in blacklist)
+        users = tuple(User(entry.pw_name) for entry in user_data if entry.pw_name not in blacklist)
+
+        logging.debug(f'Found {len(users)}/{len(user_data)} non-blacklisted users')
+        return users
 
     @staticmethod
     def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
@@ -44,6 +50,7 @@ class UserNotifier:
             An iterable collection of quota objects
         """
 
+        logging.debug(f'Building quota list for {user}...')
         all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings.get('file_systems'))
         return filter(None, all_quotas)
 
@@ -96,7 +103,6 @@ class UserNotifier:
             user: The user to send a notification to
         """
 
-        logging.debug(f'notifying {user} ...')
         quotas_to_notify = []  # Track which quotas need email notifications
 
         with DBConnection.session() as session:

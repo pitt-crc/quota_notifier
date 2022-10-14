@@ -225,13 +225,16 @@ class ApplicationSettings:
             path: Path to load settings from
         """
 
-        logging.info(f'Loading settings from file: {path}')
+        logging.debug(f'Looking for settings file: {path.resolve()}')
+
         try:
             cls._parsed_settings = SettingsSchema.parse_file(path)
 
         except Exception:
             logging.error('settings file is invalid')
             raise
+
+        logging.info(f'Loaded settings from file: {path.resolve()}')
 
     @classmethod
     def set(cls, item: str, value: Any) -> None:

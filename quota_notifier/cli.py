@@ -72,8 +72,6 @@ class Application:
         else:
             logging.info('Using default settings')
 
-        logging.debug('Settings are valid')
-
     @classmethod
     def configure_logging(cls, level):
         """Configure python logging to the appropriate level
@@ -85,7 +83,7 @@ class Application:
             level: Integer representing the desired logging level.
         """
 
-        log_format = '%(levelname)s - %(message)s'
+        log_format = '%(levelname)8s - %(message)s'
         if level == 2:
             logging.basicConfig(level=logging.DEBUG, format=log_format)
 
@@ -107,12 +105,14 @@ class Application:
         """
 
         cls.load_settings(args.settings, error_on_missing_file=args.validate)
-        if ApplicationSettings.get('debug'):
-            logging.info('running in debug mode')
+        if args.validate:
+            return
 
-        if not args.validate:
-            DBConnection.configure()
-            UserNotifier().send_notifications()
+        if ApplicationSettings.get('debug'):
+            logging.warning('Running in debug mode')
+
+        DBConnection.configure()
+        UserNotifier().send_notifications()
 
     @classmethod
     def execute(cls) -> None:

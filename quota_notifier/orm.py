@@ -82,7 +82,7 @@ class DBConnection:
             url: URL information for the application database
         """
 
-        logging.info(f'connecting to database: {url}')
+        logging.info(f'Configuring database URL: {url}')
 
         cls.url = url
         cls.engine = create_engine(cls.url)
