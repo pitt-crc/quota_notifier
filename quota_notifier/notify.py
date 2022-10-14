@@ -51,7 +51,6 @@ class UserNotifier:
             An iterable collection of quota objects
         """
 
-        logging.debug(f'Building quota list for {user}...')
         all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings.get('file_systems'))
         return filter(None, all_quotas)
 
@@ -106,7 +105,7 @@ class UserNotifier:
 
         quotas_to_notify = []  # Track which quotas need email notifications
 
-        logging.info(f'Checking quotas for {user}')
+        logging.debug(f'Checking quotas for {user}...')
         with DBConnection.session() as session:
             for quota in self.get_user_quotas(user):
                 next_threshold = self.get_next_threshold(quota)
@@ -147,7 +146,7 @@ class UserNotifier:
 
             # Issue email notification if necessary
             if quotas_to_notify:
-                logging.info(f'{user} has pending notification')
+                logging.info(f'{user} has {len(quotas_to_notify)} pending notifications')
                 EmailTemplate(quotas_to_notify).send_to_user(user)
 
             else:
@@ -163,11 +162,18 @@ class UserNotifier:
         users = self.get_users()
 
         # Cache queries for BeeGFS file systems
-        logging.info('Checking for cachable file system queries')
+        logging.info('Checking for cachable file system queries...')
+        cachable_systems_found = False
+
         for file_system in ApplicationSettings.get('file_systems'):
             if file_system.type == 'beegfs':
+                cachable_systems_found = True
                 logging.info(f'Caching quota info for {file_system.path}')
                 BeegfsQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
 
+        if not cachable_systems_found:
+            logging.debug('No cachable system queries found')
+
+        logging.info('Scanning user quotas...')
         for user in users:
             self.notify_user(user)

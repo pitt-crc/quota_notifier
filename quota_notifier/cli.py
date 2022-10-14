@@ -113,6 +113,7 @@ class Application:
 
         DBConnection.configure()
         UserNotifier().send_notifications()
+        logging.debug('Exiting application')
 
     @classmethod
     def execute(cls) -> None:
