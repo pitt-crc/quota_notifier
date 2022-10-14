@@ -64,7 +64,8 @@ class UserNotifier:
             Notification.file_system == quota.name)
 
         last_notification = None
-        if db_entry := session.execute(query).scalars().first():
+        db_entry = session.execute(query).scalars().first()
+        if db_entry:
             last_notification = db_entry.threshold
 
         return last_notification

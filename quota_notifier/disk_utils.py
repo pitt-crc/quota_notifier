@@ -139,7 +139,8 @@ class BeegfsQuota(AbstractQuota):
             An instance of the parent class or None if the allocation does not exist
         """
 
-        if cached_quota := cls._cached_quotas.get(path, dict()).get(user.gid, None):
+        cached_quota = cls._cached_quotas.get(path, dict()).get(user.gid, None)
+        if cached_quota:
             quota = copy(cached_quota)
             quota.user = user
             return quota
