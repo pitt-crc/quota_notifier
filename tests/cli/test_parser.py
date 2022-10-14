@@ -51,3 +51,25 @@ class ValidateOption(TestCase):
 
         args = Parser().parse_args(['--validate'])
         self.assertTrue(args.validate)
+
+
+class VerboseOption(TestCase):
+    """Test parsing of the ``--verbose`` option"""
+
+    def test_defaults_to_zero(self) -> None:
+        """Test the ``verbose`` value is zero when not specified"""
+
+        args = Parser().parse_args([])
+        self.assertEqual(0, args.verbose)
+
+    def test_defaults_to_one(self) -> None:
+        """Test the ``verbose`` value is one when specified without arguments"""
+
+        args = Parser().parse_args(['--verbose'])
+        self.assertEqual(1, args.verbose)
+
+    def test_accepts_custom_value(self) -> None:
+        """Test custom arguments are stored in the returned arguemnts"""
+
+        args = Parser().parse_args(['--verbose', '2'])
+        self.assertEqual(2, args.verbose)
