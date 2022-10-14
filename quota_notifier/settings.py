@@ -6,7 +6,7 @@ Module Contents
 """
 
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Set
 
 from pydantic import BaseSettings, Field, validator
 
@@ -82,21 +82,21 @@ class SettingsSchema(BaseSettings):
         default=Path('/ihome/crc/scripts/ihome_quota.json'),
         description='Path to ihome storage information.')
 
-    thresholds: list[int] = Field(
+    thresholds: List[int] = Field(
         title='Notification Thresholds',
-        type=list[int],
+        type=List[int],
         default=[98, 100],
         description='Usage percentages to issue notifications for.')
 
-    file_systems: list[FileSystemSchema] = Field(
+    file_systems: List[FileSystemSchema] = Field(
         title='Monitored File Systems',
-        type=list[FileSystemSchema],
+        type=List[FileSystemSchema],
         default=list(),
         description='List of additional settings that define which file systems to examine.')
 
-    blacklist: set[str] = Field(
+    blacklist: Set[str] = Field(
         title='Blacklisted Users',
-        type=set[str],
+        type=Set[str],
         default=set(),
         description='Do not notify usernames in this list.')
 
@@ -169,7 +169,7 @@ class SettingsSchema(BaseSettings):
         ))
 
     @validator('file_systems')
-    def validate_unique_file_systems(cls, value: list[FileSystemSchema]) -> list[FileSystemSchema]:
+    def validate_unique_file_systems(cls, value: List[FileSystemSchema]) -> List[FileSystemSchema]:
         """Ensure file systems have unique names/paths
 
         Args:
