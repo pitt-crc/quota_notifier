@@ -141,7 +141,8 @@ class UserNotifier:
                 EmailTemplate(quotas_to_notify).send_to_user(user)
 
             # Wait to commit until the email sends
-            session.commit()
+            if not ApplicationSettings.get('debug'):
+                session.commit()
 
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""

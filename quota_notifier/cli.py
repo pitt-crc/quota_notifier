@@ -8,7 +8,6 @@ Module Contents
 """
 
 import logging
-import sys
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
@@ -108,6 +107,9 @@ class Application:
         """
 
         cls.load_settings(args.settings, error_on_missing_file=args.validate)
+        if ApplicationSettings.get('debug'):
+            logging.info('running in debug mode')
+
         if not args.validate:
             DBConnection.configure()
             UserNotifier().send_notifications()

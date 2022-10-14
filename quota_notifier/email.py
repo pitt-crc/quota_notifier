@@ -54,11 +54,14 @@ class EmailTemplate:
         email["From"] = self.email_from
         email["To"] = address
 
+        logging.debug(f'Sending email notification to {address}')
+        if ApplicationSettings.get('debug'):
+            return email
+
         with smtp or SMTP(
             host=ApplicationSettings.get('smtp_host'),
             port=ApplicationSettings.get('smtp_port')
         ) as smtp_server:
-            logging.debug(f'Sending email notification to {address}')
             smtp_server.send_message(email)
 
         return email

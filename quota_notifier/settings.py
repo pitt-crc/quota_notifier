@@ -169,6 +169,12 @@ class SettingsSchema(BaseSettings):
             "The CRC Quota Bot"
         ))
 
+    debug: bool = Field(
+        title='Debug Mode',
+        type=bool,
+        default=False,
+        description='Disable database commits and email notifications. Useful for development and testing.')
+
     @validator('file_systems')
     def validate_unique_file_systems(cls, value: List[FileSystemSchema]) -> List[FileSystemSchema]:
         """Ensure file systems have unique names/paths
