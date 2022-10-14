@@ -4,6 +4,7 @@ disk quotas and issuing pending notifications.
 Module Contents
 ---------------
 """
+
 import logging
 import pwd
 from bisect import bisect_right
@@ -105,6 +106,7 @@ class UserNotifier:
 
         quotas_to_notify = []  # Track which quotas need email notifications
 
+        logging.info(f'Checking quotas for {user}')
         with DBConnection.session() as session:
             for quota in self.get_user_quotas(user):
                 next_threshold = self.get_next_threshold(quota)
@@ -119,6 +121,7 @@ class UserNotifier:
                             Notification.file_system == quota.name
                         )
                     )
+
                 # There was no previous notification
                 # Mark the quota as needing a notification and create a DB record
                 elif last_threshold is None or next_threshold > last_threshold:
@@ -144,7 +147,11 @@ class UserNotifier:
 
             # Issue email notification if necessary
             if quotas_to_notify:
+                logging.info(f'{user} has pending notification')
                 EmailTemplate(quotas_to_notify).send_to_user(user)
+
+            else:
+                logging.debug(f'{user} has no quotas pending notification')
 
             # Wait to commit until the email sends
             if not ApplicationSettings.get('debug'):
@@ -156,8 +163,10 @@ class UserNotifier:
         users = self.get_users()
 
         # Cache queries for BeeGFS file systems
+        logging.info('Checking for cachable file system queries')
         for file_system in ApplicationSettings.get('file_systems'):
             if file_system.type == 'beegfs':
+                logging.info(f'Caching quota info for {file_system.path}')
                 BeegfsQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
 
         for user in users:
