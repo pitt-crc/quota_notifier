@@ -37,17 +37,17 @@ class SettingsOption(TestCase):
         self.assertEqual(Path(test_path_str), args.settings)
 
 
-class CheckOption(TestCase):
-    """Test parsing of the ``--check`` option"""
+class ValidateOption(TestCase):
+    """Test parsing of the ``--validate`` option"""
 
     def test_defaults_to_false(self) -> None:
-        """Test the ``check`` flag defaults to ``False``"""
+        """Test the ``validate`` flag defaults to ``False``"""
 
         args = Parser().parse_args([])
-        self.assertFalse(args.check)
+        self.assertFalse(args.validate)
 
     def test_stores_as_true(self) -> None:
-        """Test the ``check`` flag defaults to ``False``"""
+        """Test the ``validate`` flag defaults to ``False``"""
 
-        args = Parser().parse_args(['--check'])
-        self.assertTrue(args.check)
+        args = Parser().parse_args(['--validate'])
+        self.assertTrue(args.validate)

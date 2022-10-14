@@ -10,12 +10,12 @@ from quota_notifier.cli import Application, DEFAULT_SETTINGS
 
 
 class SettingsValidation(TestCase):
-    """Test the validation of application settings files when ``check=True``"""
+    """Test the validation of application settings files when ``validate=True``"""
 
     def test_error_missing_file(self) -> None:
         """Test ``FileNotFoundError`` is raised when the settings file does not exist"""
 
-        args = Namespace(check=True, settings=Path('fake/file/path.json'))
+        args = Namespace(validate=True, settings=Path('fake/file/path.json'))
         with self.assertRaises(FileNotFoundError):
             Application.run(args)
 
@@ -23,12 +23,12 @@ class SettingsValidation(TestCase):
         """Test ``JSONDecodeError`` is raised when the settings file is empty"""
 
         with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
-            args = Namespace(check=True, settings=Path(temp.name))
+            args = Namespace(validate=True, settings=Path(temp.name))
             Application.run(args)
 
     @staticmethod
     def test_no_error_on_defaults() -> None:
         """Test no error is raised when validating default application settings"""
 
-        args = Namespace(check=True, settings=DEFAULT_SETTINGS)
+        args = Namespace(validate=True, settings=DEFAULT_SETTINGS)
         Application.run(args)
