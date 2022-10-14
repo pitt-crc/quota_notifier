@@ -53,6 +53,22 @@ class ValidateOption(TestCase):
         self.assertTrue(args.validate)
 
 
+class DebugOption(TestCase):
+    """Test parsing of the ``--debug`` option"""
+
+    def test_defaults_to_false(self) -> None:
+        """Test the ``debug`` flag defaults to ``False``"""
+
+        args = Parser().parse_args([])
+        self.assertFalse(args.debug)
+
+    def test_stores_as_true(self) -> None:
+        """Test the ``debug`` flag defaults to ``False``"""
+
+        args = Parser().parse_args(['--debug'])
+        self.assertTrue(args.debug)
+
+
 class VerboseOption(TestCase):
     """Test parsing of the ``--verbose`` option"""
 

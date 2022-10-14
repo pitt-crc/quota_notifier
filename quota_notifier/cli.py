@@ -33,9 +33,9 @@ class Parser(ArgumentParser):
         super().__init__(*args, prog=prog, description=description, **kwargs)
         self.add_argument('-v', '--version', action='version', version=__version__)
         self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS, help='path to application settings')
-        self.add_argument('--validate', action='store_true', help='validate app settings without sending notifications')
 
-        # Verbose set to 0 if not specified and 1 if specified without an argument
+        self.add_argument('--validate', action='store_true', help='validate app settings without sending notifications')
+        self.add_argument('--debug', action='store_true', help='run in debug mode')
         self.add_argument(
             '--verbose', type=int, nargs='?',
             default=0, const=1, choices=[0, 1, 2],
@@ -105,6 +105,9 @@ class Application:
         """
 
         cls.load_settings(args.settings, error_on_missing_file=args.validate)
+        if args.debug:
+            ApplicationSettings.set(debug=True)
+
         if args.validate:
             return
 
