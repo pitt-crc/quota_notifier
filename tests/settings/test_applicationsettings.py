@@ -27,11 +27,11 @@ class Setter(TestCase):
         """Test settings are updated by the setter"""
 
         new_setting_value = 'test@some_domain.com'
-        ApplicationSettings.set('email_from', new_setting_value)
+        ApplicationSettings.set(email_from=new_setting_value)
         self.assertEqual(new_setting_value, ApplicationSettings.get('email_from'))
 
     def test_error_invalid_settings(self) -> None:
         """Test a ``ValueError`` is raised for an invalid settings name"""
 
         with self.assertRaises(ValueError):
-            ApplicationSettings.set('fakesetting', 1)
+            ApplicationSettings.set(fakesetting=1)

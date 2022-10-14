@@ -214,8 +214,7 @@ class ApplicationSettings:
         """
 
         cls._parsed_settings = SettingsSchema()
-        for key, value in kwargs.items():
-            cls.set(key, value)
+        cls.set(**kwargs)
 
     @classmethod
     def configure_from_file(cls, path: Path) -> None:
