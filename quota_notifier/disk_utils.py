@@ -18,6 +18,7 @@ Module Contents
 from __future__ import annotations
 
 import json
+import logging
 import math
 from abc import abstractmethod
 from copy import copy
@@ -110,6 +111,8 @@ class GenericQuota(AbstractQuota):
             An instance of the parent class or None if the allocation does not exist
         """
 
+        logging.debug(f'fetching generic quota for {user.username} at {path}')
+
         df_command = f"df {path}"
         quota_info_list = ShellCmd(df_command).out.splitlines()
         if not quota_info_list:
@@ -139,8 +142,11 @@ class BeegfsQuota(AbstractQuota):
             An instance of the parent class or None if the allocation does not exist
         """
 
+        logging.debug(f'fetching BeeGFS quota for {user.username} at {path}')
+
         cached_quota = cls._cached_quotas.get(path, dict()).get(user.gid, None)
         if cached_quota:
+            logging.debug(f'Found cached query')
             quota = copy(cached_quota)
             quota.user = user
             return quota
@@ -170,6 +176,8 @@ class BeegfsQuota(AbstractQuota):
         Yield:
             Quota objects for each user having a quota
         """
+
+        logging.info(f'Caching quota information for path {path}')
 
         group_ids = ','.join(map(str, set(user.gid for user in users)))  # CSV string of unique group IDs
         cmd_str = f"beegfs-ctl --getquota  --csv --mount={path} --storagepoolid={storage_pool} --gid --list {group_ids}"
@@ -201,6 +209,8 @@ class IhomeQuota(AbstractQuota):
         Returns:
             An instance of the parent class or None if the allocation does not exist
         """
+
+        logging.debug(f'fetching Ihome quota for {user.username} at {path}')
 
         # Get the information from Isilon
         with ApplicationSettings.get('ihome_quota_path').open('r') as infile:
@@ -240,6 +250,7 @@ class QuotaFactory:
             quota_class = cls.QuotaType[quota_type].value
 
         except KeyError:
-            raise ValueError(f'Unknown quota type {quota_type}')
+            logging.error(f'Could not create quota object ')
+            raise ValueError(f'Unknown quota type quota_type: {quota_type}, path: {path}, user: {user}')
 
         return quota_class.get_quota(name, path, user, **kwargs)

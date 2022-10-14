@@ -5,6 +5,7 @@ Module Contents
 ---------------
 """
 
+import logging
 from pathlib import Path
 from typing import Any, List, Set
 
@@ -218,7 +219,13 @@ class ApplicationSettings:
             path: Path to load settings from
         """
 
-        cls._parsed_settings = SettingsSchema.parse_file(path)
+        logging.info(f'Loading settings from file: {path}')
+        try:
+            cls._parsed_settings = SettingsSchema.parse_file(path)
+
+        except Exception:
+            logging.error('settings file is invalid')
+            raise
 
     @classmethod
     def set(cls, item: str, value: Any) -> None:

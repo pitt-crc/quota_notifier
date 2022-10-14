@@ -7,6 +7,7 @@ Module Contents
 
 from __future__ import annotations
 
+import logging
 from typing import Callable
 
 from sqlalchemy import Column, DateTime, Integer, MetaData, String, UniqueConstraint, create_engine, func
@@ -80,6 +81,8 @@ class DBConnection:
         Args:
             url: URL information for the application database
         """
+
+        logging.info(f'connecting to database: {url}')
 
         cls.url = url
         cls.engine = create_engine(cls.url)

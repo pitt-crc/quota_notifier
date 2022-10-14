@@ -4,7 +4,7 @@ disk quotas and issuing pending notifications.
 Module Contents
 ---------------
 """
-
+import logging
 import pwd
 from bisect import bisect_right
 from typing import Iterable, Optional
@@ -82,7 +82,7 @@ class UserNotifier:
         """
 
         next_threshold = None
-        thresholds: list[int] = ApplicationSettings.get('thresholds')
+        thresholds = ApplicationSettings.get('thresholds')
         if quota.percentage >= min(thresholds):
             index = bisect_right(thresholds, quota.percentage)
             next_threshold = thresholds[index - 1]
@@ -96,6 +96,7 @@ class UserNotifier:
             user: The user to send a notification to
         """
 
+        logging.debug(f'notifying {user} ...')
         quotas_to_notify = []  # Track which quotas need email notifications
 
         with DBConnection.session() as session:

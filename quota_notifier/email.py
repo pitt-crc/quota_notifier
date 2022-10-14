@@ -5,7 +5,7 @@ running on localhost.
 Module Contents
 ---------------
 """
-
+import logging
 from email.message import EmailMessage
 from smtplib import SMTP
 from typing import Collection, Optional
@@ -55,9 +55,10 @@ class EmailTemplate:
         email["To"] = address
 
         with smtp or SMTP(
-                host=ApplicationSettings.get('smtp_host'),
-                port=ApplicationSettings.get('smtp_port')
+            host=ApplicationSettings.get('smtp_host'),
+            port=ApplicationSettings.get('smtp_port')
         ) as smtp_server:
+            logging.debug(f'Sending email notification to {address}')
             smtp_server.send_message(email)
 
         return email
