@@ -8,12 +8,15 @@ The ``notifier`` command line utility is installable via the `pip <https://pip.p
 
    pipx install git+https://github.com/pitt-crc/quota_notifier.git
 
-If you are working as a developer, installation options are provided for extra dependencies:
+If you are working as a developer/contributor, installation options are provided for extra dependencies:
 
 .. code-block:: bash
 
-    git clone https://github.com/pitt-crc/quota_notifier
-    pip install quota_notifier.[all]
+    pip install -e quota_notifier.[docs]
+
+.. note:: Developers may also appreciate the use of
+   `editable mode <https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs>`_
+   in the above example.
 
 To install a specific subset of extras, chose from the options below.
 All options will install the ``notifier`` utility plus core package dependencies.
@@ -21,8 +24,6 @@ All options will install the ``notifier`` utility plus core package dependencies
 +----------------------+---------------------------------------------------------+
 | Install Option       | Description                                             |
 +======================+=========================================================+
-| ``[all]``            | Install all extra dependencies listed in this table.    |
-+----------------------+---------------------------------------------------------+
 | ``[docs]``           | Dependencies required for building the documentation.   |
 +----------------------+---------------------------------------------------------+
 | ``[tests]``          | Dependencies required for running tests with coverage.  |

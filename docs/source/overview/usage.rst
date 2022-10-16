@@ -1,7 +1,7 @@
 Usage Example
 =============
 
-To send any pending email notifications, call ``notifier`` utility:
+To send any pending email notifications, call the ``notifier`` utility:
 
 .. code-block:: bash
 
