@@ -73,11 +73,13 @@ class Application:
             logging.info('Using default settings')
 
     @classmethod
-    def configure_logging(cls, level):
+    def configure_logging(cls, level: int) -> None:
         """Configure python logging to the appropriate level
 
-        Accepted logging levels are 0 (no logging information displayed),
-        1 (information level logging) and 2 (debeug level logging.
+        Arguments for the ``level`` argument are NOT the same as the
+        default integer values used by Python to enumerate logging levels.
+        Accepted values are 0 (no logging information displayed),
+        1 (information level logging) and 2 (debug level logging).
 
         Args:
             level: Integer representing the desired logging level.
