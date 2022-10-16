@@ -7,9 +7,9 @@ Quota Notification Utility
    :hidden:
 
    Overview<self>
+   overview/usage
    overview/install
    overview/config_options
-   overview/usage
 
 .. Put the most important modules towards the top.
    The rest are picked up by glob.

@@ -13,7 +13,7 @@ from typing import Iterable, Optional, Tuple
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
 
-from .disk_utils import AbstractQuota, BeegfsQuota, QuotaFactory
+from .disk_utils import AbstractQuota, BeeGFSQuota, QuotaFactory
 from .email import EmailTemplate
 from .orm import DBConnection, Notification
 from .settings import ApplicationSettings
@@ -169,7 +169,7 @@ class UserNotifier:
             if file_system.type == 'beegfs':
                 cachable_systems_found = True
                 logging.info(f'Caching quota info for {file_system.path}')
-                BeegfsQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
+                BeeGFSQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
 
         if not cachable_systems_found:
             logging.debug('No cachable system queries found')

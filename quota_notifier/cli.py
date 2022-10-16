@@ -10,6 +10,7 @@ Module Contents
 import logging
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
+from typing import List
 
 from . import __version__
 from .notify import UserNotifier
@@ -32,14 +33,13 @@ class Parser(ArgumentParser):
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
         self.add_argument('-v', '--version', action='version', version=__version__)
-        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS, help='path to application settings')
-
-        self.add_argument('--validate', action='store_true', help='validate app settings without sending notifications')
-        self.add_argument('--debug', action='store_true', help='run in debug mode')
+        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS, help='path to the app settings file')
+        self.add_argument('--validate', action='store_true', help='validate settings without sending notifications')
+        self.add_argument('--debug', action='store_true', help='run the application but do not send any emails')
         self.add_argument(
             '--verbose', type=int, nargs='?',
             default=0, const=1, choices=[0, 1, 2],
-            help='set the verbosity level')
+            help='print nothing (0), general info (1), or debug messages (2)')
 
 
 class Application:
@@ -121,14 +121,17 @@ class Application:
         logging.debug('Exiting application')
 
     @classmethod
-    def execute(cls) -> None:
+    def execute(cls, arg_list: List[str] = None) -> None:
         """Parse arguments and execute the application
 
         Raised exceptions are passed to STDERR via the argument parser.
+
+        Args:
+            arg_list: Run the application with the given arguments instead of parsing the command line
         """
 
         parser = Parser()
-        args = parser.parse_args()
+        args = parser.parse_args(arg_list)
 
         try:
             cls.configure_logging(args.verbose)
