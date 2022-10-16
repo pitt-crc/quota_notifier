@@ -10,6 +10,7 @@ Module Contents
 import logging
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
+from typing import List
 
 from . import __version__
 from .notify import UserNotifier
@@ -121,14 +122,17 @@ class Application:
         logging.debug('Exiting application')
 
     @classmethod
-    def execute(cls) -> None:
+    def execute(cls, arg_list: List[str]) -> None:
         """Parse arguments and execute the application
 
         Raised exceptions are passed to STDERR via the argument parser.
+
+        Args:
+            arg_list: Run the application with the given arguments instead of parsing the command line
         """
 
         parser = Parser()
-        args = parser.parse_args()
+        args = parser.parse_args(arg_list)
 
         try:
             cls.configure_logging(args.verbose)

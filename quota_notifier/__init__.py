@@ -35,4 +35,6 @@ However, a user will receive additional notifications if their usage drops below
 a threshold before exceeding the threshold a second time.
 """
 
+from cli import Application
+
 __version__ = '0.1.1'
