@@ -54,12 +54,12 @@ class MessageSending(TestCase):
 
     @patch('smtplib.SMTP')
     def test_fields_are_set(self, mock_smtp) -> None:
-        """Test email fields (to, from, subject, body) are set in the sent email"""
+        """Test required email fields (to, from, subject, body) are included in the delivered email"""
 
         to_address = 'fake_recipient@fake_domain.com'
         sent_message = self.template.send(to_address, mock_smtp)
 
-        # The rstrip removes a newline character that is added automatically in the sent message
+        # The rstrip removes a newline character that is added automatically in the delivered message
         body = sent_message.get_body().get_content().rstrip()
         self.assertEqual(self.template.message, body)
 

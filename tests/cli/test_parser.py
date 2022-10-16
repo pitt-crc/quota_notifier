@@ -37,17 +37,55 @@ class SettingsOption(TestCase):
         self.assertEqual(Path(test_path_str), args.settings)
 
 
-class CheckOption(TestCase):
-    """Test parsing of the ``--check`` option"""
+class ValidateOption(TestCase):
+    """Test parsing of the ``--validate`` option"""
 
     def test_defaults_to_false(self) -> None:
-        """Test the ``check`` flag defaults to ``False``"""
+        """Test the ``validate`` flag defaults to ``False``"""
 
         args = Parser().parse_args([])
-        self.assertFalse(args.check)
+        self.assertFalse(args.validate)
 
     def test_stores_as_true(self) -> None:
-        """Test the ``check`` flag defaults to ``False``"""
+        """Test the ``validate`` flag defaults to ``False``"""
 
-        args = Parser().parse_args(['--check'])
-        self.assertTrue(args.check)
+        args = Parser().parse_args(['--validate'])
+        self.assertTrue(args.validate)
+
+
+class DebugOption(TestCase):
+    """Test parsing of the ``--debug`` option"""
+
+    def test_defaults_to_false(self) -> None:
+        """Test the ``debug`` flag defaults to ``False``"""
+
+        args = Parser().parse_args([])
+        self.assertFalse(args.debug)
+
+    def test_stores_as_true(self) -> None:
+        """Test the ``debug`` flag defaults to ``False``"""
+
+        args = Parser().parse_args(['--debug'])
+        self.assertTrue(args.debug)
+
+
+class VerboseOption(TestCase):
+    """Test parsing of the ``--verbose`` option"""
+
+    def test_defaults_to_zero(self) -> None:
+        """Test the ``verbose`` value is zero when not specified"""
+
+        args = Parser().parse_args([])
+        self.assertEqual(0, args.verbose)
+
+    def test_defaults_to_one(self) -> None:
+        """Test the ``verbose`` value is one when specified without arguments"""
+
+        args = Parser().parse_args(['--verbose'])
+        self.assertEqual(1, args.verbose)
+
+    def test_accepts_custom_value(self) -> None:
+        """Test custom arguments are stored in the returned arguemnts"""
+
+        args = Parser().parse_args(['--verbose', '2'])
+        self.assertEqual(2, args.verbose)

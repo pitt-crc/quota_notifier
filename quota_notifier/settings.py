@@ -5,6 +5,7 @@ Module Contents
 ---------------
 """
 
+import logging
 from pathlib import Path
 from typing import Any, List, Set
 
@@ -168,6 +169,12 @@ class SettingsSchema(BaseSettings):
             "The CRC Quota Bot"
         ))
 
+    debug: bool = Field(
+        title='Debug Mode',
+        type=bool,
+        default=False,
+        description='Disable database commits and email notifications. Useful for development and testing.')
+
     @validator('file_systems')
     def validate_unique_file_systems(cls, value: List[FileSystemSchema]) -> List[FileSystemSchema]:
         """Ensure file systems have unique names/paths
@@ -207,8 +214,7 @@ class ApplicationSettings:
         """
 
         cls._parsed_settings = SettingsSchema()
-        for key, value in kwargs.items():
-            cls.set(key, value)
+        cls.set(**kwargs)
 
     @classmethod
     def configure_from_file(cls, path: Path) -> None:
@@ -218,24 +224,30 @@ class ApplicationSettings:
             path: Path to load settings from
         """
 
-        cls._parsed_settings = SettingsSchema.parse_file(path)
+        logging.debug(f'Looking for settings file: {path.resolve()}')
+
+        try:
+            cls._parsed_settings = SettingsSchema.parse_file(path)
+
+        except Exception:
+            logging.error('settings file is invalid')
+            raise
+
+        logging.info(f'Loaded settings from file: {path.resolve()}')
 
     @classmethod
-    def set(cls, item: str, value: Any) -> None:
+    def set(cls, **kwargs) -> None:
         """Update a single value in the application settings
-
-        Args:
-            item: Name of the settings value to set
-            value: Value to set the settings item to
 
         Raises:
             ValueError: If the item name is not a valid setting
         """
 
-        if not hasattr(cls._parsed_settings, item):
-            ValueError(f'Invalid settings option: {item}')
+        for item, value in kwargs.items():
+            if not hasattr(cls._parsed_settings, item):
+                ValueError(f'Invalid settings option: {item}')
 
-        setattr(cls._parsed_settings, item, value)
+            setattr(cls._parsed_settings, item, value)
 
     @classmethod
     def get(cls, item: str) -> Any:

@@ -5,9 +5,10 @@ Module Contents
 ---------------
 """
 
+import logging
 import pwd
 from bisect import bisect_right
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple
 
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
@@ -23,15 +24,21 @@ class UserNotifier:
     """Issue and manage user disk quota notifications"""
 
     @staticmethod
-    def get_users() -> Iterable[User]:
+    def get_users() -> Tuple[User]:
         """Return a collection of users to check quotas for
 
         Returns:
             A iterable collection of ``User`` objects
         """
 
+        logging.info('Fetching user list...')
+
+        user_data = pwd.getpwall()
         blacklist = ApplicationSettings.get('blacklist')
-        return (User(entry.pw_name) for entry in pwd.getpwall() if entry.pw_name not in blacklist)
+        users = tuple(User(entry.pw_name) for entry in user_data if entry.pw_name not in blacklist)
+
+        logging.debug(f'Found {len(users)}/{len(user_data)} non-blacklisted users')
+        return users
 
     @staticmethod
     def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
@@ -82,7 +89,7 @@ class UserNotifier:
         """
 
         next_threshold = None
-        thresholds: list[int] = ApplicationSettings.get('thresholds')
+        thresholds = ApplicationSettings.get('thresholds')
         if quota.percentage >= min(thresholds):
             index = bisect_right(thresholds, quota.percentage)
             next_threshold = thresholds[index - 1]
@@ -98,6 +105,7 @@ class UserNotifier:
 
         quotas_to_notify = []  # Track which quotas need email notifications
 
+        logging.debug(f'Checking quotas for {user}...')
         with DBConnection.session() as session:
             for quota in self.get_user_quotas(user):
                 next_threshold = self.get_next_threshold(quota)
@@ -112,6 +120,7 @@ class UserNotifier:
                             Notification.file_system == quota.name
                         )
                     )
+
                 # There was no previous notification
                 # Mark the quota as needing a notification and create a DB record
                 elif last_threshold is None or next_threshold > last_threshold:
@@ -137,10 +146,15 @@ class UserNotifier:
 
             # Issue email notification if necessary
             if quotas_to_notify:
+                logging.info(f'{user} has {len(quotas_to_notify)} pending notifications')
                 EmailTemplate(quotas_to_notify).send_to_user(user)
 
+            else:
+                logging.debug(f'{user} has no quotas pending notification')
+
             # Wait to commit until the email sends
-            session.commit()
+            if not ApplicationSettings.get('debug'):
+                session.commit()
 
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
@@ -148,9 +162,18 @@ class UserNotifier:
         users = self.get_users()
 
         # Cache queries for BeeGFS file systems
+        logging.info('Checking for cachable file system queries...')
+        cachable_systems_found = False
+
         for file_system in ApplicationSettings.get('file_systems'):
             if file_system.type == 'beegfs':
+                cachable_systems_found = True
+                logging.info(f'Caching quota info for {file_system.path}')
                 BeegfsQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
 
+        if not cachable_systems_found:
+            logging.debug('No cachable system queries found')
+
+        logging.info('Scanning user quotas...')
         for user in users:
             self.notify_user(user)

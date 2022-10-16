@@ -75,3 +75,11 @@ class User:
         """Fetch and return the users group id"""
 
         return pwd.getpwnam(self._username).pw_gid
+
+    def __str__(self) -> str:
+        """Return the parent object's username"""
+
+        return self.username
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.username})'
