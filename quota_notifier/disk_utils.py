@@ -122,14 +122,14 @@ class GenericQuota(AbstractQuota):
         return cls(name, user, int(result[2]) * 1024, int(result[1]) * 1024)
 
 
-class BeegfsQuota(AbstractQuota):
+class BeeGFSQuota(AbstractQuota):
     """Disk storage quota for a BeeGFS file system"""
 
     # Map file system path to cached quota objects {file path: {group ID: quota object}}
-    _cached_quotas: dict[Path: dict[int: BeegfsQuota]] = dict()
+    _cached_quotas: dict[Path: dict[int: BeeGFSQuota]] = dict()
 
     @classmethod
-    def get_quota(cls, name: str, path: Path, user: User, storage_pool: int = 1) -> Optional[BeegfsQuota]:
+    def get_quota(cls, name: str, path: Path, user: User, storage_pool: int = 1) -> Optional[BeeGFSQuota]:
         """Return a quota object for a given user and file path
 
         Args:
@@ -228,7 +228,7 @@ class QuotaFactory:
 
     class QuotaType(Enum):
         generic = GenericQuota
-        beegfs = BeegfsQuota
+        beegfs = BeeGFSQuota
         ihome = IhomeQuota
 
     def __new__(cls, quota_type: str, name: str, path: Path, user: User, **kwargs) -> AbstractQuota:
