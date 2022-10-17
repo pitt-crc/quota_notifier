@@ -149,15 +149,17 @@ class BeeGFSQuota(AbstractQuota):
         if cached_quota:
             quota = copy(cached_quota)
             quota.user = user
-            return quota
 
-        beegfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.group}"
-        quota_info_cmd = ShellCmd(beegfs_command)
-        if quota_info_cmd.err:
-            return None
+        else:
+            beegfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.gid}"
+            quota_info_cmd = ShellCmd(beegfs_command)
+            if quota_info_cmd.err:
+                logging.error(quota_info_cmd.err)
+                raise RuntimeError(quota_info_cmd.err)
 
-        result = quota_info_cmd.out.splitlines()[1].split(',')
-        quota = cls(name, user, int(result[2]), int(result[3]))
+            result = quota_info_cmd.out.splitlines()[1].split(',')
+            quota = cls(name, user, int(result[2]), int(result[3]))
+
         logging.debug(str(quota))
         return quota
 
@@ -187,6 +189,7 @@ class BeeGFSQuota(AbstractQuota):
         # Fetch quota data from BeeGFS via the underlying shell
         quota_info_cmd = ShellCmd(cmd_str, timeout=60 * 5)
         if quota_info_cmd.err:
+            logging.error(quota_info_cmd.err)
             raise RuntimeError(quota_info_cmd.err)
 
         # Cache returned values for future use

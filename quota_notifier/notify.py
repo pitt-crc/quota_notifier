@@ -53,7 +53,7 @@ class UserNotifier:
 
         for file_sys in ApplicationSettings.get('file_systems'):
             user_path = file_sys.path
-            if file_sys.type != 'ihome':
+            if file_sys.type == 'generic':
                 user_path /= user.username
 
             quota = QuotaFactory(quota_type=file_sys.type, name=file_sys.name, path=user_path, user=user)
