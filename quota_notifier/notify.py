@@ -51,12 +51,14 @@ class UserNotifier:
             An iterable collection of quota objects
         """
 
-        all_quotas = (
-            QuotaFactory(quota_type=file_sys.type, name=file_sys.name, path=file_sys.path, user=user) for
-            file_sys in ApplicationSettings.get('file_systems')
-        )
+        for file_sys in ApplicationSettings.get('file_systems'):
+            user_path = file_sys.path
+            if file_sys.type != 'ihome':
+                user_path /= user.username
 
-        return filter(None, all_quotas)
+            quota = QuotaFactory(quota_type=file_sys.type, name=file_sys.name, path=user_path, user=user)
+            if quota:
+                yield quota
 
     @staticmethod
     def get_last_threshold(session: Session, quota: AbstractQuota) -> Optional[int]:
