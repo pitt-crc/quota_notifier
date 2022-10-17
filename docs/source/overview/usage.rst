@@ -20,7 +20,7 @@ However, the settings file can be validated without issuing email notifications 
 
 .. code-block:: bash
 
-   notifier --check
+   notifier --validate
 
 Full documentation for the commandline interface is provided below.
 
