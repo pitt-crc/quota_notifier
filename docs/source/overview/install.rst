@@ -9,7 +9,7 @@ System Utilities
 The ``df`` command line utility must be installed for the quota notifier to
 process *generic* file systems. The ``beegfs-ctl`` utility is also required to
 support BeeGFS file systems. see :doc:`file_systems` for more details on how
-the different file system types are expected to be configrued.
+the different file system types are expected to be configured.
 
 Installing the Package
 ----------------------
@@ -21,15 +21,23 @@ The ``notifier`` command line utility is installable via the `pip <https://pip.p
 
    pipx install git+https://github.com/pitt-crc/quota_notifier.git
 
-If you are working as a developer/contributor, installation options are provided for extra dependencies:
+Installing for Developers
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If your system is running `pip ≥ 21.3 <https://pip.pypa.io/en/stable/news/#v21-3>`_
+and `setuptools ≥ 24 <https://github.com/pypa/setuptools/blob/main/CHANGES.rst#v6400>`_,
+the package can be installed in
+`editable mode <https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs>`_.
 
 .. code-block:: bash
 
-    pip install -e quota_notifier.[docs]
+    pip install -e quota_notifier
 
-.. note:: Developers may also appreciate the use of
-   `editable mode <https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs>`_
-   in the above example.
+Installation options are also provided for extra dependencies:
+
+.. code-block:: bash
+
+    pip install -e quota_notifier[docs]
 
 To install a specific subset of extras, chose from the options below.
 All options will install the ``notifier`` utility plus core package dependencies.
