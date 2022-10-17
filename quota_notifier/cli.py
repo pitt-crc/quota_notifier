@@ -115,8 +115,11 @@ class Application:
 
         if ApplicationSettings.get('debug'):
             logging.warning('Running in debug mode')
+            DBConnection.configure('sqlite:///:memory:')
 
-        DBConnection.configure()
+        else:
+            DBConnection.configure()
+
         UserNotifier().send_notifications()
         logging.debug('Exiting application')
 

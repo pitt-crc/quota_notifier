@@ -51,8 +51,14 @@ class UserNotifier:
             An iterable collection of quota objects
         """
 
-        all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings.get('file_systems'))
-        return filter(None, all_quotas)
+        for file_sys in ApplicationSettings.get('file_systems'):
+            user_path = file_sys.path
+            if file_sys.type == 'generic':
+                user_path /= user.group
+
+            quota = QuotaFactory(quota_type=file_sys.type, name=file_sys.name, path=user_path, user=user)
+            if quota:
+                yield quota
 
     @staticmethod
     def get_last_threshold(session: Session, quota: AbstractQuota) -> Optional[int]:
@@ -153,8 +159,7 @@ class UserNotifier:
                 logging.debug(f'{user} has no quotas pending notification')
 
             # Wait to commit until the email sends
-            if not ApplicationSettings.get('debug'):
-                session.commit()
+            session.commit()
 
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
@@ -168,7 +173,6 @@ class UserNotifier:
         for file_system in ApplicationSettings.get('file_systems'):
             if file_system.type == 'beegfs':
                 cachable_systems_found = True
-                logging.info(f'Caching quota info for {file_system.path}')
                 BeeGFSQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
 
         if not cachable_systems_found:

@@ -112,6 +112,8 @@ class GenericQuota(AbstractQuota):
         """
 
         logging.debug(f'fetching generic quota for {user.username} at {path}')
+        if not path.exists():
+            return None
 
         df_command = f"df {path}"
         quota_info_list = ShellCmd(df_command).out.splitlines()
@@ -119,7 +121,9 @@ class GenericQuota(AbstractQuota):
             return None
 
         result = quota_info_list[1].split()
-        return cls(name, user, int(result[2]) * 1024, int(result[1]) * 1024)
+        quota = cls(name, user, int(result[2]) * 1024, int(result[1]) * 1024)
+        logging.debug(str(quota))
+        return quota
 
 
 class BeeGFSQuota(AbstractQuota):
@@ -143,21 +147,23 @@ class BeeGFSQuota(AbstractQuota):
         """
 
         logging.debug(f'fetching BeeGFS quota for {user.username} at {path}')
-
         cached_quota = cls._cached_quotas.get(path, dict()).get(user.gid, None)
         if cached_quota:
-            logging.debug(f'Found cached query')
             quota = copy(cached_quota)
             quota.user = user
-            return quota
 
-        beegfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.group}"
-        quota_info_cmd = ShellCmd(beegfs_command)
-        if quota_info_cmd.err:
-            return None
+        else:
+            bgfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.gid}"
+            quota_info_cmd = ShellCmd(bgfs_command)
+            if quota_info_cmd.err:
+                logging.error(quota_info_cmd.err)
+                raise RuntimeError(quota_info_cmd.err)
 
-        result = quota_info_cmd.out.splitlines()[1].split(',')
-        return cls(name, user, int(result[2]), int(result[3]))
+            result = quota_info_cmd.out.splitlines()[1].split(',')
+            quota = cls(name, user, int(result[2]), int(result[3]))
+
+        logging.debug(str(quota))
+        return quota
 
     @classmethod
     def cache_quotas(cls, name: str, path: Path, users: Iterable[User], storage_pool: int = 1) -> None:
@@ -183,19 +189,39 @@ class BeeGFSQuota(AbstractQuota):
         cmd_str = f"beegfs-ctl --getquota  --csv --mount={path} --storagepoolid={storage_pool} --gid --list {group_ids}"
 
         # Fetch quota data from BeeGFS via the underlying shell
-        quota_info_cmd = ShellCmd(cmd_str)
+        quota_info_cmd = ShellCmd(cmd_str, timeout=60 * 5)
         if quota_info_cmd.err:
+            logging.error(quota_info_cmd.err)
             raise RuntimeError(quota_info_cmd.err)
 
         # Cache returned values for future use
         cls._cached_quotas[path] = dict()
         for quota_data in quota_info_cmd.out.splitlines()[1:]:
             _, gid, used, avail, *_ = quota_data.split(',')
-            cls._cached_quotas[int(gid)] = cls(name, None, int(used), int(avail))
+            cls._cached_quotas[path][int(gid)] = cls(name, None, int(used), int(avail))
 
 
 class IhomeQuota(AbstractQuota):
     """Disk storage quota for the ihome file system"""
+
+    _parsed_quota_data = None
+
+    @classmethod
+    def _get_quota_data(cls) -> dict:
+        """Parse and cache Ihome quota data
+
+        Returns:
+            Quota information as a dictionary
+        """
+
+        # Get the information from Isilon
+        if cls._parsed_quota_data is None:
+            ihome_data_path = ApplicationSettings.get('ihome_quota_path')
+            logging.debug(f'Parsing {ihome_data_path}')
+            with ihome_data_path.open('r') as infile:
+                cls._parsed_quota_data = json.load(infile)
+
+        return cls._parsed_quota_data
 
     @classmethod
     def get_quota(cls, name: str, path: Path, user: User) -> Optional[IhomeQuota]:
@@ -212,15 +238,14 @@ class IhomeQuota(AbstractQuota):
 
         logging.debug(f'fetching Ihome quota for {user.username} at {path}')
 
-        # Get the information from Isilon
-        with ApplicationSettings.get('ihome_quota_path').open('r') as infile:
-            data = json.load(infile)
-
+        quota_data = cls._get_quota_data()
         persona = f"UID:{user.uid}"
-        for item in data["quotas"]:
+        for item in quota_data["quotas"]:
             if item["persona"] is not None:
                 if item["persona"]["id"] == persona:
-                    return cls(name, user, item["usage"]["logical"], item["thresholds"]["hard"])
+                    quota = cls(name, user, item["usage"]["logical"], item["thresholds"]["hard"])
+                    logging.debug(str(quota))
+                    return quota
 
 
 class QuotaFactory:

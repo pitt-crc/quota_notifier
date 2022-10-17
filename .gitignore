@@ -1,3 +1,7 @@
+# Select files
+profile_app.py
+profile_settings.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
