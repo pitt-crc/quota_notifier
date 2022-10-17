@@ -153,8 +153,8 @@ class BeeGFSQuota(AbstractQuota):
             quota.user = user
 
         else:
-            beegfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.gid}"
-            quota_info_cmd = ShellCmd(beegfs_command)
+            bgfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.gid}"
+            quota_info_cmd = ShellCmd(bgfs_command)
             if quota_info_cmd.err:
                 logging.error(quota_info_cmd.err)
                 raise RuntimeError(quota_info_cmd.err)
