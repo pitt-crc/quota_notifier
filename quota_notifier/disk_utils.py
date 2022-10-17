@@ -119,7 +119,9 @@ class GenericQuota(AbstractQuota):
             return None
 
         result = quota_info_list[1].split()
-        return cls(name, user, int(result[2]) * 1024, int(result[1]) * 1024)
+        quota = cls(name, user, int(result[2]) * 1024, int(result[1]) * 1024)
+        logging.debug(str(quota))
+        return quota
 
 
 class BeeGFSQuota(AbstractQuota):
@@ -143,10 +145,8 @@ class BeeGFSQuota(AbstractQuota):
         """
 
         logging.debug(f'fetching BeeGFS quota for {user.username} at {path}')
-
         cached_quota = cls._cached_quotas.get(path, dict()).get(user.gid, None)
         if cached_quota:
-            logging.debug(f'Found cached query')
             quota = copy(cached_quota)
             quota.user = user
             return quota
@@ -157,7 +157,9 @@ class BeeGFSQuota(AbstractQuota):
             return None
 
         result = quota_info_cmd.out.splitlines()[1].split(',')
-        return cls(name, user, int(result[2]), int(result[3]))
+        quota = cls(name, user, int(result[2]), int(result[3]))
+        logging.debug(str(quota))
+        return quota
 
     @classmethod
     def cache_quotas(cls, name: str, path: Path, users: Iterable[User], storage_pool: int = 1) -> None:
@@ -236,7 +238,9 @@ class IhomeQuota(AbstractQuota):
         for item in quota_data["quotas"]:
             if item["persona"] is not None:
                 if item["persona"]["id"] == persona:
-                    return cls(name, user, item["usage"]["logical"], item["thresholds"]["hard"])
+                    quota = cls(name, user, item["usage"]["logical"], item["thresholds"]["hard"])
+                    logging.debug(str(quota))
+                    return quota
 
 
 class QuotaFactory:

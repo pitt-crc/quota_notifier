@@ -157,8 +157,7 @@ class UserNotifier:
                 logging.debug(f'{user} has no quotas pending notification')
 
             # Wait to commit until the email sends
-            if not ApplicationSettings.get('debug'):
-                session.commit()
+            session.commit()
 
     def send_notifications(self) -> None:
         """Send email notifications to any users who have exceeded a notification threshold"""
