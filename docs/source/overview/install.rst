@@ -51,7 +51,7 @@ Once the application has been configured, you can check the configuration file i
 
 .. code-block:: bash
 
-   notifier --check
+   notifier --validate
 
 Issuing Automated Notifications
 -------------------------------
