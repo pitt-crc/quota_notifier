@@ -5,6 +5,7 @@ Module Contents
 """
 
 import grp
+import logging
 import pwd
 from shlex import split
 from subprocess import PIPE, Popen
@@ -35,6 +36,7 @@ class ShellCmd:
         if not cmd:
             raise ValueError('Command string cannot be empty')
 
+        logging.debug(f'running {cmd}')
         out, err = Popen(split(cmd), stdout=PIPE, stderr=PIPE).communicate(timeout=timeout)
         self.out = out.decode("utf-8").strip()
         self.err = err.decode("utf-8").strip()
