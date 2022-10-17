@@ -172,7 +172,6 @@ class UserNotifier:
         for file_system in ApplicationSettings.get('file_systems'):
             if file_system.type == 'beegfs':
                 cachable_systems_found = True
-                logging.info(f'Caching quota info for {file_system.path}')
                 BeeGFSQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
 
         if not cachable_systems_found:

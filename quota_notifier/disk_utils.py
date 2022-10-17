@@ -191,7 +191,7 @@ class BeeGFSQuota(AbstractQuota):
         cls._cached_quotas[path] = dict()
         for quota_data in quota_info_cmd.out.splitlines()[1:]:
             _, gid, used, avail, *_ = quota_data.split(',')
-            cls._cached_quotas[int(gid)] = cls(name, None, int(used), int(avail))
+            cls._cached_quotas[path][int(gid)] = cls(name, None, int(used), int(avail))
 
 
 class IhomeQuota(AbstractQuota):
