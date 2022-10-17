@@ -252,6 +252,8 @@ class QuotaFactory:
     """Factory object for dynamically creating quota instances of different types"""
 
     class QuotaType(Enum):
+        """Map file system types to quota objects"""
+
         generic = GenericQuota
         beegfs = BeeGFSQuota
         ihome = IhomeQuota
