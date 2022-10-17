@@ -112,6 +112,8 @@ class GenericQuota(AbstractQuota):
         """
 
         logging.debug(f'fetching generic quota for {user.username} at {path}')
+        if not path.exists():
+            return None
 
         df_command = f"df {path}"
         quota_info_list = ShellCmd(df_command).out.splitlines()
