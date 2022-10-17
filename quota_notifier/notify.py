@@ -51,7 +51,11 @@ class UserNotifier:
             An iterable collection of quota objects
         """
 
-        all_quotas = (QuotaFactory(**file_sys, user=user) for file_sys in ApplicationSettings.get('file_systems'))
+        all_quotas = (
+            QuotaFactory(quota_type=file_sys.type, name=file_sys.name, path=file_sys.path, user=user) for
+            file_sys in ApplicationSettings.get('file_systems')
+        )
+
         return filter(None, all_quotas)
 
     @staticmethod

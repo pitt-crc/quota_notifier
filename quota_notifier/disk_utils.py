@@ -183,7 +183,7 @@ class BeeGFSQuota(AbstractQuota):
         cmd_str = f"beegfs-ctl --getquota  --csv --mount={path} --storagepoolid={storage_pool} --gid --list {group_ids}"
 
         # Fetch quota data from BeeGFS via the underlying shell
-        quota_info_cmd = ShellCmd(cmd_str)
+        quota_info_cmd = ShellCmd(cmd_str, timeout=60 * 5)
         if quota_info_cmd.err:
             raise RuntimeError(quota_info_cmd.err)
 
@@ -196,6 +196,23 @@ class BeeGFSQuota(AbstractQuota):
 
 class IhomeQuota(AbstractQuota):
     """Disk storage quota for the ihome file system"""
+
+    _parsed_quota_data = None
+
+    @classmethod
+    def _get_quota_data(cls) -> dict:
+        """Parse and cache Ihome quota data
+
+        Returns:
+            Quota information as a dictionary
+        """
+
+        # Get the information from Isilon
+        if cls._parsed_quota_data is None:
+            with ApplicationSettings.get('ihome_quota_path').open('r') as infile:
+                cls._parsed_quota_data = json.load(infile)
+
+        return cls._parsed_quota_data
 
     @classmethod
     def get_quota(cls, name: str, path: Path, user: User) -> Optional[IhomeQuota]:
@@ -212,12 +229,9 @@ class IhomeQuota(AbstractQuota):
 
         logging.debug(f'fetching Ihome quota for {user.username} at {path}')
 
-        # Get the information from Isilon
-        with ApplicationSettings.get('ihome_quota_path').open('r') as infile:
-            data = json.load(infile)
-
+        quota_data = cls._get_quota_data()
         persona = f"UID:{user.uid}"
-        for item in data["quotas"]:
+        for item in quota_data["quotas"]:
             if item["persona"] is not None:
                 if item["persona"]["id"] == persona:
                     return cls(name, user, item["usage"]["logical"], item["thresholds"]["hard"])
