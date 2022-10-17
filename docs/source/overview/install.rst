@@ -1,6 +1,18 @@
 Installation
 ============
 
+Follow the instructions below to install and configure the ``notifier`` utility.
+
+System Utilities
+----------------
+
+The ``df`` command line utility must be installed for the quota notifier to
+process *generic* file systems. The ``beegfs-ctl`` utility is also required to
+support BeeGFS file systems. see :doc:`file_systems` for more details.
+
+Installing the Package
+----------------------
+
 The ``notifier`` command line utility is installable via the `pip <https://pip.pypa.io/en/stable/>`_
 (or `pipx <https://pypa.github.io/pipx/>`_) package manager:
 
