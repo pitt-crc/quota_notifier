@@ -209,7 +209,9 @@ class IhomeQuota(AbstractQuota):
 
         # Get the information from Isilon
         if cls._parsed_quota_data is None:
-            with ApplicationSettings.get('ihome_quota_path').open('r') as infile:
+            ihome_data_path = ApplicationSettings.get('ihome_quota_path')
+            logging.debug(f'Parsing {ihome_data_path}')
+            with ihome_data_path.open('r') as infile:
                 cls._parsed_quota_data = json.load(infile)
 
         return cls._parsed_quota_data
