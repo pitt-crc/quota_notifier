@@ -8,7 +8,8 @@ System Utilities
 
 The ``df`` command line utility must be installed for the quota notifier to
 process *generic* file systems. The ``beegfs-ctl`` utility is also required to
-support BeeGFS file systems. see :doc:`file_systems` for more details.
+support BeeGFS file systems. see :doc:`file_systems` for more details on how
+the different file system types are expected to be configrued.
 
 Installing the Package
 ----------------------
