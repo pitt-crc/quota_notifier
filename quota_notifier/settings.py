@@ -6,12 +6,22 @@ Module Contents
 """
 
 import logging
+from enum import Enum
 from pathlib import Path
-from typing import Any, List, Set, Literal
+from typing import Any, List, Set
 
 from pydantic import BaseSettings, Field, validator, BaseModel
 
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
+
+
+class FileSystemTypes(str, Enum):
+    """Valid string representations for file system types"""
+
+    # These values must match key names in disk_utils.QuotaFactory.QuotaType
+    generic: str = 'generic'
+    ihome: str = 'ihome'
+    beegfs: str = 'beegfs'
 
 
 class FileSystemSchema(BaseModel):
@@ -29,10 +39,10 @@ class FileSystemSchema(BaseModel):
         type=Path,
         description='Absolute path to the mounted file system')
 
-    type: Literal['generic', 'ihome', 'beegfs'] = Field(
+    type: FileSystemTypes = Field(
         ...,
         title='System Type',
-        type=Literal['generic', 'ihome', 'beegfs'],
+        type=FileSystemTypes,
         description='Type of the file system')
 
     @validator('path')
