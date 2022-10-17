@@ -25,7 +25,7 @@ Installing for Developers
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If your system is running `pip ≥ 21.3 <https://pip.pypa.io/en/stable/news/#v21-3>`_
-and `setuptools ≥ 24 <https://github.com/pypa/setuptools/blob/main/CHANGES.rst#v6400>`_,
+and `setuptools ≥ 64 <https://github.com/pypa/setuptools/blob/main/CHANGES.rst#v6400>`_,
 the package can be installed in
 `editable mode <https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs>`_.
 
