@@ -8,6 +8,7 @@ Module Contents
 import logging
 from pathlib import Path
 from typing import Any, List, Set
+from typing import Literal
 
 from pydantic import BaseSettings, Field, validator
 
@@ -29,10 +30,12 @@ class FileSystemSchema(BaseSettings):
         type=Path,
         description='Absolute path to the mounted file system')
 
-    type: str = Field(
+    # If modifying options for this setting, also update
+    # quota_notifier.disk_utils.QuotaFactory.QuotaType
+    type: Literal['ihome', 'generic', 'beegfs'] = Field(
         ...,
         title='System Type',
-        type=str,
+        type=Literal['ihome', 'generic', 'beegfs'],
         description='Type of the file system')
 
     @validator('type')
