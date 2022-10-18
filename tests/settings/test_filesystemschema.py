@@ -3,8 +3,6 @@
 from pathlib import Path
 from unittest import TestCase
 
-from pydantic import ValidationError
-
 from quota_notifier.disk_utils import QuotaFactory
 from quota_notifier.settings import FileSystemSchema
 
@@ -35,16 +33,15 @@ class PathValidation(TestCase):
 class TypeValidation(TestCase):
     """Test validation of the ``type`` filed"""
 
-    @staticmethod
-    def test_valid_types_pass() -> None:
+    def test_valid_types_pass(self) -> None:
         """Test valid types do not raise errors"""
 
         for fs_type in QuotaFactory.QuotaType:
             fs_type_string = fs_type.name
-            FileSystemSchema(path='/', name='test', type=fs_type_string)
+            self.assertEqual(fs_type_string, FileSystemSchema.validate_type(fs_type_string))
 
     def test_invalid_type_error(self) -> None:
         """Test a ``ValueError`` is raised for invalid types"""
 
-        with self.assertRaises(ValidationError):
-            FileSystemSchema(path='/', name='test', type='fake_type')
+        with self.assertRaises(ValueError):
+            FileSystemSchema.validate_type('fake_type')

@@ -6,25 +6,16 @@ Module Contents
 """
 
 import logging
-from enum import Enum
 from pathlib import Path
 from typing import Any, List, Set
 
-from pydantic import BaseSettings, Field, validator, BaseModel
+from pydantic import BaseSettings, Field, validator
+from typing import Literal
 
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
 
-class FileSystemTypes(str, Enum):
-    """Valid string representations for file system types"""
-
-    # These values must match key names in disk_utils.QuotaFactory.QuotaType
-    generic: str = 'generic'
-    ihome: str = 'ihome'
-    beegfs: str = 'beegfs'
-
-
-class FileSystemSchema(BaseModel):
+class FileSystemSchema(BaseSettings):
     """Defines the schema settings related to an individual file system"""
 
     name: str = Field(
@@ -39,11 +30,35 @@ class FileSystemSchema(BaseModel):
         type=Path,
         description='Absolute path to the mounted file system')
 
-    type: FileSystemTypes = Field(
+    # If modifying options for this setting, also update
+    # quota_notifier.disk_utils.QuotaFactory.QuotaType
+    type: Literal['ihome', 'generic', 'beegfs'] = Field(
         ...,
         title='System Type',
-        type=FileSystemTypes,
+        type=Literal['ihome', 'generic', 'beegfs'],
         description='Type of the file system')
+
+    @validator('type')
+    def validate_type(cls, value: str) -> str:
+        """Ensure the given system type is a valid quota object
+
+        Args:
+            value: The value to validate
+
+        Returns:
+            The validated file system type
+        """
+
+        # Moved here to avoid circular import
+        from .disk_utils import QuotaFactory
+
+        try:
+            QuotaFactory.QuotaType[value]
+
+        except KeyError as excep:
+            raise ValueError(f'File system types must be one of {list(QuotaFactory.QuotaType)}') from excep
+
+        return value
 
     @validator('path')
     def validate_path(cls, value: Path) -> Path:
