@@ -20,3 +20,17 @@ class ReturnedQuotaType(TestCase):
 
         quota = QuotaFactory(quota_type='generic', name='test_quota', path=Path('/'), user=User('root'))
         self.assertIsInstance(quota, GenericQuota)
+
+    def test_quota_matches_user(self) -> None:
+        """Test the returned quota object matches the requested user"""
+
+        user = User('root')
+        quota = QuotaFactory(quota_type='generic', name='name', user=user, path=Path('/'))
+        self.assertEqual(user, quota.user)
+
+    def test_quota_matches_path(self) -> None:
+        """Test the returned quota object matches the requested path"""
+
+        path = Path('/')
+        quota = QuotaFactory(quota_type='generic', name='name', user=User('root'), path=path)
+        self.assertEqual(path, quota.path)
