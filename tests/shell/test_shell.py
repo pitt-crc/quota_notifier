@@ -12,8 +12,11 @@ class EmptyCommandError(TestCase):
     def runTest(self) -> None:
         """Execute the test"""
 
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, 'Command string cannot be empty'):
             ShellCmd('')
+
+        with self.assertRaisesRegex(ValueError, 'Command string cannot be empty'):
+            ShellCmd(' ')
 
 
 class FileDescriptors(TestCase):

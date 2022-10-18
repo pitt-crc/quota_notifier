@@ -33,7 +33,7 @@ class ShellCmd:
             TimeoutExpired: If the command times out
         """
 
-        if not cmd:
+        if not cmd.strip():
             raise ValueError('Command string cannot be empty')
 
         logging.debug(f'running {cmd}')
@@ -83,5 +83,3 @@ class User:
 
         return self.username
 
-    def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({self.username})'
