@@ -8,9 +8,9 @@ Module Contents
 import logging
 from pathlib import Path
 from typing import Any, List, Set
+from typing import Literal
 
 from pydantic import BaseSettings, Field, validator
-from typing import Literal
 
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
