@@ -11,6 +11,7 @@ from quota_notifier.shell import User
 
 
 class Initialization(TestCase):
+    """Tests related to class instantiation"""
 
     def test_error_on_empty_name(self) -> None:
         """Test for a ``ValueError`` when the quota name is empty"""

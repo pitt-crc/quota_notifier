@@ -1,7 +1,7 @@
-"""The ``main`` module defines the application's command line interface and
-serves as the primary entrypoint for executing the parent package.
-It is responsible for displaying help text, parsing arguments, and
-instantiating/executing the underlying application logic.
+"""The ``main`` module defines the application's command line interface
+and serves as the primary entrypoint for executing the parent package.
+It is responsible for displaying parsing arguments, configuring the
+application, and instantiating/executing the underlying application logic.
 
 Module Contents
 ---------------
@@ -46,7 +46,7 @@ class Application:
     """Entry point for instantiating and executing the application from the command line"""
 
     @staticmethod
-    def load_settings(settings_path: Path, error_on_missing_file: bool = False) -> None:
+    def _load_settings(settings_path: Path, error_on_missing_file: bool = False) -> None:
         """Load application settings from the given file path
 
         Args:
@@ -73,7 +73,7 @@ class Application:
             logging.info('Using default settings')
 
     @classmethod
-    def configure_logging(cls, level: int) -> None:
+    def _configure_logging(cls, level: int) -> None:
         """Configure python logging to the appropriate level
 
         Arguments for the ``level`` argument are NOT the same as the
@@ -106,13 +106,16 @@ class Application:
             args: Parsed commandline arguments
         """
 
-        cls.load_settings(args.settings, error_on_missing_file=args.validate)
+        # Update application settings
+        cls._configure_logging(args.verbose)
+        cls._load_settings(args.settings, error_on_missing_file=args.validate)
         if args.debug:
             ApplicationSettings.set(debug=True)
 
         if args.validate:
             return
 
+        # Configure the application database
         if ApplicationSettings.get('debug'):
             logging.warning('Running in debug mode')
             DBConnection.configure('sqlite:///:memory:')
@@ -120,6 +123,7 @@ class Application:
         else:
             DBConnection.configure()
 
+        # Run core application logic
         UserNotifier().send_notifications()
         logging.debug('Exiting application')
 
@@ -137,7 +141,6 @@ class Application:
         args = parser.parse_args(arg_list)
 
         try:
-            cls.configure_logging(args.verbose)
             cls.run(args)
 
         except Exception as caught:
