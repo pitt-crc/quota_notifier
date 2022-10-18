@@ -4,6 +4,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
+from pydantic import ValidationError
+
 from quota_notifier.settings import ApplicationSettings
 
 
@@ -36,7 +38,20 @@ class ConfigureFromFIle(TestCase):
                 json.dump(settings, io)
 
             ApplicationSettings.configure_from_file(path_obj)
-            self.assertListEqual(['fake_username'], ApplicationSettings.get('blacklist'))
+            self.assertEqual({'fake_username'}, ApplicationSettings.get('blacklist'))
+
+    def test_invalid_file(self) -> None:
+        """Test a ``ValidationError`` is raised for an invalid settings file"""
+
+        settings = dict(extra_key=['bad_value'])
+
+        with NamedTemporaryFile() as temp_file:
+            path_obj = Path(temp_file.name)
+            with path_obj.open('w') as io:
+                json.dump(settings, io)
+
+            with self.assertRaisesRegex(ValidationError, 'extra fields not permitted'):
+                ApplicationSettings.configure_from_file(path_obj)
 
 
 class Setter(TestCase):
