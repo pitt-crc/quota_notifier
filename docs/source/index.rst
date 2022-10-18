@@ -20,7 +20,7 @@ Quota Notification Utility
    :caption: Module Docs
    :glob:
 
-   modules/cli
+   modules/main
    modules/notify
    modules/settings
    modules/disk_utils

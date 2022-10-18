@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest import TestCase
 
-from quota_notifier.cli import DEFAULT_SETTINGS, Parser
+from quota_notifier.main import DEFAULT_SETTINGS, Parser
 
 
 class ParserHelpData(TestCase):

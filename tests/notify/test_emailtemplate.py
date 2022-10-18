@@ -4,7 +4,7 @@ from unittest import TestCase
 from unittest.mock import call, patch
 
 from quota_notifier.disk_utils import GenericQuota
-from quota_notifier.email import EmailTemplate
+from quota_notifier.notify import EmailTemplate
 from quota_notifier.settings import ApplicationSettings
 from quota_notifier.shell import User
 
