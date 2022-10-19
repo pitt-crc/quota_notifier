@@ -50,7 +50,7 @@ class GetUserQuotas(TestCase):
         ApplicationSettings.configure(file_systems=[self.mock_file_system])
 
         # Create a subdirectory matching the current user's group
-        self.current_user = User(os.getlogin())
+        self.current_user = User(os.getenv('USER') )
         self.temp_dir = self.current_dir / self.current_user.group
         self.temp_dir.mkdir(exist_ok=True)
 
