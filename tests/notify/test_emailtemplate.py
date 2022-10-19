@@ -57,6 +57,11 @@ class MessageSending(TestCase):
         self.quota = GenericQuota('testquota', Path('/'), User('test_user'), size_used=10, size_limit=100)
         self.template = EmailTemplate([self.quota])
 
+    def tearDown(self) -> None:
+        """Reset any modified application settings"""
+
+        ApplicationSettings.configure()
+
     @patch('smtplib.SMTP')
     def test_fields_are_set(self, mock_smtp) -> None:
         """Test required email fields (to, from, subject, body) are included in the delivered email"""
@@ -83,6 +88,14 @@ class MessageSending(TestCase):
             mock_smtp.__enter__.mock_calls,
             [call(), call().send_message(email_message)]
         )
+
+    @patch('smtplib.SMTP')
+    def test_not_send_on_debug(self, mock_smtp) -> None:
+        """Test an email is not sent in debug mode"""
+
+        ApplicationSettings.set(debug=True)
+        self.template.send('to@address.com', mock_smtp)
+        self.assertFalse(mock_smtp.mock_calls)
 
 
 class SendingViaUsername(TestCase):
