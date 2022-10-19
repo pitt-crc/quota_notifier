@@ -119,19 +119,18 @@ class GenericQuota(AbstractQuota):
             An instance of the parent class or None if the allocation does not exist
 
         Raises:
-            FileNotFoundError: If the given file path does not exist
             RuntimeError: If something goes wrong communicating with the file system
         """
 
         logging.debug(f'fetching generic quota for {user.username} at {path}')
         if not path.exists():
-            logging.error(f'Could not file path: {path}')
-            raise FileNotFoundError(f'Could not file path: {path}')
+            logging.debug(f'Could not file path: {path}')
+            return None
 
         df_command = ShellCmd(f"df {path}")
         if df_command.err:
             logging.error(df_command.err)
-            raise RuntimeError(df_command.err)
+            return None
 
         result = df_command.out.splitlines()[1].split()
         quota = cls(name, path, user, int(result[2]) * 1024, int(result[1]) * 1024)
@@ -165,7 +164,8 @@ class BeeGFSQuota(AbstractQuota):
 
         logging.debug(f'fetching BeeGFS quota for {user.username} at {path}')
         if not path.exists():
-            raise FileNotFoundError(f'Could not file path: {path}')
+            logging.debug(f'Could not file path: {path}')
+            return None
 
         cached_quota = cls._cached_quotas.get(path, dict()).get(user.gid, None)
         if cached_quota:
@@ -177,7 +177,7 @@ class BeeGFSQuota(AbstractQuota):
             quota_info_cmd = ShellCmd(bgfs_command)
             if quota_info_cmd.err:
                 logging.error(quota_info_cmd.err)
-                raise RuntimeError(quota_info_cmd.err)
+                return None
 
             result = quota_info_cmd.out.splitlines()[1].split(',')
             quota = cls(name, path, user, int(result[2]), int(result[3]))

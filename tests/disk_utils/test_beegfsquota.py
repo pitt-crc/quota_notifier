@@ -10,8 +10,8 @@ from quota_notifier.shell import User
 class GetQuota(TestCase):
     """Test the ``get_quota`` factory method"""
 
-    def test_error_on_missing_path(self) -> None:
-        """Test for a ``FileNotFoundError`` when the file path does not exist"""
+    def test_none_on_missing_path(self) -> None:
+        """Test ``None`` is returned when the file path does not exist"""
 
-        with self.assertRaises(FileNotFoundError):
-            BeeGFSQuota.get_quota(name='name', user=User('root'), path=Path('/fake/path'))
+        quota = BeeGFSQuota.get_quota(name='name', user=User('root'), path=Path('/fake/path'))
+        self.assertIsNone(quota)
