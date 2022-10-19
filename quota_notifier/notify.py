@@ -99,7 +99,7 @@ class UserNotifier:
                 allowed_users.append(user)
 
         logging.debug(f'Found {len(allowed_users)}/{len(all_users)} non-blacklisted users')
-        return all_users
+        return allowed_users
 
     @staticmethod
     def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
