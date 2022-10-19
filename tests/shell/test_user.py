@@ -16,3 +16,14 @@ class UserInfo(TestCase):
         self.assertEqual(user.uid, 0)
         self.assertEqual(user.group, 'root')
         self.assertEqual(user.gid, 0)
+
+
+class StringRepresentation(TestCase):
+    """Test casting User objects as strings"""
+
+    def test_matches_username(self) -> None:
+        """Test the string representation matches the username"""
+
+        username = 'some_user'
+        user = User(username)
+        self.assertEqual(username, str(user))

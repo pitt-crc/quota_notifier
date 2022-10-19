@@ -10,6 +10,19 @@ from quota_notifier.disk_utils import AbstractQuota
 from quota_notifier.shell import User
 
 
+class Initialization(TestCase):
+    """Tests related to class instantiation"""
+
+    def test_error_on_empty_name(self) -> None:
+        """Test for a ``ValueError`` when the quota name is empty"""
+
+        with self.assertRaises(ValueError):
+            AbstractQuota(name='', user=User('root'), path=Path('/'), size_used=10, size_limit=100)
+
+        with self.assertRaises(ValueError):
+            AbstractQuota(name=' ', user=User('root'), path=Path('/'), size_used=10, size_limit=100)
+
+
 class DummyQuotaObj(AbstractQuota):
     """Subclass of an abstract parent to use in testing"""
 
@@ -17,7 +30,7 @@ class DummyQuotaObj(AbstractQuota):
     def get_quota(cls, name: str, path: Path, user: User) -> Optional[DummyQuotaObj]:
         """Return an instance of the parent class"""
 
-        return DummyQuotaObj(name=name, user=user, size_used=10, size_limit=100)
+        return DummyQuotaObj(name=name, user=user, path=Path('/'), size_used=10, size_limit=100)
 
 
 class BytesToString(TestCase):

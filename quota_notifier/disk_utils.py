@@ -33,18 +33,26 @@ from .shell import ShellCmd, User
 class AbstractQuota(object):
     """Base class for building object-oriented representations of file system quotas."""
 
-    def __init__(self, name: str, user: User, size_used: int, size_limit: int) -> None:
+    def __init__(self, name: str, path: Path, user: User, size_used: int, size_limit: int) -> None:
         """Create a new quota from known system metrics
 
         Args:
             name: Human readable name of the file system
+            path: Mounted file system path
             user: User that the quota is tied to
             size_used: Disk space used by the user/group
             size_limit: Maximum disk space allowed by the allocation
+
+        Raises:
+            ValueError: For a blank/empty ``name`` argument
         """
+
+        if not name.strip():
+            raise ValueError('Quota names cannot be blank')
 
         self.name = name
         self.user = user
+        self.path = path
         self.size_used = size_used
         self.size_limit = size_limit
 
@@ -109,19 +117,24 @@ class GenericQuota(AbstractQuota):
 
         Returns:
             An instance of the parent class or None if the allocation does not exist
+
+        Raises:
+            FileNotFoundError: If the given file path does not exist
+            RuntimeError: If something goes wrong communicating with the file system
         """
 
         logging.debug(f'fetching generic quota for {user.username} at {path}')
         if not path.exists():
-            return None
+            logging.error(f'Could not file path: {path}')
+            raise FileNotFoundError(f'Could not file path: {path}')
 
-        df_command = f"df {path}"
-        quota_info_list = ShellCmd(df_command).out.splitlines()
-        if not quota_info_list:
-            return None
+        df_command = ShellCmd(f"df {path}")
+        if df_command.err:
+            logging.error(df_command.err)
+            raise RuntimeError(df_command.err)
 
-        result = quota_info_list[1].split()
-        quota = cls(name, user, int(result[2]) * 1024, int(result[1]) * 1024)
+        result = df_command.out.splitlines()[1].split()
+        quota = cls(name, path, user, int(result[2]) * 1024, int(result[1]) * 1024)
         logging.debug(str(quota))
         return quota
 
@@ -144,9 +157,16 @@ class BeeGFSQuota(AbstractQuota):
 
         Returns:
             An instance of the parent class or None if the allocation does not exist
+
+        Raises:
+            FileNotFoundError: If the given file path does not exist
+            RuntimeError: If something goes wrong communicating with the file system
         """
 
         logging.debug(f'fetching BeeGFS quota for {user.username} at {path}')
+        if not path.exists():
+            raise FileNotFoundError(f'Could not file path: {path}')
+
         cached_quota = cls._cached_quotas.get(path, dict()).get(user.gid, None)
         if cached_quota:
             quota = copy(cached_quota)
@@ -160,7 +180,7 @@ class BeeGFSQuota(AbstractQuota):
                 raise RuntimeError(quota_info_cmd.err)
 
             result = quota_info_cmd.out.splitlines()[1].split(',')
-            quota = cls(name, user, int(result[2]), int(result[3]))
+            quota = cls(name, path, user, int(result[2]), int(result[3]))
 
         logging.debug(str(quota))
         return quota
@@ -198,7 +218,7 @@ class BeeGFSQuota(AbstractQuota):
         cls._cached_quotas[path] = dict()
         for quota_data in quota_info_cmd.out.splitlines()[1:]:
             _, gid, used, avail, *_ = quota_data.split(',')
-            cls._cached_quotas[path][int(gid)] = cls(name, None, int(used), int(avail))
+            cls._cached_quotas[path][int(gid)] = cls(name, path, None, int(used), int(avail))
 
 
 class IhomeQuota(AbstractQuota):
@@ -243,7 +263,7 @@ class IhomeQuota(AbstractQuota):
         for item in quota_data["quotas"]:
             if item["persona"] is not None:
                 if item["persona"]["id"] == persona:
-                    quota = cls(name, user, item["usage"]["logical"], item["thresholds"]["hard"])
+                    quota = cls(name, path, user, item["usage"]["logical"], item["thresholds"]["hard"])
                     logging.debug(str(quota))
                     return quota
 

@@ -1,10 +1,10 @@
 """Tests for the ``EmailTemplate`` class."""
-
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import call, patch
 
 from quota_notifier.disk_utils import GenericQuota
-from quota_notifier.email import EmailTemplate
+from quota_notifier.notify import EmailTemplate
 from quota_notifier.settings import ApplicationSettings
 from quota_notifier.shell import User
 
@@ -20,7 +20,12 @@ class TemplateFormatting(TestCase):
     def setUpClass(cls) -> None:
         """Create a formatted email template"""
 
-        cls.quota = GenericQuota('testquota', User('test_user'), size_used=10, size_limit=100)
+        cls.quota = GenericQuota(
+            name='testquota',
+            path=Path('/'),
+            user=User('test_user'),
+            size_used=10, size_limit=100)
+
         cls.template = EmailTemplate([cls.quota])
 
     def test_starts_with_header(self) -> None:
@@ -49,8 +54,13 @@ class MessageSending(TestCase):
     def setUp(self) -> None:
         """Create a formatted email template"""
 
-        self.quota = GenericQuota('testquota', User('test_user'), size_used=10, size_limit=100)
+        self.quota = GenericQuota('testquota', Path('/'), User('test_user'), size_used=10, size_limit=100)
         self.template = EmailTemplate([self.quota])
+
+    def tearDown(self) -> None:
+        """Reset any modified application settings"""
+
+        ApplicationSettings.configure()
 
     @patch('smtplib.SMTP')
     def test_fields_are_set(self, mock_smtp) -> None:
@@ -78,6 +88,14 @@ class MessageSending(TestCase):
             mock_smtp.__enter__.mock_calls,
             [call(), call().send_message(email_message)]
         )
+
+    @patch('smtplib.SMTP')
+    def test_not_send_on_debug(self, mock_smtp) -> None:
+        """Test an email is not sent in debug mode"""
+
+        ApplicationSettings.set(debug=True)
+        self.template.send('to@address.com', mock_smtp)
+        self.assertFalse(mock_smtp.mock_calls)
 
 
 class SendingViaUsername(TestCase):

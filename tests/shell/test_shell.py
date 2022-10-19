@@ -6,14 +6,28 @@ from unittest import TestCase
 from quota_notifier.shell import ShellCmd
 
 
+class ErrorOnProhibitedCharacters(TestCase):
+    """Test an error is raised if special characters are used in the piped commands"""
+
+    def runTest(self) -> None:
+        """Execute the test"""
+
+        for char in ShellCmd.prohibited_characters:
+            with self.assertRaisesRegex(RuntimeError, 'Special characters are not allowed'):
+                ShellCmd(char)
+
+
 class EmptyCommandError(TestCase):
     """Test an error is raised if the command string is empty"""
 
     def runTest(self) -> None:
         """Execute the test"""
 
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, 'Command string cannot be empty'):
             ShellCmd('')
+
+        with self.assertRaisesRegex(ValueError, 'Command string cannot be empty'):
+            ShellCmd(' ')
 
 
 class FileDescriptors(TestCase):

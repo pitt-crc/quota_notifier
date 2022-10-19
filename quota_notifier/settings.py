@@ -38,25 +38,19 @@ class FileSystemSchema(BaseSettings):
         type=Literal['ihome', 'generic', 'beegfs'],
         description='Type of the file system')
 
-    @validator('type')
-    def validate_type(cls, value: str) -> str:
-        """Ensure the given system type is a valid quota object
+    @validator('name')
+    def validate_name(cls, value: str) -> str:
+        """Ensure the given name is not blank
 
         Args:
-            value: The value to validate
+            value: The name value to validate
 
         Returns:
-            The validated file system type
+            The validated file system name
         """
 
-        # Moved here to avoid circular import
-        from .disk_utils import QuotaFactory
-
-        try:
-            QuotaFactory.QuotaType[value]
-
-        except KeyError as excep:
-            raise ValueError(f'File system types must be one of {list(QuotaFactory.QuotaType)}') from excep
+        if not value.strip():
+            raise ValueError(f'File system name cannot be blank')
 
         return value
 

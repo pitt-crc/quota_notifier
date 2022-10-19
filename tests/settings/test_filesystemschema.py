@@ -1,10 +1,27 @@
 """Tests for the ``FileSystemSchema`` class"""
 
+import string
 from pathlib import Path
 from unittest import TestCase
 
+from pydantic import ValidationError
+
 from quota_notifier.disk_utils import QuotaFactory
 from quota_notifier.settings import FileSystemSchema
+
+
+class NameValidation(TestCase):
+    """Test validation of the file system ``name`` field"""
+
+    def test_blank_name(self) -> None:
+        """Test a ``ValueError`` is raised for empty/blank names"""
+
+        with self.assertRaisesRegex(ValueError, 'File system name cannot be blank'):
+            FileSystemSchema.validate_name('')
+
+        for char in string.whitespace:
+            with self.assertRaisesRegex(ValueError, 'File system name cannot be blank'):
+                FileSystemSchema.validate_name(char)
 
 
 class PathValidation(TestCase):
@@ -19,7 +36,7 @@ class PathValidation(TestCase):
     def test_nonexistent_path(self) -> None:
         """Test a ``ValueError`` is raised for non-existent paths"""
 
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, 'File system does not exist'):
             FileSystemSchema.validate_path(Path('/fake/path'))
 
     def test_valid_path(self) -> None:
@@ -33,15 +50,15 @@ class PathValidation(TestCase):
 class TypeValidation(TestCase):
     """Test validation of the ``type`` filed"""
 
-    def test_valid_types_pass(self) -> None:
+    @staticmethod
+    def test_valid_types_pass() -> None:
         """Test valid types do not raise errors"""
 
         for fs_type in QuotaFactory.QuotaType:
-            fs_type_string = fs_type.name
-            self.assertEqual(fs_type_string, FileSystemSchema.validate_type(fs_type_string))
+            FileSystemSchema(name='name', type=fs_type.name, path='/')
 
     def test_invalid_type_error(self) -> None:
         """Test a ``ValueError`` is raised for invalid types"""
 
-        with self.assertRaises(ValueError):
-            FileSystemSchema.validate_type('fake_type')
+        with self.assertRaisesRegex(ValidationError, 'type\n  unexpected value;'):
+            FileSystemSchema(type='fake_type')

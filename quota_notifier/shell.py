@@ -21,6 +21,8 @@ class ShellCmd:
     attributes respectively.
     """
 
+    prohibited_characters = '!#$%&\*+,:;<=>?@[]^`{|}~'
+
     def __init__(self, cmd: str, timeout: Optional[int] = ApplicationSettings.get('disk_timeout')) -> None:
         """Execute the given command in the underlying shell
 
@@ -33,8 +35,11 @@ class ShellCmd:
             TimeoutExpired: If the command times out
         """
 
-        if not cmd:
+        if not cmd.strip():
             raise ValueError('Command string cannot be empty')
+
+        if any(char in cmd for char in self.prohibited_characters):
+            raise RuntimeError('Special characters are not allowed in piped commands')
 
         logging.debug(f'running {cmd}')
         out, err = Popen(split(cmd), stdout=PIPE, stderr=PIPE).communicate(timeout=timeout)
@@ -78,10 +83,10 @@ class User:
 
         return pwd.getpwnam(self._username).pw_gid
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and other.username == self.username
+
     def __str__(self) -> str:
         """Return the parent object's username"""
 
         return self.username
-
-    def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({self.username})'

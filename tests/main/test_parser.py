@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest import TestCase
 
-from quota_notifier.cli import DEFAULT_SETTINGS, Parser
+from quota_notifier.main import DEFAULT_SETTINGS, Parser
 
 
 class ParserHelpData(TestCase):
@@ -85,7 +85,13 @@ class VerboseOption(TestCase):
         self.assertEqual(1, args.verbose)
 
     def test_accepts_custom_value(self) -> None:
-        """Test custom arguments are stored in the returned arguemnts"""
+        """Test custom arguments are stored in the returned arguments"""
+
+        args = Parser().parse_args(['--verbose', '0'])
+        self.assertEqual(0, args.verbose)
+
+        args = Parser().parse_args(['--verbose', '1'])
+        self.assertEqual(1, args.verbose)
 
         args = Parser().parse_args(['--verbose', '2'])
         self.assertEqual(2, args.verbose)
