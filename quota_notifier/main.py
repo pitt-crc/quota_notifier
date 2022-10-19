@@ -70,6 +70,7 @@ class Application:
             raise FileNotFoundError(f'No settings file at {settings_path}')
 
         else:
+            ApplicationSettings.configure()
             logging.info('Using default settings')
 
     @classmethod

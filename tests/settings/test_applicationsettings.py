@@ -24,7 +24,7 @@ class Configure(TestCase):
         self.assertFalse(ApplicationSettings.get('blacklist'))
 
 
-class ConfigureFromFIle(TestCase):
+class ConfigureFromFile(TestCase):
     """Test the modification of settings via the ``configure_from_file`` method"""
 
     def test_setting_are_overwritten(self) -> None:

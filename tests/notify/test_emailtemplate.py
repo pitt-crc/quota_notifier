@@ -1,5 +1,5 @@
 """Tests for the ``EmailTemplate`` class."""
-
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import call, patch
 
@@ -49,7 +49,7 @@ class MessageSending(TestCase):
     def setUp(self) -> None:
         """Create a formatted email template"""
 
-        self.quota = GenericQuota('testquota', User('test_user'), size_used=10, size_limit=100)
+        self.quota = GenericQuota('testquota', Path('/'), User('test_user'), size_used=10, size_limit=100)
         self.template = EmailTemplate([self.quota])
 
     @patch('smtplib.SMTP')
