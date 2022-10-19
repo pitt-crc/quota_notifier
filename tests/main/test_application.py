@@ -40,13 +40,23 @@ class SettingsValidation(TestCase):
 class LoggingConfiguration(TestCase):
     """Test the configuration of application logging"""
 
+    def setUp(self) -> None:
+        """Reset any existing logging configuration to defaults
+
+        Prevents application state from bleeding over from other tests.
+        """
+
+        root = logging.getLogger()
+        list(map(root.removeHandler, root.handlers[:]))
+        list(map(root.removeFilter, root.filters[:]))
+
     def test_logging_format_set(self):
         """Test the logging format is configured"""
 
         args = Namespace(validate=False, verbose=0, debug=False, settings=DEFAULT_SETTINGS)
         Application.run(args)
 
-        log_format = logging.root.handlers[0].formatter._fmt
+        log_format = logging.getLogger().handlers[0].formatter._fmt
         self.assertEqual('%(levelname)8s - %(message)s', log_format)
 
     def test_logging_level_zero(self):
@@ -54,27 +64,21 @@ class LoggingConfiguration(TestCase):
 
         args = Namespace(validate=False, verbose=0, debug=False, settings=DEFAULT_SETTINGS)
         Application.run(args)
-
-        level = logging.root.handlers[0].level
-        self.assertEqual(0, level)
+        self.assertEqual(100, logging.getLogger().level)
 
     def test_logging_level_one(self):
         """Test settings the logging level to ``verbose=1``"""
 
         args = Namespace(validate=False, verbose=1, debug=False, settings=DEFAULT_SETTINGS)
         Application.run(args)
-
-        level = logging.root.handlers[0].level
-        self.assertEqual(logging.INFO, level)
+        self.assertEqual(logging.INFO, logging.getLogger().level)
 
     def test_logging_level_two(self):
         """Test settings the logging level to ``verbose=2``"""
 
         args = Namespace(validate=False, verbose=2, debug=False, settings=DEFAULT_SETTINGS)
         Application.run(args)
-
-        level = logging.root.handlers[0].level
-        self.assertEqual(logging.DEBUG, level)
+        self.assertEqual(logging.DEBUG, logging.getLogger().level)
 
     def test_error_invalid_level(self):
         """Test an error is raised for an invalid verbose level"""
