@@ -21,7 +21,7 @@ class ShellCmd:
     attributes respectively.
     """
 
-    prohibited_characters = '!#$%&\*+,:;<=>?@[]^`{|}~'
+    prohibited_characters = '!#$%&\*+:;<>?@[]^`{|}~'
 
     def __init__(self, cmd: str, timeout: Optional[int] = ApplicationSettings.get('disk_timeout')) -> None:
         """Execute the given command in the underlying shell
@@ -38,10 +38,11 @@ class ShellCmd:
         if not cmd.strip():
             raise ValueError('Command string cannot be empty')
 
-        if any(char in cmd for char in self.prohibited_characters):
-            raise RuntimeError('Special characters are not allowed in piped commands')
-
         logging.debug(f'running {cmd}')
+        for char in self.prohibited_characters:
+            if char in cmd:
+                raise RuntimeError(f'Special characters are not allowed in piped commands ({char})')
+
         out, err = Popen(split(cmd), stdout=PIPE, stderr=PIPE).communicate(timeout=timeout)
         self.out = out.decode("utf-8").strip()
         self.err = err.decode("utf-8").strip()
