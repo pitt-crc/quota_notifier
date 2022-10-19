@@ -61,8 +61,8 @@ A full list of available settings is provided in the :doc:`config_options` page.
 
    {
      "thresholds": [75, 100],
-     "blacklist": ["root"], # Blacklisted users
-     "group_blacklist": ["root"], # Blacklisted groups
+     "blacklist": ["root"],
+     "group_blacklist": ["root"],
      "file_systems": [
          {
            "name": "main",

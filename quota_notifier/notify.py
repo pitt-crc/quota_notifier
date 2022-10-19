@@ -11,7 +11,7 @@ from bisect import bisect_right
 from email.message import EmailMessage
 from smtplib import SMTP
 from typing import Collection, Optional
-from typing import Iterable, Tuple
+from typing import Iterable
 
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
@@ -95,7 +95,7 @@ class UserNotifier:
         allowed_users = []
         for user_entry in all_users:
             user = User(user_entry.pw_name)
-            if user.username not in user_blacklist and user.group not in group_blacklist:
+            if (user.username not in user_blacklist) and (user.group not in group_blacklist):
                 allowed_users.append(user)
 
         logging.debug(f'Found {len(allowed_users)}/{len(all_users)} non-blacklisted users')
