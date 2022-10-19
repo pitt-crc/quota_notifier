@@ -61,8 +61,15 @@ A full list of available settings is provided in the :doc:`config_options` page.
 
    {
      "thresholds": [75, 100],
-     "file_systems": null,
-     "blacklist": null,
+     "blacklist": ["root"], # Blacklisted users
+     "group_blacklist": ["root"], # Blacklisted groups
+     "file_systems": [
+         {
+           "name": "main",
+           "path": "/some/filepath",
+           "type": "generic"
+         }
+     ]
    }
 
 By default, the application looks for the settings file at ``/etc/notifier/settings.json``.
