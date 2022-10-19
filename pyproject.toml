@@ -34,4 +34,4 @@ docs = ["sphinx==5.2.1", "sphinx-argparse==0.3.1", "sphinx-copybutton==0.5.0", "
 tests = ["coverage", ]
 
 [tool.setuptools.dynamic]
-version = {attr = "quota_notifier.__version__"}
+version = { attr = "quota_notifier.__version__" }
