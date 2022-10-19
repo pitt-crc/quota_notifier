@@ -42,15 +42,18 @@ class GetUsers(TestCase):
 
 
 class GetUserQuotas(TestCase):
+    """Test the fetching of user quotas via the ``get_user_quotas`` method"""
 
     def setUp(self) -> None:
+        """Create and register a temporary directory to generate quota objects for"""
+
         # Register the current directory with the application
         self.current_dir = Path(__file__).parent
         self.mock_file_system = FileSystemSchema(name='test', path=self.current_dir, type='generic')
         ApplicationSettings.configure(file_systems=[self.mock_file_system])
 
         # Create a subdirectory matching the current user's group
-        self.current_user = User(os.getenv('USER') )
+        self.current_user = User(os.getenv('USER'))
         self.temp_dir = self.current_dir / self.current_user.group
         self.temp_dir.mkdir(exist_ok=True)
 
@@ -61,10 +64,14 @@ class GetUserQuotas(TestCase):
         self.temp_dir.rmdir()
 
     def test_quota_matches_user(self) -> None:
+        """Test the returned quotas match the given user"""
+
         quota = next(UserNotifier().get_user_quotas(self.current_user))
         self.assertEqual(self.current_user, quota.user)
 
     def test_path_is_customized(self) -> None:
+        """Test the returned quotas match the given path"""
+
         quota = next(UserNotifier().get_user_quotas(self.current_user))
         self.assertEqual(self.current_user.group, quota.path.name)
 
