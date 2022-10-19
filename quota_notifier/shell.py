@@ -7,6 +7,7 @@ Module Contents
 import grp
 import logging
 import pwd
+import string
 from shlex import split
 from subprocess import PIPE, Popen
 from typing import Optional
@@ -20,6 +21,8 @@ class ShellCmd:
     Outputs to STDOUT and STDERR are exposed via the ``out`` and ``err``
     attributes respectively.
     """
+
+    prohibited_characters = '!#$%&\*+,:;<=>?@[]^`{|}~'
 
     def __init__(self, cmd: str, timeout: Optional[int] = ApplicationSettings.get('disk_timeout')) -> None:
         """Execute the given command in the underlying shell
@@ -35,6 +38,9 @@ class ShellCmd:
 
         if not cmd.strip():
             raise ValueError('Command string cannot be empty')
+
+        if any(char in cmd for char in self.prohibited_characters):
+            raise RuntimeError('Special characters are not allowed in piped commands')
 
         logging.debug(f'running {cmd}')
         out, err = Popen(split(cmd), stdout=PIPE, stderr=PIPE).communicate(timeout=timeout)
@@ -82,4 +88,3 @@ class User:
         """Return the parent object's username"""
 
         return self.username
-
