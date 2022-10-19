@@ -95,8 +95,14 @@ class SettingsSchema(BaseSettings):
     blacklist: Set[str] = Field(
         title='Blacklisted Users',
         type=Set[str],
-        default=set(),
+        default={'root', },
         description='Do not notify usernames in this list.')
+
+    group_blacklist: Set[str] = Field(
+        title='Blacklisted Groups',
+        type=Set[str],
+        default={'root', },
+        description='Do not notify groups in this list.')
 
     disk_timeout: int = Field(
         title='File System Timeout',

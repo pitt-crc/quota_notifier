@@ -11,7 +11,7 @@ from bisect import bisect_right
 from email.message import EmailMessage
 from smtplib import SMTP
 from typing import Collection, Optional
-from typing import Iterable, Tuple
+from typing import Iterable
 
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
@@ -79,7 +79,7 @@ class UserNotifier:
     """Issue and manage user disk quota notifications"""
 
     @staticmethod
-    def get_users() -> Tuple[User]:
+    def get_users() -> Iterable[User]:
         """Return a collection of users to check quotas for
 
         Returns:
@@ -88,12 +88,18 @@ class UserNotifier:
 
         logging.info('Fetching user list...')
 
-        user_data = pwd.getpwall()
-        blacklist = ApplicationSettings.get('blacklist')
-        users = tuple(User(entry.pw_name) for entry in user_data if entry.pw_name not in blacklist)
+        all_users = pwd.getpwall()
+        user_blacklist = ApplicationSettings.get('blacklist')
+        group_blacklist = ApplicationSettings.get('group_blacklist')
 
-        logging.debug(f'Found {len(users)}/{len(user_data)} non-blacklisted users')
-        return users
+        allowed_users = []
+        for user_entry in all_users:
+            user = User(user_entry.pw_name)
+            if (user.username not in user_blacklist) and (user.group not in group_blacklist):
+                allowed_users.append(user)
+
+        logging.debug(f'Found {len(allowed_users)}/{len(all_users)} non-blacklisted users')
+        return allowed_users
 
     @staticmethod
     def get_user_quotas(user: User) -> Iterable[AbstractQuota]:

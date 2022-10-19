@@ -24,10 +24,10 @@ class GetUsers(TestCase):
         ApplicationSettings.configure()
 
     def test_includes_all_users(self) -> None:
-        """Test all users are returned by default"""
+        """Test all users except root are returned by default"""
 
         returned_users = [user.username for user in UserNotifier().get_users()]
-        all_users = [user.pw_name for user in pwd.getpwall()]
+        all_users = [user.pw_name for user in pwd.getpwall() if user.pw_name != 'root']
         self.assertListEqual(all_users, returned_users)
 
     def test_blacklisted_users_excluded(self) -> None:

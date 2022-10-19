@@ -9,6 +9,22 @@ from pydantic import ValidationError
 from quota_notifier.settings import ApplicationSettings
 
 
+class Defaults(TestCase):
+    """Test default settings"""
+
+    def test_blacklisted_users(self) -> None:
+        """Test root is in blacklisted users"""
+
+        ApplicationSettings.configure()
+        self.assertEqual({'root'}, ApplicationSettings.get('blacklist'))
+
+    def test_blacklisted_groups(self) -> None:
+        """Test root is in blacklisted groups"""
+
+        ApplicationSettings.configure()
+        self.assertEqual({'root'}, ApplicationSettings.get('group_blacklist'))
+
+
 class Configure(TestCase):
     """Test the modification of settings via the ``configure`` method"""
 
@@ -21,7 +37,7 @@ class Configure(TestCase):
 
         # Test settings are restored
         ApplicationSettings.configure()
-        self.assertFalse(ApplicationSettings.get('blacklist'))
+        self.assertEqual({'root'}, ApplicationSettings.get('blacklist'))
 
 
 class ConfigureFromFile(TestCase):
