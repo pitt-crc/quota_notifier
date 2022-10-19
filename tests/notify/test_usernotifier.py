@@ -1,6 +1,7 @@
 """Tests for the ``UserNotifier`` class"""
 
 import pwd
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -45,13 +46,14 @@ class GetLastThreshold(TestCase):
     def test_missing_notification_history(self) -> None:
         """Test the first return value is ``None`` for a missing notification history"""
 
-        quota = GenericQuota(name='fake', user=User('fake'), size_used=0, size_limit=100)
+        quota = GenericQuota(name='fake', path=Path('/'), user=User('fake'), size_used=0, size_limit=100)
         threshold = UserNotifier.get_next_threshold(quota)
         self.assertIsNone(threshold)
 
     def test_matches_notification_history(self) -> None:
         """Test the first return matches the notification history"""
 
+        test_path = '/'
         test_user = User('user1')
         test_filesystem = 'filesystem1'
         test_threshold = ApplicationSettings.get('thresholds')[0]
@@ -65,7 +67,7 @@ class GetLastThreshold(TestCase):
             ))
             session.commit()
 
-        quota = GenericQuota(test_filesystem, test_user, 0, 100)
+        quota = GenericQuota(test_filesystem, test_path, test_user, 0, 100)
         threshold = UserNotifier.get_last_threshold(session, quota)
         self.assertEqual(test_threshold, threshold)
 
@@ -76,7 +78,7 @@ class GetNextThreshold(TestCase):
     def test_usage_below_minimum_thresholds(self) -> None:
         """Test return is ``None`` when usage is below the minimum threshold"""
 
-        quota = GenericQuota('filesystem1', User('user1'), 0, 100)
+        quota = GenericQuota('filesystem1', Path('/'), User('user1'), 0, 100)
         self.assertIsNone(UserNotifier.get_next_threshold(quota))
 
     def test_usage_at_thresholds(self) -> None:
@@ -84,10 +86,10 @@ class GetNextThreshold(TestCase):
 
         thresholds = ApplicationSettings.get('thresholds')
 
-        quota = GenericQuota('filesystem1', User('user1'), thresholds[0], 100)
+        quota = GenericQuota('filesystem1', Path('/'), User('user1'), thresholds[0], 100)
         self.assertEqual(thresholds[0], UserNotifier.get_next_threshold(quota))
 
-        quota = GenericQuota('filesystem1', User('user1'), thresholds[-1], 100)
+        quota = GenericQuota('filesystem1', Path('/'), User('user1'), thresholds[-1], 100)
         self.assertEqual(thresholds[-1], UserNotifier.get_next_threshold(quota))
 
     def test_usage_between_thresholds(self) -> None:
@@ -95,7 +97,7 @@ class GetNextThreshold(TestCase):
 
         thresholds = ApplicationSettings.get('thresholds')
         usage = (thresholds[0] + thresholds[1]) // 2
-        quota = GenericQuota('filesystem1', User('user1'), usage, 100)
+        quota = GenericQuota('filesystem1', Path('/'), User('user1'), usage, 100)
         self.assertEqual(thresholds[0], UserNotifier.get_next_threshold(quota))
 
     def test_usage_above_max_threshold(self) -> None:
@@ -103,7 +105,7 @@ class GetNextThreshold(TestCase):
 
         max_threshold = max(ApplicationSettings.get('thresholds'))
         usage = max_threshold + 1
-        quota = GenericQuota('filesystem1', User('user1'), usage, 100)
+        quota = GenericQuota('filesystem1', Path('/'), User('user1'), usage, 100)
         self.assertEqual(max_threshold, UserNotifier.get_next_threshold(quota))
 
 
@@ -142,7 +144,7 @@ class NotificationHistory(TestCase):
             usage: Storage quota usage between 0 and 100
         """
 
-        test_quota = GenericQuota(self.mock_file_system, self.mock_user, size_used=usage, size_limit=100)
+        test_quota = GenericQuota(self.mock_file_system, Path('/'), self.mock_user, size_used=usage, size_limit=100)
         with patch('quota_notifier.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
             UserNotifier().notify_user(self.mock_user)
 

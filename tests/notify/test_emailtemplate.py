@@ -20,7 +20,12 @@ class TemplateFormatting(TestCase):
     def setUpClass(cls) -> None:
         """Create a formatted email template"""
 
-        cls.quota = GenericQuota('testquota', User('test_user'), size_used=10, size_limit=100)
+        cls.quota = GenericQuota(
+            name='testquota',
+            path=Path('/'),
+            user=User('test_user'),
+            size_used=10, size_limit=100)
+
         cls.template = EmailTemplate([cls.quota])
 
     def test_starts_with_header(self) -> None:
