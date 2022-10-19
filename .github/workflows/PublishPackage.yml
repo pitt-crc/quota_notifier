@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   tests:
+    name: Run Tests
     uses: ./.github/workflows/Unittests.yml
 
   deploy:
@@ -17,7 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout source
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v3
