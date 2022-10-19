@@ -1,5 +1,6 @@
 """Tests for the ``UserNotifier`` class"""
 
+import os
 import pwd
 from pathlib import Path
 from unittest import TestCase
@@ -10,7 +11,7 @@ from sqlalchemy import select
 from quota_notifier.disk_utils import GenericQuota
 from quota_notifier.notify import UserNotifier
 from quota_notifier.orm import DBConnection, Notification
-from quota_notifier.settings import ApplicationSettings
+from quota_notifier.settings import ApplicationSettings, FileSystemSchema
 from quota_notifier.shell import User
 
 
@@ -38,6 +39,34 @@ class GetUsers(TestCase):
         ApplicationSettings.configure(blacklist=['root'])
         returned_users = [user.username for user in UserNotifier().get_users()]
         self.assertNotIn('root', returned_users)
+
+
+class GetUserQuotas(TestCase):
+
+    def setUp(self) -> None:
+        # Register the current directory with the application
+        self.current_dir = Path(__file__).parent
+        self.mock_file_system = FileSystemSchema(name='test', path=self.current_dir, type='generic')
+        ApplicationSettings.configure(file_systems=[self.mock_file_system])
+
+        # Create a subdirectory matching the current user's group
+        self.current_user = User(os.getlogin())
+        self.temp_dir = self.current_dir / self.current_user.group
+        self.temp_dir.mkdir(exist_ok=True)
+
+    def tearDown(self) -> None:
+        """Restore application settings and remove temporary directories"""
+
+        ApplicationSettings.configure()
+        self.temp_dir.rmdir()
+
+    def test_quota_matches_user(self) -> None:
+        quota = next(UserNotifier().get_user_quotas(self.current_user))
+        self.assertEqual(self.current_user, quota.user)
+
+    def test_path_is_customized(self) -> None:
+        quota = next(UserNotifier().get_user_quotas(self.current_user))
+        self.assertEqual(self.current_user.group, quota.path.name)
 
 
 class GetLastThreshold(TestCase):

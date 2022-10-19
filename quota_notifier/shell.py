@@ -84,6 +84,9 @@ class User:
 
         return pwd.getpwnam(self._username).pw_gid
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and other.username == self.username
+
     def __str__(self) -> str:
         """Return the parent object's username"""
 
