@@ -10,11 +10,11 @@ from quota_notifier.shell import User
 class GetQuota(TestCase):
     """Test the ``get_quota`` factory method"""
 
-    def test_error_on_missing_path(self) -> None:
-        """Test for a ``FileNotFoundError`` when the file path does not exist"""
+    def test_none_on_missing_path(self) -> None:
+        """Test ``None`` is returned when the file path does not exist"""
 
-        with self.assertRaises(FileNotFoundError):
-            GenericQuota.get_quota(name='name', user=User('root'), path=Path('/fake/path'))
+        quota = GenericQuota.get_quota(name='name', user=User('root'), path=Path('/fake/path'))
+        self.assertIsNone(quota)
 
     def test_quota_matches_user(self) -> None:
         """Test the returned quota object matches the requested user"""
