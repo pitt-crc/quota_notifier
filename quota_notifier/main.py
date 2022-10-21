@@ -1,7 +1,7 @@
 """The ``main`` module defines the application's command line interface
 and serves as the primary entrypoint for executing the parent package.
-It is responsible for displaying parsing arguments, configuring the
-application, and instantiating/executing the underlying application logic.
+It is responsible for parsing arguments, configuring the application, 
+and instantiating/executing the underlying application logic.
 
 Module Contents
 ---------------
