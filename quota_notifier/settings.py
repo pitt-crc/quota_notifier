@@ -62,7 +62,10 @@ class FileSystemSchema(BaseSettings):
             value: The path value to validate
 
         Returns:
-            The validated system path
+            The validated path object
+
+        Raises:
+            ValueError: If the path does not exist
         """
 
         if not value.exists():
@@ -187,6 +190,9 @@ class SettingsSchema(BaseSettings):
 
         Returns:
             The validated file systems
+
+        Raises:
+            ValueError: If the file system names and paths are not unique
         """
 
         paths = [fs.path for fs in value]
@@ -211,7 +217,7 @@ class ApplicationSettings:
 
     @classmethod
     def configure(cls, **kwargs) -> None:
-        """Reset settings to default values
+        """Reset application settings to default values
 
         Use keyword arguments to override individual defaults
         """
@@ -221,7 +227,9 @@ class ApplicationSettings:
 
     @classmethod
     def configure_from_file(cls, path: Path) -> None:
-        """Reset application settings using values from a given file path
+        """Reset application settings to default values
+
+        Values defined in the given file path are used to override defaults.
 
         Args:
             path: Path to load settings from
@@ -240,7 +248,11 @@ class ApplicationSettings:
 
     @classmethod
     def set(cls, **kwargs) -> None:
-        """Update a single value in the application settings
+        """Update values in the application settings
+
+        Unlike the ``configure`` and ``configure_from_file`` methods,
+        application settings not specified as keyword arguments are left
+        unchanged.
 
         Raises:
             ValueError: If the item name is not a valid setting
@@ -258,6 +270,9 @@ class ApplicationSettings:
 
         Args:
             item: Name of the settings value to retrieve
+
+        Returns
+           The value currently configured in application settings
         """
 
         return getattr(cls._parsed_settings, item)

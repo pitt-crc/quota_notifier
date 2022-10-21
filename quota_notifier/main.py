@@ -1,7 +1,7 @@
 """The ``main`` module defines the application's command line interface
 and serves as the primary entrypoint for executing the parent package.
-It is responsible for displaying parsing arguments, configuring the
-application, and instantiating/executing the underlying application logic.
+It is responsible for parsing arguments, configuring the application,
+and instantiating/executing the underlying application logic.
 
 Module Contents
 ---------------
@@ -29,7 +29,13 @@ class Parser(ArgumentParser):
         description='Notify users when their disk usage passes predefined thresholds',
         **kwargs
     ) -> None:
-        """Define arguments for the command line interface"""
+        """Define arguments for the command line interface
+
+        Args:
+            prog: The name of the program displayed on the commandline
+            description: Top level application description
+            **kwargs: Any other arguments accepted by the ``ArgumentParser`` class
+        """
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
         self.add_argument('-v', '--version', action='version', version=__version__)
@@ -43,7 +49,7 @@ class Parser(ArgumentParser):
 
 
 class Application:
-    """Entry point for instantiating and executing the application from the command line"""
+    """Entry point for instantiating and executing the application"""
 
     @staticmethod
     def _load_settings(settings_path: Path, error_on_missing_file: bool = False) -> None:
@@ -54,7 +60,7 @@ class Application:
             error_on_missing_file: Optionally raise an error if ``settings_path`` does not exist
 
         Raises:
-            FileNotFoundError: When the ``settings_path`` argument does not exist
+            FileNotFoundError: When ``error_on_missing_file`` is ``True`` and ``settings_path`` does not exist
         """
 
         logging.info('Validating settings...')
@@ -64,18 +70,19 @@ class Application:
         if settings_path.exists():
             ApplicationSettings.configure_from_file(settings_path)
 
-        # If asked to validate a custom settings file that does not exist
+        # Raise an error if asked to validate a custom settings file that does not exist
         elif error_on_missing_file and settings_path != DEFAULT_SETTINGS:
             logging.error(f'Custom settings file does not exist: {settings_path}')
             raise FileNotFoundError(f'No settings file at {settings_path}')
 
+        # Load the default application settings
         else:
             ApplicationSettings.configure()
             logging.info('Using default settings')
 
     @classmethod
     def _configure_logging(cls, level: int) -> None:
-        """Configure python logging to the appropriate level
+        """Configure python logging to the given level
 
         Arguments for the ``level`` argument are NOT the same as the
         default integer values used by Python to enumerate logging levels.

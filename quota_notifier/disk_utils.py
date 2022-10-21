@@ -58,7 +58,7 @@ class AbstractQuota(object):
 
     @property
     def percentage(self) -> int:
-        """The current quota utilization as an integer percentage"""
+        """Return the current quota utilization as an integer percentage"""
 
         return (self.size_used * 100) // self.size_limit
 

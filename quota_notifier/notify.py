@@ -1,5 +1,5 @@
-"""The ``notify`` module contains the primary application logic for checking
-disk quotas and issuing pending email notifications.
+"""The ``notify`` module provides logic for checking if users have pending
+notifications and issuing those notifications via email.
 
 Module Contents
 ---------------
@@ -24,7 +24,7 @@ from .orm import DBConnection, Notification
 
 
 class EmailTemplate:
-    """Formattable email template to notify users about their quota"""
+    """A formattable email template to notify users about their disk quota usage"""
 
     email_subject = ApplicationSettings.get('email_subject')
     email_from = ApplicationSettings.get('email_from')
@@ -32,7 +32,11 @@ class EmailTemplate:
     footer = ApplicationSettings.get('email_footer')
 
     def __init__(self, quotas: Collection[AbstractQuota]) -> None:
-        """Generate a formatted instance of the email template"""
+        """Generate a formatted instance of the email template
+
+        Args:
+            quotas: Disk quotas to mention in the email
+        """
 
         quota_str = '\n'.join(map(str, quotas))
         self.message = '\n\n'.join((self.header, quota_str, self.footer))
@@ -51,8 +55,10 @@ class EmailTemplate:
     def send(self, address: str, smtp: Optional[SMTP] = None) -> EmailMessage:
         """Send the formatted email to the given email address
 
+        The default smtp server is determined via the current application settings.
+
         Args:
-             address: Destination email address
+            address: Destination email address
             smtp: Optionally use a custom SMTP server
         """
 
@@ -76,7 +82,7 @@ class EmailTemplate:
 
 
 class UserNotifier:
-    """Issue and manage user disk quota notifications"""
+    """Issue and manage user quota notifications"""
 
     @staticmethod
     def get_users() -> Iterable[User]:
