@@ -23,11 +23,11 @@ class Notification(Base):
     """History of user notifications
 
     Fields:
-      - id         (Integer): Primary key for this table
-      - username    (String): Unique account name
-      - datetime  (DateTime): Datetime of the last user notification
-      - threshold  (Integer): Disk usage threshold that triggered the notification
-      - file_system (String): Name of the file system triggering the notification
+      - id           (Integer): Primary key for this table
+      - username      (String): Unique account name
+      - last_update (DateTime): Datetime of the last user notification
+      - threshold    (Integer): Disk usage threshold that triggered the notification
+      - file_system   (String): Name of the file system triggering the notification
     """
 
     __tablename__ = 'notification'
@@ -46,6 +46,9 @@ class Notification(Base):
         Args:
             key: Name of the database column being tested
             value: The value to test
+
+        Returns:
+            The validated value
 
         Raises:
             ValueError: If the given value does not match required criteria

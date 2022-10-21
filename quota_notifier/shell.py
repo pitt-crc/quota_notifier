@@ -21,7 +21,7 @@ class ShellCmd:
     attributes respectively.
     """
 
-    prohibited_characters = '!#$%&\*+:;<>?@[]^`{|}~'
+    prohibited_characters = r'!#$%&\*+:;<>?@[]^`{|}~'
 
     def __init__(self, cmd: str, timeout: Optional[int] = ApplicationSettings.get('disk_timeout')) -> None:
         """Execute the given command in the underlying shell
@@ -85,6 +85,8 @@ class User:
         return pwd.getpwnam(self._username).pw_gid
 
     def __eq__(self, other):
+        """Return true if both user objects have the same username"""
+
         return isinstance(other, self.__class__) and other.username == self.username
 
     def __str__(self) -> str:
