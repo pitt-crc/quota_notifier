@@ -113,11 +113,11 @@ class SettingsSchema(BaseSettings):
         default=30,
         description='Give up on checking a file system after the given number of seconds.')
 
-    # Settings for the smtp port
+    # Settings for the smtp host/port
     smtp_host: str = Field(
         title='SMTP Server Host Name',
         type=str,
-        default='localhost',
+        default='',
         description='Name of the remote SMTP host'
     )
 

@@ -2,7 +2,12 @@ Config Options
 ==============
 
 The ``SettingsSchema`` defines the available options in the application settings file.
-Note the ``file_systems`` field is a nested field and should adhere to the ``FileSystemSchema`` schema.
+
+.. important:: The top level ``file_systems`` field is a nested field and entries
+   should adhere to the :ref:`#/definitions/FileSystemSchema` schema outlined below.
+
+.. note:: If the SMTP host is ``''`` and the STMP port is ``0``, the OS default behavior
+   will be used for connecting to the SMTP server.
 
 .. pydantic:: quota_notifier.settings.SettingsSchema
 
