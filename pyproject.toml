@@ -10,13 +10,13 @@ keywords = ["disk", "usage", "quota", "notify", "email", ]
 classifiers = [
     "Environment :: Console",
     "Intended Audience :: System Administrators",
-    "Operating System :: POSIX :: IRIX",
+    "Operating System :: POSIX :: Linux",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Topic :: System :: Filesystems",
     "Topic :: System :: Monitoring"
 ]
-requires-python = ">=3.7z"
+requires-python = ">=3.7"
 dependencies = ["pydantic==1.10.2", "sqlalchemy==1.4.41", ]
 
 [[project.authors]]
