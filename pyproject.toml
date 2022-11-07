@@ -10,7 +10,7 @@ keywords = ["disk", "usage", "quota", "notify", "email", ]
 classifiers = [
     "Environment :: Console",
     "Intended Audience :: System Administrators",
-    "Operating System :: POSIX :: IRIX",
+    "Operating System :: POSIX :: Linux",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Topic :: System :: Filesystems",
