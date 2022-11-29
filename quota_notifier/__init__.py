@@ -28,4 +28,4 @@ However, a user will receive additional notifications if their usage drops below
 a threshold before exceeding the threshold a second time.
 """
 
-__version__ = '0.1.1'
+__version__ = '0.2.2'
