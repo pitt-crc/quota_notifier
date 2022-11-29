@@ -1,4 +1,4 @@
-name: Documentation
+name: Build Documentation
 
 on:
   pull_request:
@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   build:
@@ -34,20 +32,3 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           path: docs/build/html
-
-  deploy:
-    name: Publish Documentation
-    if: github.event_name == 'push'
-    needs: [ build ]
-
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
