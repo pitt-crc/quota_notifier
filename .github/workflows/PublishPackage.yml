@@ -58,6 +58,9 @@ jobs:
           path: dist
 
       - name: Publish package
-        run: |
-          pip install twine
-          twine upload --repository-url ${{ secrets.REPO_URL }} -u ${{ secrets.REPO_USER }} -p ${{ secrets.REPO_PASSWORD }} --verbose 
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          repository_url: ${{ secrets.REPO_URL }}
+          user: ${{ secrets.REPO_USER }}
+          password: ${{ secrets.REPO_PASSWORD }}
