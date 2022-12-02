@@ -41,11 +41,15 @@ jobs:
           path: dist
           retention-days: 7
 
-  publish-h2p:
-    name: Publish to H2P
+  publish:
+    name: Publish Distribution
     needs: build
     runs-on: ubuntu-latest
-    environment: publish-h2p
+
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [ publish-h2p ]
 
     steps:
       - name: Download distribution from artifact storage
