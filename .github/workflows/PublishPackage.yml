@@ -44,11 +44,14 @@ jobs:
     name: Publish Distribution
     needs: build
     runs-on: ubuntu-latest
+    environment: ${{ matrix.environment }}
 
     strategy:
       fail-fast: false
       matrix:
-        environment: [ publish-h2p ]
+        include:
+          - host: https://py00.crc.pitt.edu
+            environment: publish-h2p
 
     steps:
       - name: Download distribution from artifact storage
