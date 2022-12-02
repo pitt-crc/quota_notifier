@@ -31,7 +31,7 @@ content-type = "text/markdown"
 notifier = "quota_notifier.main:Application.execute"
 
 [project.optional-dependencies]
-docs = ["sphinx==5.3.0", "sphinx-argparse==0.4.0", "sphinx-copybutton==0.5.0", "sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.1.1", "sphinx-jsonschema==1.15", ]
+docs = ["sphinx==5.3.0", "sphinx-argparse==0.4.0", "sphinx-copybutton==0.5.1", "sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.1.1", "sphinx-jsonschema==1.15", ]
 tests = ["coverage", ]
 
 [tool.setuptools.dynamic]
