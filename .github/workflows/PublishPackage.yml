@@ -61,6 +61,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
         with:
           print_hash: true
-          repository_url: https://py-repo.crc.pitt.edu
-          user: ${{ secrets.REPO_PASSWORD }}
+          repository_url: ${{ secrets.REPO_URL }}
+          user: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PASSWORD }}
