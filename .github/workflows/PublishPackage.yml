@@ -8,13 +8,13 @@ permissions:
   contents: read
 
 jobs:
-  tests:
+  test:
     name: Run Tests
     uses: ./.github/workflows/Unittests.yml
 
-  deploy:
-    name: Deploy
-    needs: tests
+  build:
+    name: Build Source Distribution
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -34,10 +34,29 @@ jobs:
       - name: Build package
         run: python -m build
 
+      - name: Upload distribution to artifact storage
+        uses: actions/upload-artifact@v3
+        with:
+          name: package-build
+          path: dist
+          retention-days: 7
+
+  publish-h2p:
+    name: Publish to H2P
+    needs: build
+    runs-on: ubuntu-latest
+    environment: publish-h2p
+
+    steps:
+      - name: Download distribution from artifact storage
+        uses: actions/download-artifact@v3
+        with:
+          name: package-build
+
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
         with:
           print_hash: true
           repository_url: https://py-repo.crc.pitt.edu
-          user: ${{ secrets.PY_REPO_PASSWORD }}
-          password: ${{ secrets.PY_REPO_PASSWORD }}
+          user: ${{ secrets.REPO_PASSWORD }}
+          password: ${{ secrets.REPO_PASSWORD }}
