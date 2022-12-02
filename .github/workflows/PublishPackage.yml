@@ -64,4 +64,3 @@ jobs:
           repository_url: ${{ secrets.REPO_URL }}
           user: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PASSWORD }}
-          skip_existing: true
