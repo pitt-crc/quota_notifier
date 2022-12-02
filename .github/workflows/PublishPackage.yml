@@ -8,8 +8,7 @@ jobs:
   test:
     name: Run Tests
     uses: ./.github/workflows/Unittests.yml
-    secrets:
-      CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+    secrets: inherit
 
   build:
     name: Build Source Distribution
