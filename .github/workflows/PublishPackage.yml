@@ -1,6 +1,7 @@
 name: Publish Package
 
 on:
+  push:
   release:
     types: [ released ]
 
@@ -54,6 +55,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: package-build
+          path: dist
 
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
