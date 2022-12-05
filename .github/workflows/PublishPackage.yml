@@ -1,7 +1,6 @@
 name: Publish Package
 
 on:
-  push:
   release:
     types: [ released ]
 
