@@ -43,23 +43,27 @@ jobs:
     name: Publish Distribution
     needs: build
     runs-on: ubuntu-latest
+    environment: ${{ matrix.environment }}
 
     strategy:
       fail-fast: false
       matrix:
-        environment: [ publish-h2p ]
+        include:
+          - host: https://py00.crc.pitt.edu
+            environment: publish-h2p
 
     steps:
       - name: Download distribution from artifact storage
         uses: actions/download-artifact@v3
         with:
           name: package-build
+          path: dist
 
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
-          repository_url: ${{ secrets.REPO_URL }}
+          repository_url: ${{ matrix.host }}
           user: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PASSWORD }}
           skip_existing: true
