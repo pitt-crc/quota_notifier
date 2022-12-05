@@ -43,6 +43,8 @@ All options will install the ``notifier`` utility plus core package dependencies
 +----------------------+---------------------------------------------------------+
 | Install Option       | Description                                             |
 +======================+=========================================================+
+| ``[dev]``            | Includes all dependencies listed in this table.         |
++----------------------+---------------------------------------------------------+
 | ``[docs]``           | Dependencies required for building the documentation.   |
 +----------------------+---------------------------------------------------------+
 | ``[tests]``          | Dependencies required for running tests with coverage.  |
