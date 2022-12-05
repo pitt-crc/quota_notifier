@@ -23,14 +23,22 @@ classifiers = [
     "Typing :: Typed"
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8"
-pydantic = "==1.10.2"
-sqlalchemy = '==1.4.44'
-
 [tool.poetry.scripts]
 notifier = "quota_notifier.main:Application.execute"
 
-[tool.poetry.extras]
-docs = ["sphinx==5.3.0", "sphinx-argparse==0.4.0", "sphinx-copybutton==0.5.1", "sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.1.1", "sphinx-jsonschema==1.15", ]
-tests = ["coverage", ]
+[tool.poetry.dependencies]
+python = ">=3.8"
+pydantic = "==1.10.2"
+sqlalchemy = "==1.4.44"
+
+# Optional dependencies for running tests
+coverage = { version = "*", extras = ["dev", "tests"] }
+
+# Optional dependencies for building docs
+sphinx = { version = "5.3.0", extras = ["dev", "docs"] }
+sphinx-argparse = { version = "==0.4.0 ", extras = ["dev", "docs"] }
+sphinx-copybutton = { version = "==0.5.1 ", extras = ["dev", "docs"] }
+sphinx-pydantic = { version = "==0.1.1 ", extras = ["dev", "docs"] }
+sphinx-rtd-theme = { version = "==1.1.1 ", extras = ["dev", "docs"] }
+sphinx-jsonschema = { version = "==1.15", extras = ["dev", "docs"] }
+
