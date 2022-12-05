@@ -1,11 +1,16 @@
 [build-system]
-requires = ["setuptools>=64.0"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "quota-notifier"
-dynamic = ["version"]
+version = "0.3.1"
+authors = ["Pitt Center for Research Computing", ]
+readme = "README.md"
 description = "Automatic email notification tool for disk quota usage."
+homepage = "https://github.com/pitt-crc/quota_notifier"
+repository = "https://github.com/pitt-crc/quota_notifier"
+documentation = "https://crc-pages.pitt.edu/quota_notifier/"
 keywords = ["disk", "usage", "quota", "notify", "email", ]
 classifiers = [
     "Environment :: Console",
@@ -17,22 +22,28 @@ classifiers = [
     "Topic :: System :: Monitoring",
     "Typing :: Typed"
 ]
-requires-python = ">=3.8"
-dependencies = ["pydantic==1.10.2", "sqlalchemy==1.4.44", ]
 
-[[project.authors]]
-name = "Pitt Center for Research Computing"
+[tool.poetry.dependencies]
+python = ">=3.8"
+pydantic = "==1.10.2"
+sqlalchemy = '==1.4.44'
 
-[project.readme]
-file = "README.md"
-content-type = "text/markdown"
-
-[project.scripts]
+[tool.poetry.scripts]
 notifier = "quota_notifier.main:Application.execute"
 
-[project.optional-dependencies]
-docs = ["sphinx==5.3.0", "sphinx-argparse==0.4.0", "sphinx-copybutton==0.5.1", "sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.1.1", "sphinx-jsonschema==1.15", ]
-tests = ["coverage", ]
+[tool.poetry.group.docs]
+optional = true
 
-[tool.setuptools.dynamic]
-version = { attr = "quota_notifier.__version__" }
+[tool.poetry.group.docs.dependencies]
+sphinx = "==5.3.0"
+sphinx-argparse = "==0.4.0"
+sphinx-copybutton = "==0.5.1"
+sphinx-pydantic = "==0.1.1"
+sphinx-rtd-theme = "==1.1.1"
+sphinx-jsonschema = "==1.15"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+coverage = "*"
