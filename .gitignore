@@ -1,6 +1,5 @@
-# Select files
-profile_app.py
-profile_settings.json
+# Pacakge manager files
+*.lock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
