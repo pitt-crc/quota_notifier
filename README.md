@@ -5,6 +5,6 @@
 [![Tests](https://github.com/pitt-crc/quota_notifier/actions/workflows/Unittests.yml/badge.svg)](https://github.com/pitt-crc/quota_notifier/actions/workflows/Unittests.yml)
 [![Upload Python Package](https://github.com/pitt-crc/quota_notifier/actions/workflows/PublishPackage.yml/badge.svg)](https://github.com/pitt-crc/quota_notifier/actions/workflows/PublishPackage.yml)
 
-Automatically notifier users by email when their disk usage hits a certain limit.
+A simple command line utility for emailing users when they exceed disk usage thresholds 
 
-See the [project documentation](https://crc-pages.pitt.edu/quota_notifier/).
+See the [official documentation](https://crc-pages.pitt.edu/quota_notifier/).
