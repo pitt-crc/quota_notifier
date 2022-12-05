@@ -42,8 +42,8 @@ sphinx-pydantic = "==0.1.1"
 sphinx-rtd-theme = "==1.1.1"
 sphinx-jsonschema = "==1.15"
 
-[tool.poetry.group.test]
+[tool.poetry.group.tests]
 optional = true
 
-[tool.poetry.group.test.dependencies]
+[tool.poetry.group.tests.dependencies]
 coverage = "*"
