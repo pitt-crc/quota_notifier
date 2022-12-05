@@ -31,19 +31,6 @@ sqlalchemy = '==1.4.44'
 [tool.poetry.scripts]
 notifier = "quota_notifier.main:Application.execute"
 
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-sphinx = "==5.3.0"
-sphinx-argparse = "==0.4.0"
-sphinx-copybutton = "==0.5.1"
-sphinx-pydantic = "==0.1.1"
-sphinx-rtd-theme = "==1.1.1"
-sphinx-jsonschema = "==1.15"
-
-[tool.poetry.group.tests]
-optional = true
-
-[tool.poetry.group.tests.dependencies]
-coverage = "*"
+[tool.poetry.extras]
+docs = ["sphinx==5.3.0", "sphinx-argparse==0.4.0", "sphinx-copybutton==0.5.1", "sphinx-pydantic==0.1.1", "sphinx-rtd-theme==1.1.1", "sphinx-jsonschema==1.15", ]
+tests = ["coverage", ]
