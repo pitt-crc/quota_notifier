@@ -24,13 +24,18 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Install Poetry
+        run: pip install poetry
+
+      # Get the new package version from the release tag
+      # Release tags are expected to start with a "v", so the first character is stripped
+      - name: Set package version
         run: |
-          python -m pip install --upgrade pip
-          pip install build
+          tag=${{github.ref}}
+          poetry version "${tag:1}"
 
       - name: Build package
-        run: python -m build
+        run: poetry build -v
 
       - name: Upload distribution to artifact storage
         uses: actions/upload-artifact@v3
@@ -66,4 +71,3 @@ jobs:
           repository_url: ${{ matrix.host }}
           user: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PASSWORD }}
-          skip_existing: true
