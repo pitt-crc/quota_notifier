@@ -13,6 +13,7 @@ sys.path.insert(0, str(project_root))
 
 # -- Project information -----------------------------------------------------
 
+# noinspection PyPep8
 from quota_notifier import __version__
 
 project = 'Quota Notification Utility'
