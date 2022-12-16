@@ -117,8 +117,7 @@ class Application:
         # Update application settings
         cls._configure_logging(args.verbose)
         cls._load_settings(args.settings, error_on_missing_file=args.validate)
-        if args.debug:
-            ApplicationSettings.set(debug=True)
+        ApplicationSettings.set(debug=args.debug)
 
         if args.validate:
             return
