@@ -24,10 +24,10 @@ class Parser(ArgumentParser):
     """Responsible for defining the commandline interface and parsing commandline arguments"""
 
     def __init__(
-            self, *args,
-            prog='notifier',
-            description='Notify users when their disk usage passes predefined thresholds',
-            **kwargs
+        self, *args,
+        prog='notifier',
+        description='Notify users when their disk usage passes predefined thresholds',
+        **kwargs
     ) -> None:
         """Define arguments for the command line interface
 
