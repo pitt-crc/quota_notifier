@@ -24,10 +24,10 @@ class Parser(ArgumentParser):
     """Responsible for defining the commandline interface and parsing commandline arguments"""
 
     def __init__(
-        self, *args,
-        prog='notifier',
-        description='Notify users when their disk usage passes predefined thresholds',
-        **kwargs
+            self, *args,
+            prog='notifier',
+            description='Notify users when their disk usage passes predefined thresholds',
+            **kwargs
     ) -> None:
         """Define arguments for the command line interface
 
@@ -38,14 +38,13 @@ class Parser(ArgumentParser):
         """
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
-        self.add_argument('-v', '--version', action='version', version=__version__)
+        self.add_argument('--version', action='version', version=__version__)
         self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS, help='path to the app settings file')
         self.add_argument('--validate', action='store_true', help='validate settings without sending notifications')
         self.add_argument('--debug', action='store_true', help='run the application but do not send any emails')
         self.add_argument(
-            '--verbose', type=int, nargs='?',
-            default=0, const=1, choices=[0, 1, 2],
-            help='print nothing (0), general info (1), or debug messages (2)')
+            '-v', action='count', default=0,
+            help='set output verbosity to warning (-v), info (-vv), or debug (-vvv)')
 
 
 class Application:
@@ -94,17 +93,17 @@ class Application:
         """
 
         log_format = '%(levelname)8s - %(message)s'
-        if level == 2:
-            logging.basicConfig(level=logging.DEBUG, format=log_format)
-
-        elif level == 1:
-            logging.basicConfig(level=logging.INFO, format=log_format)
-
-        elif level == 0:
+        if level == 0:
             logging.basicConfig(level=100, format=log_format)
 
+        elif level == 1:
+            logging.basicConfig(level=logging.WARNING, format=log_format)
+
+        elif level == 2:
+            logging.basicConfig(level=logging.INFO, format=log_format)
+
         else:
-            raise ValueError(f'Unrecognized logging level option {level}')
+            logging.basicConfig(level=logging.DEBUG, format=log_format)
 
     @classmethod
     def run(cls, args: Namespace) -> None:
