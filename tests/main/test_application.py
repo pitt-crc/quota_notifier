@@ -59,33 +59,40 @@ class LoggingConfiguration(TestCase):
         log_format = logging.getLogger().handlers[0].formatter._fmt
         self.assertEqual('%(levelname)8s - %(message)s', log_format)
 
-    def test_logging_level_zero(self):
-        """Test settings the logging level to ``verbose=0``"""
+    def test_verbose_level_zero(self):
+        """Test setting ``verbose=0`` blocks all logging"""
 
         args = Namespace(validate=False, verbose=0, debug=False, settings=DEFAULT_SETTINGS)
         Application.run(args)
         self.assertEqual(100, logging.getLogger().level)
 
-    def test_logging_level_one(self):
-        """Test settings the logging level to ``verbose=1``"""
+    def test_verbose_level_one(self):
+        """Test setting ``verbose=1`` sets the logging level to ``WARNING``"""
 
         args = Namespace(validate=False, verbose=1, debug=False, settings=DEFAULT_SETTINGS)
         Application.run(args)
-        self.assertEqual(logging.INFO, logging.getLogger().level)
+        self.assertEqual(logging.WARNING, logging.getLogger().level)
 
-    def test_logging_level_two(self):
-        """Test settings the logging level to ``verbose=2``"""
+    def test_verbose_level_two(self):
+        """Test setting ``verbose=2`` sets the logging level to ``INFO``"""
 
         args = Namespace(validate=False, verbose=2, debug=False, settings=DEFAULT_SETTINGS)
         Application.run(args)
+        self.assertEqual(logging.INFO, logging.getLogger().level)
+
+    def test_verbose_level_three(self):
+        """Test setting ``verbose=3`` sets the logging level to ``DEBUG``"""
+
+        args = Namespace(validate=False, verbose=3, debug=False, settings=DEFAULT_SETTINGS)
+        Application.run(args)
         self.assertEqual(logging.DEBUG, logging.getLogger().level)
 
-    def test_error_invalid_level(self):
-        """Test an error is raised for an invalid verbose level"""
+    def test_verbose_level_100(self):
+        """Test setting ``verbose=100`` sets the logging level to ``DEBUG``"""
 
-        with self.assertRaises(ValueError):
-            args = Namespace(validate=False, verbose=5, debug=False, settings=DEFAULT_SETTINGS)
-            Application.run(args)
+        args = Namespace(validate=False, verbose=100, debug=False, settings=DEFAULT_SETTINGS)
+        Application.run(args)
+        self.assertEqual(logging.DEBUG, logging.getLogger().level)
 
 
 class DatabaseConfiguration(TestCase):
