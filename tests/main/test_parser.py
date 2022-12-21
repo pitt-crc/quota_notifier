@@ -78,20 +78,20 @@ class VerboseOption(TestCase):
         args = Parser().parse_args([])
         self.assertEqual(0, args.verbose)
 
-    def test_defaults_to_one(self) -> None:
-        """Test the ``verbose`` value is one when specified without arguments"""
+    def test_single_flag(self) -> None:
+        """Test a single verbose flag returns a verbose value of one"""
 
-        args = Parser().parse_args(['--verbose'])
+        args = Parser().parse_args(['-v'])
         self.assertEqual(1, args.verbose)
 
-    def test_accepts_custom_value(self) -> None:
-        """Test custom arguments are stored in the returned arguments"""
+    def test_double_flag(self) -> None:
+        """Test a double verbose flag returns a verbose value of two"""
 
-        args = Parser().parse_args(['--verbose', '0'])
-        self.assertEqual(0, args.verbose)
-
-        args = Parser().parse_args(['--verbose', '1'])
-        self.assertEqual(1, args.verbose)
-
-        args = Parser().parse_args(['--verbose', '2'])
+        args = Parser().parse_args(['-vv'])
         self.assertEqual(2, args.verbose)
+
+    def test_triple_flag(self) -> None:
+        """Test a triple verbose flag returns a verbose value of three"""
+
+        args = Parser().parse_args(['-vvv'])
+        self.assertEqual(3, args.verbose)
