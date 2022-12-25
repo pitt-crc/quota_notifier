@@ -79,7 +79,6 @@ jobs:
           password: ${{ secrets.REPO_PASSWORD }}
 
   publish-docs:
-    name: Publish Documentation
     needs: test-package
     uses: ./.github/workflows/DocumentationPublish.yml
     secrets: inherit
