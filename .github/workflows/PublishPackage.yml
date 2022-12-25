@@ -4,15 +4,20 @@ on:
   release:
     types: [ released ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  test:
+  test-package:
     name: Run Tests
     uses: ./.github/workflows/Unittests.yml
     secrets: inherit
 
-  build:
+  build-package:
     name: Build Source Distribution
-    needs: test
+    needs: test-package
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +51,7 @@ jobs:
 
   publish:
     name: Publish Distribution
-    needs: build
+    needs: build-package
     runs-on: ubuntu-latest
     environment: ${{ matrix.environment }}
 
@@ -71,3 +76,9 @@ jobs:
           repository_url: ${{ matrix.host }}
           user: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PASSWORD }}
+
+  publish-docs:
+    name: Publish Documentation
+    needs: test-package
+    uses: ./.github/workflows/DocumentationPublish.yml
+    secrets: inherit
