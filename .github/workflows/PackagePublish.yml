@@ -30,7 +30,9 @@ jobs:
           python-version: '3.x'
 
       - name: Install Poetry
-        run: pip install poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
 
       # Get the new package version from the release tag
       # Release tags are expected to start with "refs/tags/v", so the first 11 characters are stripped
