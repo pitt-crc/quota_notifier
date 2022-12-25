@@ -13,16 +13,19 @@ jobs:
     name: Build Documentation
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout project source
+        uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Install poetry
+        run: pip install poetry
 
       - name: Install dependencies
-        run: pip install .[docs]
+        run: poetry install -E docs .
 
       - name: Build Docs
         working-directory: docs
