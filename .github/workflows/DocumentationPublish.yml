@@ -3,8 +3,6 @@ name: Publish Documentation
 on:
   workflow_dispatch:
   workflow_call:
-  release:
-    types: [ released ]
 
 permissions:
   contents: read
