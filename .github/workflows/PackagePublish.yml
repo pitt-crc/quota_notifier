@@ -33,7 +33,7 @@ jobs:
         run: pip install poetry
 
       # Get the new package version from the release tag
-      # Release tags are expected to start with a "v", so the first character is stripped
+      # Release tags are expected to start with "refs/tags/v", so the first 11 characters are stripped
       - name: Set package version
         run: |
           tag=${{github.ref}}
