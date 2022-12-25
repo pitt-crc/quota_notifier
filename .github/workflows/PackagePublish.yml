@@ -38,7 +38,7 @@ jobs:
       - name: Set package version
         run: |
           tag=${{github.ref}}
-          poetry version "${tag:1}"
+          poetry version "0.0.0-dev"
 
       - name: Build package
         run: poetry build -v
