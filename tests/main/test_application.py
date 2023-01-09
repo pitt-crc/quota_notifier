@@ -4,7 +4,7 @@ import logging
 from argparse import Namespace
 from json import JSONDecodeError
 from pathlib import Path
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import TestCase
 
 from quota_notifier.main import Application, DEFAULT_SETTINGS
@@ -53,7 +53,7 @@ class LoggingConfiguration(TestCase):
     def test_logging_format_set(self):
         """Test the logging format is configured"""
 
-        args = Namespace(validate=False, verbose=0, debug=False, settings=DEFAULT_SETTINGS)
+        args = Namespace(validate=True, debug=True, verbose=0, settings=DEFAULT_SETTINGS)
         Application.run(args)
 
         log_format = logging.getLogger().handlers[0].formatter._fmt
@@ -62,35 +62,35 @@ class LoggingConfiguration(TestCase):
     def test_verbose_level_zero(self):
         """Test setting ``verbose=0`` blocks all logging"""
 
-        args = Namespace(validate=False, verbose=0, debug=False, settings=DEFAULT_SETTINGS)
+        args = Namespace(validate=False, debug=True, verbose=0, settings=DEFAULT_SETTINGS)
         Application.run(args)
         self.assertEqual(100, logging.getLogger().level)
 
     def test_verbose_level_one(self):
         """Test setting ``verbose=1`` sets the logging level to ``WARNING``"""
 
-        args = Namespace(validate=False, verbose=1, debug=False, settings=DEFAULT_SETTINGS)
+        args = Namespace(validate=True, debug=True, verbose=1, settings=DEFAULT_SETTINGS)
         Application.run(args)
         self.assertEqual(logging.WARNING, logging.getLogger().level)
 
     def test_verbose_level_two(self):
         """Test setting ``verbose=2`` sets the logging level to ``INFO``"""
 
-        args = Namespace(validate=False, verbose=2, debug=False, settings=DEFAULT_SETTINGS)
+        args = Namespace(validate=True, debug=True, verbose=2, settings=DEFAULT_SETTINGS)
         Application.run(args)
         self.assertEqual(logging.INFO, logging.getLogger().level)
 
     def test_verbose_level_three(self):
         """Test setting ``verbose=3`` sets the logging level to ``DEBUG``"""
 
-        args = Namespace(validate=False, verbose=3, debug=False, settings=DEFAULT_SETTINGS)
+        args = Namespace(validate=True, debug=True, verbose=3, settings=DEFAULT_SETTINGS)
         Application.run(args)
         self.assertEqual(logging.DEBUG, logging.getLogger().level)
 
     def test_verbose_level_100(self):
         """Test setting ``verbose=100`` sets the logging level to ``DEBUG``"""
 
-        args = Namespace(validate=False, verbose=100, debug=False, settings=DEFAULT_SETTINGS)
+        args = Namespace(validate=True, debug=True, verbose=100, settings=DEFAULT_SETTINGS)
         Application.run(args)
         self.assertEqual(logging.DEBUG, logging.getLogger().level)
 
@@ -106,10 +106,19 @@ class DatabaseConfiguration(TestCase):
 
         self.assertEqual('sqlite:///:memory:', DBConnection.url)
 
-    def test_db_matches_url_matches_settings(self) -> None:
+    def test_db_matches_default_settings(self) -> None:
         """Test debug mode forces an in-memory database"""
 
         args = Namespace(validate=False, verbose=0, debug=False, settings=DEFAULT_SETTINGS)
         Application.run(args)
+
+        self.assertEqual(ApplicationSettings.get('db_url'), DBConnection.url)
+
+    def test_db_matches_custom_url(self) -> None:
+        """Test debug mode forces an in-memory database"""
+
+        with TemporaryDirectory() as temp_dir:
+            args = Namespace(validate=False, verbose=0, debug=False, settings=DEFAULT_SETTINGS)
+            Application.run(args)
 
         self.assertEqual(ApplicationSettings.get('db_url'), DBConnection.url)

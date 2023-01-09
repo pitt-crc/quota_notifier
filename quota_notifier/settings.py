@@ -79,6 +79,12 @@ class FileSystemSchema(BaseSettings):
 class SettingsSchema(BaseSettings):
     """Defines the schema and default values for top level application settings"""
 
+    verbosity: Literal[0, 1, 2] = Field(
+        title='Verbosity Level',
+        type=Literal[0, 1, 2],
+        default=0,
+        description='Application verbosity (defaults to silent)')
+
     ihome_quota_path: Path = Field(
         title='Ihome Quota Path',
         type=Path,
@@ -218,30 +224,32 @@ class ApplicationSettings:
     _parsed_settings: SettingsSchema = SettingsSchema()
 
     @classmethod
-    def _configure_logging(cls, level: int) -> None:
+    def _configure_logging(cls) -> None:
         """Configure python logging to the given level
 
         Arguments for the ``level`` argument are NOT the same as the
         default integer values used by Python to enumerate logging levels.
         Accepted values are 0 (no logging information displayed),
         1 (information level logging) and 2 (debug level logging).
-
-        Args:
-            level: Integer representing the desired logging level.
         """
 
+        verbosity = cls.get('verbosity')
         log_format = '%(levelname)8s - %(message)s'
-        if level == 0:
+
+        if verbosity == 0:
             logging.basicConfig(level=100, format=log_format)
 
-        elif level == 1:
+        elif verbosity == 1:
             logging.basicConfig(level=logging.WARNING, format=log_format)
 
-        elif level == 2:
+        elif verbosity == 2:
             logging.basicConfig(level=logging.INFO, format=log_format)
 
-        else:
+        elif verbosity > 2:
             logging.basicConfig(level=logging.DEBUG, format=log_format)
+
+        else:
+            raise RuntimeError('Unrecognized verbosity level')
 
     @classmethod
     def _configure_database(cls) -> None:
@@ -255,10 +263,10 @@ class ApplicationSettings:
             DBConnection.configure(cls.get('db_url'))
 
     @classmethod
-    def _configure(cls):
+    def _configure_application(cls):
         """Update backend application constructs to reflect current application settings"""
 
-        cls._configure_logging(1)
+        cls._configure_logging()
         cls._configure_database()
 
     @classmethod
@@ -275,7 +283,7 @@ class ApplicationSettings:
 
         try:
             cls._parsed_settings = SettingsSchema.parse_file(path)
-            cls._configure()
+            cls._configure_application()
 
         except Exception:
             logging.error('settings file is invalid')
@@ -301,7 +309,7 @@ class ApplicationSettings:
 
             setattr(cls._parsed_settings, item, value)
 
-        cls._configure()
+        cls._configure_application()
 
     @classmethod
     def reset_defaults(cls) -> None:

@@ -87,7 +87,7 @@ class Application:
 
         # Update application settings
         cls._load_settings(args.settings, error_on_missing_file=args.validate)
-        ApplicationSettings.set(debug=args.debug)
+        ApplicationSettings.set(debug=args.debug, verbosity=args.verbose)
 
         if args.validate:
             return
