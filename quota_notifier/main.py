@@ -38,9 +38,10 @@ class Parser(ArgumentParser):
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
         self.add_argument('--version', action='version', version=__version__)
-        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH, help='path to the app settings file')
         self.add_argument('--validate', action='store_true', help='validate settings without sending notifications')
         self.add_argument('--debug', action='store_true', help='run the application but do not send any emails')
+        self.add_argument(
+            '-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH, help='path to a app settings file')
         self.add_argument(
             '-v', action='count', dest='verbose', default=0,
             help='set output verbosity to warning (-v), info (-vv), or debug (-vvv)')

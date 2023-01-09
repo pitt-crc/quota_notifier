@@ -6,7 +6,7 @@ Quota Notification Utility
 .. toctree::
    :hidden:
 
-   Overview<cls>
+   Overview<self>
    overview/usage
    overview/file_systems
    overview/install
