@@ -12,31 +12,29 @@ from quota_notifier.settings import ApplicationSettings
 class Defaults(TestCase):
     """Test default settings"""
 
+    @classmethod
+    def setUpClass(cls) -> None:
+        ApplicationSettings.reset_defaults()
+
     def test_blacklisted_users(self) -> None:
         """Test root is in blacklisted users"""
 
-        ApplicationSettings.configure()
         self.assertEqual({'root'}, ApplicationSettings.get('blacklist'))
 
     def test_blacklisted_groups(self) -> None:
         """Test root is in blacklisted groups"""
 
-        ApplicationSettings.configure()
         self.assertEqual({'root'}, ApplicationSettings.get('group_blacklist'))
 
 
-class Configure(TestCase):
-    """Test the modification of settings via the ``configure`` method"""
+class ResetDefaults(TestCase):
+    """Test the overwriting of settings via the ``reset_defaults`` method"""
 
     def test_setting_are_overwritten(self) -> None:
-        """Test settings values are overwritten/reset by the ``configure`` method"""
+        """Test settings values are overwritten/reset by the ``reset_defaults`` method"""
 
-        # Check settings are overwritten
-        ApplicationSettings.configure(blacklist=['fake_username'])
-        self.assertListEqual(['fake_username'], ApplicationSettings.get('blacklist'))
-
-        # Test settings are restored
-        ApplicationSettings.configure()
+        ApplicationSettings.set(blacklist=['fake_username'])
+        ApplicationSettings.reset_defaults()
         self.assertEqual({'root'}, ApplicationSettings.get('blacklist'))
 
 
@@ -53,7 +51,7 @@ class ConfigureFromFile(TestCase):
             with path_obj.open('w') as io:
                 json.dump(settings, io)
 
-            ApplicationSettings.configure_from_file(path_obj)
+            ApplicationSettings.set_from_file(path_obj)
             self.assertEqual({'fake_username'}, ApplicationSettings.get('blacklist'))
 
     def test_invalid_file(self) -> None:
@@ -67,7 +65,7 @@ class ConfigureFromFile(TestCase):
                 json.dump(settings, io)
 
             with self.assertRaisesRegex(ValidationError, 'extra fields not permitted'):
-                ApplicationSettings.configure_from_file(path_obj)
+                ApplicationSettings.set_from_file(path_obj)
 
 
 class Setter(TestCase):

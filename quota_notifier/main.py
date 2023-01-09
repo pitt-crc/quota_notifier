@@ -14,7 +14,6 @@ from typing import List
 
 from . import __version__
 from .notify import UserNotifier
-from .orm import DBConnection
 from .settings import ApplicationSettings
 
 DEFAULT_SETTINGS = Path('/etc/notifier/settings.json')
@@ -67,7 +66,7 @@ class Application:
         # Load and validate custom application settings from disk
         # Implicitly raises an error if settings are invalid
         if settings_path.exists():
-            ApplicationSettings.configure_from_file(settings_path)
+            ApplicationSettings.set_from_file(settings_path)
 
         # Raise an error if asked to validate a custom settings file that does not exist
         elif error_on_missing_file and settings_path != DEFAULT_SETTINGS:
@@ -76,34 +75,7 @@ class Application:
 
         # Load the default application settings
         else:
-            ApplicationSettings.configure()
             logging.info('Using default settings')
-
-    @classmethod
-    def _configure_logging(cls, level: int) -> None:
-        """Configure python logging to the given level
-
-        Arguments for the ``level`` argument are NOT the same as the
-        default integer values used by Python to enumerate logging levels.
-        Accepted values are 0 (no logging information displayed),
-        1 (information level logging) and 2 (debug level logging).
-
-        Args:
-            level: Integer representing the desired logging level.
-        """
-
-        log_format = '%(levelname)8s - %(message)s'
-        if level == 0:
-            logging.basicConfig(level=100, format=log_format)
-
-        elif level == 1:
-            logging.basicConfig(level=logging.WARNING, format=log_format)
-
-        elif level == 2:
-            logging.basicConfig(level=logging.INFO, format=log_format)
-
-        else:
-            logging.basicConfig(level=logging.DEBUG, format=log_format)
 
     @classmethod
     def run(cls, args: Namespace) -> None:
@@ -114,20 +86,11 @@ class Application:
         """
 
         # Update application settings
-        cls._configure_logging(args.verbose)
         cls._load_settings(args.settings, error_on_missing_file=args.validate)
         ApplicationSettings.set(debug=args.debug)
 
         if args.validate:
             return
-
-        # Configure the application database
-        if ApplicationSettings.get('debug'):
-            logging.warning('Running in debug mode')
-            DBConnection.configure('sqlite:///:memory:')
-
-        else:
-            DBConnection.configure()
 
         # Run core application logic
         UserNotifier().send_notifications()

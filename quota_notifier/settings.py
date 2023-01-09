@@ -12,6 +12,8 @@ from typing import Literal
 
 from pydantic import BaseSettings, Field, validator
 
+from quota_notifier.orm import DBConnection
+
 DEFAULT_DB_PATH = Path(__file__).parent.resolve() / 'app_data.db'
 
 
@@ -216,17 +218,51 @@ class ApplicationSettings:
     _parsed_settings: SettingsSchema = SettingsSchema()
 
     @classmethod
-    def configure(cls, **kwargs) -> None:
-        """Reset application settings to default values
+    def _configure_logging(cls, level: int) -> None:
+        """Configure python logging to the given level
 
-        Use keyword arguments to override individual defaults
+        Arguments for the ``level`` argument are NOT the same as the
+        default integer values used by Python to enumerate logging levels.
+        Accepted values are 0 (no logging information displayed),
+        1 (information level logging) and 2 (debug level logging).
+
+        Args:
+            level: Integer representing the desired logging level.
         """
 
-        cls._parsed_settings = SettingsSchema()
-        cls.set(**kwargs)
+        log_format = '%(levelname)8s - %(message)s'
+        if level == 0:
+            logging.basicConfig(level=100, format=log_format)
+
+        elif level == 1:
+            logging.basicConfig(level=logging.WARNING, format=log_format)
+
+        elif level == 2:
+            logging.basicConfig(level=logging.INFO, format=log_format)
+
+        else:
+            logging.basicConfig(level=logging.DEBUG, format=log_format)
 
     @classmethod
-    def configure_from_file(cls, path: Path) -> None:
+    def _configure_database(cls) -> None:
+        """Configure the application database connection"""
+
+        if cls.get('debug'):
+            logging.warning('Running in debug mode')
+            DBConnection.configure('sqlite:///:memory:')
+
+        else:
+            DBConnection.configure(cls.get('db_url'))
+
+    @classmethod
+    def _configure(cls):
+        """Update backend application constructs to reflect current application settings"""
+
+        cls._configure_logging(1)
+        cls._configure_database()
+
+    @classmethod
+    def set_from_file(cls, path: Path) -> None:
         """Reset application settings to default values
 
         Values defined in the given file path are used to override defaults.
@@ -239,6 +275,7 @@ class ApplicationSettings:
 
         try:
             cls._parsed_settings = SettingsSchema.parse_file(path)
+            cls._configure()
 
         except Exception:
             logging.error('settings file is invalid')
@@ -263,6 +300,14 @@ class ApplicationSettings:
                 ValueError(f'Invalid settings option: {item}')
 
             setattr(cls._parsed_settings, item, value)
+
+        cls._configure()
+
+    @classmethod
+    def reset_defaults(cls) -> None:
+        """Reset application settings to default values"""
+
+        cls._parsed_settings = SettingsSchema()
 
     @classmethod
     def get(cls, item: str) -> Any:
