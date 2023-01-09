@@ -16,7 +16,7 @@ from . import __version__
 from .notify import UserNotifier
 from .settings import ApplicationSettings
 
-DEFAULT_SETTINGS = Path('/etc/notifier/settings.json')
+DEFAULT_SETTINGS_PATH = Path('/etc/notifier/settings.json')
 
 
 class Parser(ArgumentParser):
@@ -38,7 +38,7 @@ class Parser(ArgumentParser):
 
         super().__init__(*args, prog=prog, description=description, **kwargs)
         self.add_argument('--version', action='version', version=__version__)
-        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS, help='path to the app settings file')
+        self.add_argument('-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH, help='path to the app settings file')
         self.add_argument('--validate', action='store_true', help='validate settings without sending notifications')
         self.add_argument('--debug', action='store_true', help='run the application but do not send any emails')
         self.add_argument(
@@ -69,7 +69,7 @@ class Application:
             ApplicationSettings.set_from_file(settings_path)
 
         # Raise an error if asked to validate a custom settings file that does not exist
-        elif error_on_missing_file and settings_path != DEFAULT_SETTINGS:
+        elif error_on_missing_file and settings_path != DEFAULT_SETTINGS_PATH:
             logging.error(f'Custom settings file does not exist: {settings_path}')
             raise FileNotFoundError(f'No settings file at {settings_path}')
 

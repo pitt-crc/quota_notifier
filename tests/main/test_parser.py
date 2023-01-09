@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest import TestCase
 
-from quota_notifier.main import DEFAULT_SETTINGS, Parser
+from quota_notifier.main import DEFAULT_SETTINGS_PATH, Parser
 
 
 class ParserHelpData(TestCase):
@@ -27,7 +27,7 @@ class SettingsOption(TestCase):
         """Test the default settings path matches globally defined values"""
 
         args = Parser().parse_args([])
-        self.assertEqual(DEFAULT_SETTINGS, args.settings)
+        self.assertEqual(DEFAULT_SETTINGS_PATH, args.settings)
 
     def test_stored_as_path(self) -> None:
         """Test the parsed value is stored as a ``Path`` object"""

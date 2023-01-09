@@ -320,6 +320,7 @@ class ApplicationSettings:
         """Reset application settings to default values"""
 
         cls._parsed_settings = SettingsSchema()
+        cls._configure_application()
 
     @classmethod
     def get(cls, item: str) -> Any:
