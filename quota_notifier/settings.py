@@ -233,6 +233,10 @@ class ApplicationSettings:
         1 (information level logging) and 2 (debug level logging).
         """
 
+        # Remove existing logging settings
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+
         verbosity = cls.get('verbosity')
         log_format = '%(levelname)8s - %(message)s'
 
