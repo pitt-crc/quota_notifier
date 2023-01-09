@@ -21,7 +21,7 @@ class GetUsers(TestCase):
     def tearDown(self) -> None:
         """Reset any modifications to application settings after each test"""
 
-        ApplicationSettings.configure()
+        ApplicationSettings.reset_defaults()
 
     def test_includes_all_users(self) -> None:
         """Test all users except root are returned by default"""
@@ -36,7 +36,7 @@ class GetUsers(TestCase):
         all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertIn('root', all_users)
 
-        ApplicationSettings.configure(blacklist=['root'])
+        ApplicationSettings.set(blacklist=['root'])
         returned_users = [user.username for user in UserNotifier().get_users()]
         self.assertNotIn('root', returned_users)
 
@@ -50,7 +50,7 @@ class GetUserQuotas(TestCase):
         # Register the current directory with the application
         self.current_dir = Path(__file__).parent
         self.mock_file_system = FileSystemSchema(name='test', path=self.current_dir, type='generic')
-        ApplicationSettings.configure(file_systems=[self.mock_file_system])
+        ApplicationSettings.set(file_systems=[self.mock_file_system])
 
         # Create a subdirectory matching the current user's group
         self.current_user = User(os.getenv('USER'))
@@ -60,7 +60,7 @@ class GetUserQuotas(TestCase):
     def tearDown(self) -> None:
         """Restore application settings and remove temporary directories"""
 
-        ApplicationSettings.configure()
+        ApplicationSettings.reset_defaults()
         self.temp_dir.rmdir()
 
     def test_quota_matches_user(self) -> None:

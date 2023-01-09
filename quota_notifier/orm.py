@@ -14,8 +14,6 @@ from sqlalchemy import Column, DateTime, Integer, MetaData, String, UniqueConstr
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 
-from quota_notifier.settings import ApplicationSettings
-
 Base = declarative_base()
 
 
@@ -76,7 +74,7 @@ class DBConnection:
     session: Callable[[], Session] = None
 
     @classmethod
-    def configure(cls, url: str = ApplicationSettings.get('db_url')) -> None:
+    def configure(cls, url: str) -> None:
         """Update the connection information for the underlying database
 
         Changes made here will affect the entire running application

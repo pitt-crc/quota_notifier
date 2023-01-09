@@ -60,7 +60,7 @@ class MessageSending(TestCase):
     def tearDown(self) -> None:
         """Reset any modified application settings"""
 
-        ApplicationSettings.configure()
+        ApplicationSettings.reset_defaults()
 
     @patch('smtplib.SMTP')
     def test_fields_are_set(self, mock_smtp) -> None:
