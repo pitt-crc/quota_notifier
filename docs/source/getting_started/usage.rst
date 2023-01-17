@@ -1,5 +1,5 @@
-Usage Example
-=============
+Usage Examples
+==============
 
 To send any pending email notifications, call the ``notifier`` utility:
 
@@ -23,11 +23,3 @@ However, the settings file can be validated without issuing email notifications 
    notifier --validate
 
 Full documentation for the commandline interface is provided below.
-
-Commandline Interface
----------------------
-
-.. argparse::
-   :ref: quota_notifier.main.Parser
-   :prog: notifier
-

@@ -1,5 +1,5 @@
-Config Options
-==============
+Configuration
+=============
 
 The ``SettingsSchema`` defines the available options in the application settings file.
 

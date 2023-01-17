@@ -26,7 +26,7 @@ Configuration
 
 Application settings are configurable via JSON settings file.
 The example below includes a minimal subset of useful settings to get up and running.
-A full list of available settings is provided in the :doc:`config_options` page.
+A full list of available settings is provided in the :doc:`configuration` page.
 
 .. code-block:: json
 
