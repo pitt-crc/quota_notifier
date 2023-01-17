@@ -5,23 +5,31 @@ Quota Notification Utility
 
 .. toctree::
    :hidden:
+   :glob:
 
    Overview<self>
-   overview/usage
+   overview/installation
+   overview/configuration
    overview/file_systems
-   overview/install
-   overview/config_options
 
 .. Put the most important modules towards the top.
    The rest are picked up by glob.
 
 .. toctree::
    :hidden:
-   :caption: Module Docs
+   :caption: Getting Started
    :glob:
 
-   modules/main
-   modules/notify
-   modules/settings
-   modules/disk_utils
-   modules/*
+   getting_started/command_line
+   getting_started/usage
+
+
+.. Put the most important modules towards the top.
+   The rest are picked up by glob.
+
+.. toctree::
+   :hidden:
+   :caption: Source Documentation
+   :glob:
+
+   source_docs/*
