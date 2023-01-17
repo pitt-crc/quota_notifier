@@ -12,9 +12,6 @@ Quota Notification Utility
    overview/configuration
    overview/file_systems
 
-.. Put the most important modules towards the top.
-   The rest are picked up by glob.
-
 .. toctree::
    :hidden:
    :caption: Getting Started
