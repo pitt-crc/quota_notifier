@@ -1,5 +1,5 @@
 Commandline Interface
-=============
+=====================
 
 .. argparse::
    :ref: quota_notifier.main.Parser
