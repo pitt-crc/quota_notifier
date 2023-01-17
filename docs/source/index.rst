@@ -22,7 +22,6 @@ Quota Notification Utility
 
    getting_started/command_line
    getting_started/usage
-   getting_started/*
 
 
 .. Put the most important modules towards the top.

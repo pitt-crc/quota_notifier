@@ -44,7 +44,7 @@ A full list of available settings is provided in the :doc:`configuration` page.
    }
 
 By default, the application looks for the settings file at ``/etc/notifier/settings.json``.
-This path can also be changed at runtime (see the :doc:`usage` page for more information).
+This path can also be changed at runtime (see the :doc:`../getting_started/usage` page for more information).
 
 Once the application has been configured, you can check the configuration file is valid by running:
 
