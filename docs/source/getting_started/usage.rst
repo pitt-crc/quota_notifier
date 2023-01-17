@@ -33,7 +33,7 @@ notifications (among other runtime information).
 
 .. code-block:: bash
 
-   notifier --debug -vvv
+   notifier --debug -vv
 
 Send pending Notifications
 --------------------------
@@ -43,3 +43,10 @@ To send any pending email notifications, call the ``notifier`` utility without a
 .. code-block:: bash
 
    notifier
+
+If running the application on an automatic schedule, you may find it useful to increase the verbosity and write
+the application output to a system log:
+
+.. code-block:: bash
+
+   notifier -vv >> notifier.log
