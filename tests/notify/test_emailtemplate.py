@@ -1,4 +1,5 @@
 """Tests for the ``EmailTemplate`` class."""
+
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import call, patch
@@ -90,7 +91,7 @@ class MessageSending(TestCase):
         )
 
     @patch('smtplib.SMTP')
-    def test_not_send_on_debug(self, mock_smtp) -> None:
+    def test_not_sent_on_debug(self, mock_smtp) -> None:
         """Test an email is not sent in debug mode"""
 
         ApplicationSettings.set(debug=True)
@@ -98,7 +99,7 @@ class MessageSending(TestCase):
         self.assertFalse(mock_smtp.mock_calls)
 
 
-class SendingViaUsername(TestCase):
+class SendingByUsername(TestCase):
     """Test sending emails via username instead of address"""
 
     @patch('smtplib.SMTP')

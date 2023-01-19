@@ -26,13 +26,16 @@ class GetUsers(TestCase):
     def test_includes_all_users(self) -> None:
         """Test all users except root are returned by default"""
 
+        ApplicationSettings.set(blacklist=[], group_blacklist=[])
+
         returned_users = [user.username for user in UserNotifier().get_users()]
-        all_users = [user.pw_name for user in pwd.getpwall() if user.pw_name != 'root']
+        all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertListEqual(all_users, returned_users)
 
     def test_blacklisted_users_excluded(self) -> None:
         """Test blacklisted users are not included in returned values"""
 
+        # Make sure the premise for this test is satisfied
         all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertIn('root', all_users)
 
@@ -86,7 +89,7 @@ class GetLastThreshold(TestCase):
         threshold = UserNotifier.get_next_threshold(quota)
         self.assertIsNone(threshold)
 
-    def test_matches_notification_history(self) -> None:
+    def test_existing_notification_history(self) -> None:
         """Test the first return matches the notification history"""
 
         test_path = '/'
@@ -147,7 +150,7 @@ class GetNextThreshold(TestCase):
 
 @patch('quota_notifier.notify.SMTP')
 class NotificationHistory(TestCase):
-    """Test database updates when calling ``notify_user``"""
+    """Test the database updates after calling ``notify_user``"""
 
     def setUp(self) -> None:
         """Set up a mock user and mock DB"""
