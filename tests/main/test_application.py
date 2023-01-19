@@ -74,6 +74,12 @@ class LoggingConfiguration(TestCase):
         Application.execute(['-vvv'])
         self.assertEqual(logging.DEBUG, logging.getLogger().level)
 
+    def test_verbose_level_many(self):
+        """Test setting ``verbose`` to a very high number sets the logging level to ``DEBUG``"""
+
+        Application.execute(['-vvvvvvvvvv'])
+        self.assertEqual(logging.DEBUG, logging.getLogger().level)
+
 
 class DatabaseConfiguration(TestCase):
     """Test configuration of the application database"""
