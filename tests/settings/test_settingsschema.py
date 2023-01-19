@@ -9,6 +9,7 @@ from quota_notifier.settings import FileSystemSchema, SettingsSchema
 
 
 class VerbosityValidation(TestCase):
+    """Test validation for the ``verbosity`` field"""
 
     def test_valid_integers(self) -> None:
         """Test integers 0 through 2 are valid options"""
