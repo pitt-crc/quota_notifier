@@ -1,4 +1,5 @@
 """Tests for the ``ApplicationSettings`` class"""
+
 import json
 import logging
 from pathlib import Path
