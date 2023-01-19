@@ -13,38 +13,32 @@ from quota_notifier.settings import FileSystemSchema
 class NameValidation(TestCase):
     """Test validation of the file system ``name`` field"""
 
-    def test_blank_name(self) -> None:
+    def test_blank_name_error(self) -> None:
         """Test a ``ValueError`` is raised for empty/blank names"""
 
         with self.assertRaisesRegex(ValueError, 'File system name cannot be blank'):
-            FileSystemSchema.validate_name('')
+            FileSystemSchema(name='')
 
         for char in string.whitespace:
             with self.assertRaisesRegex(ValueError, 'File system name cannot be blank'):
-                FileSystemSchema.validate_name(char)
+                FileSystemSchema(name=char)
 
 
 class PathValidation(TestCase):
     """Test validation of the ``path`` field"""
 
-    def test_path_exists(self) -> None:
+    def test_existing_path_validates(self) -> None:
         """Test existing file paths do not raise errors"""
 
-        test_path = Path('/')
-        self.assertEqual(test_path, FileSystemSchema.validate_path(test_path))
+        valid_path = Path('/')
+        returned_path = FileSystemSchema.validate_path(valid_path)
+        self.assertEqual(valid_path, returned_path)
 
     def test_nonexistent_path(self) -> None:
         """Test a ``ValueError`` is raised for non-existent paths"""
 
         with self.assertRaisesRegex(ValueError, 'File system does not exist'):
             FileSystemSchema.validate_path(Path('/fake/path'))
-
-    def test_valid_path(self) -> None:
-        """Test the path value is returned for a valid path"""
-
-        valid_path = Path('/')
-        returned_path = FileSystemSchema.validate_path(valid_path)
-        self.assertEqual(valid_path, returned_path)
 
 
 class TypeValidation(TestCase):

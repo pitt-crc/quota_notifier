@@ -27,3 +27,17 @@ class StringRepresentation(TestCase):
         username = 'some_user'
         user = User(username)
         self.assertEqual(username, str(user))
+
+
+class Equality(TestCase):
+    """Test the User class supports the equal opperation"""
+
+    def test_equal_users(self) -> None:
+        """Test users with the same username are equal"""
+
+        self.assertTrue(User('root') == User('root'))
+
+    def test_unequal_users(self) -> None:
+        """Test users with the different usernames are not equal"""
+
+        self.assertFalse(User('user1') == User('user2'))
