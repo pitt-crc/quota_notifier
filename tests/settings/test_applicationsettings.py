@@ -22,11 +22,7 @@ class Defaults(TestCase):
     def test_blacklisted_users(self) -> None:
         """Test root is in blacklisted users"""
 
-<<<<<<< HEAD
-        self.assertEqual({'root'}, ApplicationSettings.get('uid_blacklist'))
-=======
-        self.assertEqual({0,}, ApplicationSettings.get('blacklist'))
->>>>>>> main
+        self.assertEqual({0,}, ApplicationSettings.get('uid_blacklist'))
 
     def test_blacklisted_groups(self) -> None:
         """Test root is in blacklisted groups"""
@@ -42,11 +38,7 @@ class ResetDefaults(TestCase):
 
         ApplicationSettings.set(uid_blacklist=['fake_username'])
         ApplicationSettings.reset_defaults()
-<<<<<<< HEAD
-        self.assertEqual({'root'}, ApplicationSettings.get('uid_blacklist'))
-=======
-        self.assertEqual({0,}, ApplicationSettings.get('blacklist'))
->>>>>>> main
+        self.assertEqual({0,}, ApplicationSettings.get('uid_blacklist'))
 
     def test_database_connection_is_reconfigured(self) -> None:
         """Test the database connection is reconfigured after resetting defaults"""
