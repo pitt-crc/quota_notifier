@@ -32,16 +32,33 @@ class GetUsers(TestCase):
         all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertListEqual(all_users, returned_users)
 
-    def test_blacklisted_users_excluded(self) -> None:
-        """Test blacklisted users are not included in returned values"""
+    def test_blacklisted_by_uid(self) -> None:
+        """Test blacklisted UIDs are not included in returned values"""
 
-        # Make sure the premise for this test is satisfied
-        all_users = [user.pw_name for user in pwd.getpwall()]
-        self.assertIn('root', all_users)
+        ApplicationSettings.set(uid_blacklist={0}, gid_blacklist=set())
+        returned_uids = [user.uid for user in UserNotifier().get_users()]
+        self.assertNotIn(0, returned_uids)
 
-        ApplicationSettings.set(uid_blacklist=[0])
-        returned_users = [user.username for user in UserNotifier().get_users()]
-        self.assertNotIn('root', returned_users)
+    def test_blacklisted_by_gid(self) -> None:
+        """Test blacklisted GIDs are not included in returned values"""
+
+        ApplicationSettings.set(uid_blacklist=set(), gid_blacklist={0})
+        returned_gids = [user.gid for user in UserNotifier().get_users()]
+        self.assertNotIn(0, returned_gids)
+
+    def test_blacklisted_by_uid_range(self) -> None:
+        """Test blacklisted UID ranges are not included in returned values"""
+
+        ApplicationSettings.set(uid_blacklist={(0, 100)}, gid_blacklist=set())
+        returned_uids = [user.uid for user in UserNotifier().get_users()]
+        self.assertNotIn(0, returned_uids)
+
+    def test_blacklisted_by_gid_range(self) -> None:
+        """Test blacklisted GID ranges are not included in returned values"""
+
+        ApplicationSettings.set(uid_blacklist=set(), gid_blacklist={(0, 100)})
+        returned_gids = [user.gid for user in UserNotifier().get_users()]
+        self.assertNotIn(0, returned_gids)
 
 
 class GetUserQuotas(TestCase):
