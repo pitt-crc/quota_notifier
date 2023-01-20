@@ -1,5 +1,5 @@
 """Tests for the ``User`` class"""
-
+import pwd
 from unittest import TestCase
 
 from quota_notifier.shell import User
@@ -16,6 +16,23 @@ class UserInfo(TestCase):
         self.assertEqual(user.uid, 0)
         self.assertEqual(user.group, 'root')
         self.assertEqual(user.gid, 0)
+
+
+class IterAllUsers(TestCase):
+    """Test the ``iter_all_users`` method"""
+
+    def test_all_users_returned(self) -> None:
+        """Test the iterator returns all users on the system"""
+
+        all_usernames = {user_entry.pw_name for user_entry in pwd.getpwall()}
+        returned_users = [user.username for user in User.iter_all_users()]
+        self.assertCountEqual(all_usernames, returned_users)
+
+    def test_returned_as_user_objects(self) -> None:
+        """Test users are returned as ``User`` objects"""
+
+        for user in User.iter_all_users():
+            self.assertIsInstance(user, User)
 
 
 class StringRepresentation(TestCase):
