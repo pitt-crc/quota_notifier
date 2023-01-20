@@ -103,17 +103,17 @@ class SettingsSchema(BaseSettings):
         default=list(),
         description='List of additional settings that define which file systems to examine.')
 
-    uid_blacklist: Set[str] = Field(
-        title='Blacklisted Users',
-        type=Set[str],
-        default={'root', },
-        description='Do not notify usernames in this list.')
+    uid_blacklist: Set[int] = Field(
+        title='Blacklisted User IDs',
+        type=Set[int],
+        default={0, },
+        description='Do not notify users with these ID values.')
 
-    group_blacklist: Set[str] = Field(
-        title='Blacklisted Groups',
-        type=Set[str],
-        default={'root', },
-        description='Do not notify groups in this list.')
+    group_blacklist: Set[int] = Field(
+        title='Blacklisted Group IDs',
+        type=Set[int],
+        default={0, },
+        description='Do not notify groups with these ID values.')
 
     disk_timeout: int = Field(
         title='File System Timeout',

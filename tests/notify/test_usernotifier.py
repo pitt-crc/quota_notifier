@@ -39,7 +39,7 @@ class GetUsers(TestCase):
         all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertIn('root', all_users)
 
-        ApplicationSettings.set(uid_blacklist=['root'])
+        ApplicationSettings.set(uid_blacklist=[0])
         returned_users = [user.username for user in UserNotifier().get_users()]
         self.assertNotIn('root', returned_users)
 

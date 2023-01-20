@@ -95,13 +95,13 @@ class UserNotifier:
         logging.info('Fetching user list...')
 
         all_users = pwd.getpwall()
-        user_blacklist = ApplicationSettings.get('uid_blacklist')
-        group_blacklist = ApplicationSettings.get('group_blacklist')
+        uid_blacklist = ApplicationSettings.get('uid_blacklist')
+        gid_blacklist = ApplicationSettings.get('group_blacklist')
 
         allowed_users = []
         for user_entry in all_users:
             user = User(user_entry.pw_name)
-            if (user.username not in user_blacklist) and (user.group not in group_blacklist):
+            if (user.uid not in uid_blacklist) and (user.gid not in gid_blacklist):
                 allowed_users.append(user)
 
         logging.debug(f'Found {len(allowed_users)}/{len(all_users)} non-blacklisted users')
