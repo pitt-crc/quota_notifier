@@ -32,7 +32,7 @@ A full list of available settings is provided in the :doc:`configuration` page.
 
    {
      "thresholds": [75, 100],
-     "blacklist": [0,],
+     "uid_blacklist": [0,],
      "group_blacklist": [0,],
      "file_systems": [
          {
