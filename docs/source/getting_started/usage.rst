@@ -18,6 +18,17 @@ In the application settings file (located at ``/etc/notifier/settings.json`` by 
      "gid_blacklist": [0, 1, 5],
    }
 
+The ``uid_blacklist`` and ``gid_blacklist`` fields also accept ID ranges.
+For example, to ignore the ``root`` user in addition to users ``100`` through ``199``:
+
+.. code-block:: json
+
+   {
+     "uid_blacklist": [0, [100, 199]]
+   }
+
+All ID ranges are treated as being inclusive.
+
 .. note:: The default value for the ``uid_blacklist`` and ``gid_blacklist`` options is ``[0]`` which excludes
           the ``root`` user/group.
 
