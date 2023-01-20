@@ -95,7 +95,7 @@ class Application:
 
         # Run core application logic
         UserNotifier().send_notifications()
-        logging.debug('Exiting application')
+        logging.info('Exiting application succesfully')
 
     @classmethod
     def execute(cls, arg_list: List[str] = None) -> None:
