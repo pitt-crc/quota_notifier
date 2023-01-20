@@ -4,6 +4,23 @@ Usage Examples
 Simple usage examples are provided below for the ``notifier`` commandline utility.
 Full documentation for the commandline interface is available in the :doc:`command_line` page.
 
+Blacklist Users and Groups
+--------------------------
+
+Individual users and groups can be blacklisted from recieving notifications using their system ID values.
+In the application settings file (located at ``/etc/notifier/settings.json`` by default) specify the
+``uid_blacklist`` and ``gid_blacklist`` options to blacklist users/groups:
+
+.. code-block:: json
+
+   {
+     "uid_blacklist": [0, 4, 7],
+     "gid_blacklist": [0, 1, 5],
+   }
+
+.. note:: The default value for the ``uid_blacklist`` and ``gid_blacklist`` options is ``[0]`` which excludes
+          the ``root` user/group.
+
 Validate Application Settings
 -----------------------------
 
@@ -35,7 +52,7 @@ notifications (among other runtime information).
 
    notifier --debug -vv
 
-Send pending Notifications
+Send Pending Notifications
 --------------------------
 
 To send any pending email notifications, call the ``notifier`` utility without any arguments:
