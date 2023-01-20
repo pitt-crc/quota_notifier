@@ -109,7 +109,7 @@ class SettingsSchema(BaseSettings):
         default={0, },
         description='Do not notify users with these ID values.')
 
-    group_blacklist: Set[int] = Field(
+    gid_blacklist: Set[int] = Field(
         title='Blacklisted Group IDs',
         type=Set[int],
         default={0, },
