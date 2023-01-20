@@ -88,7 +88,7 @@ class UserNotifier:
         """Return a collection of users to check quotas for
 
         Returns:
-            A iterable collection of ``User`` objects
+            An iterable collection of ``User`` objects
         """
 
         logging.info('Fetching user list...')
