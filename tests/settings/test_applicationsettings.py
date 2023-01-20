@@ -27,7 +27,7 @@ class Defaults(TestCase):
     def test_blacklisted_groups(self) -> None:
         """Test root is in blacklisted groups"""
 
-        self.assertEqual({0,}, ApplicationSettings.get('group_blacklist'))
+        self.assertEqual({0,}, ApplicationSettings.get('gid_blacklist'))
 
 
 class ResetDefaults(TestCase):

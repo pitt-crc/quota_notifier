@@ -33,7 +33,7 @@ A full list of available settings is provided in the :doc:`configuration` page.
    {
      "thresholds": [75, 100],
      "uid_blacklist": [0,],
-     "group_blacklist": [0,],
+     "gid_blacklist": [0,],
      "file_systems": [
          {
            "name": "main",
