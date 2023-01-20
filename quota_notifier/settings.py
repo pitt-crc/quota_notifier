@@ -103,7 +103,7 @@ class SettingsSchema(BaseSettings):
         default=list(),
         description='List of additional settings that define which file systems to examine.')
 
-    blacklist: Set[int] = Field(
+    uid_blacklist: Set[int] = Field(
         title='Blacklisted User IDs',
         type=Set[int],
         default={0, },

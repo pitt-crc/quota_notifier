@@ -26,7 +26,7 @@ class GetUsers(TestCase):
     def test_includes_all_users(self) -> None:
         """Test all users except root are returned by default"""
 
-        ApplicationSettings.set(blacklist=[], group_blacklist=[])
+        ApplicationSettings.set(uid_blacklist=[], group_blacklist=[])
 
         returned_users = [user.username for user in UserNotifier().get_users()]
         all_users = [user.pw_name for user in pwd.getpwall()]
@@ -39,7 +39,7 @@ class GetUsers(TestCase):
         all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertIn('root', all_users)
 
-        ApplicationSettings.set(blacklist=[0])
+        ApplicationSettings.set(uid_blacklist=[0])
         returned_users = [user.username for user in UserNotifier().get_users()]
         self.assertNotIn('root', returned_users)
 
