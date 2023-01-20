@@ -19,7 +19,7 @@ In the application settings file (located at ``/etc/notifier/settings.json`` by 
    }
 
 .. note:: The default value for the ``uid_blacklist`` and ``gid_blacklist`` options is ``[0]`` which excludes
-          the ``root` user/group.
+          the ``root`` user/group.
 
 Validate Application Settings
 -----------------------------
