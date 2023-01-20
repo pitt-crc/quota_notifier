@@ -4,12 +4,14 @@ Module Contents
 ---------------
 """
 
+from __future__ import annotations
+
 import grp
 import logging
 import pwd
 from shlex import split
 from subprocess import PIPE, Popen
-from typing import Optional
+from typing import Optional, Iterator
 
 from quota_notifier.settings import ApplicationSettings
 
@@ -59,6 +61,13 @@ class User:
         """
 
         self._username = username
+
+    @classmethod
+    def iter_all_users(cls) -> Iterator[User]:
+        """Iterable over user objects for all users on the system"""
+
+        for user_entry in pwd.getpwall():
+            yield cls(user_entry.pw_name)
 
     @property
     def username(self) -> str:

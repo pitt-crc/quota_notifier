@@ -6,11 +6,10 @@ Module Contents
 """
 
 import logging
-import pwd
 from bisect import bisect_right
 from email.message import EmailMessage
 from smtplib import SMTP
-from typing import Collection, Optional
+from typing import Collection, Optional, Set, Union, Tuple
 from typing import Iterable
 
 from sqlalchemy import delete, insert, select
@@ -84,28 +83,46 @@ class EmailTemplate:
 class UserNotifier:
     """Issue and manage user quota notifications"""
 
-    @staticmethod
-    def get_users() -> Iterable[User]:
+    @classmethod
+    def get_users(cls) -> Iterable[User]:
         """Return a collection of users to check quotas for
 
         Returns:
-            A iterable collection of ``User`` objects
+            An iterable collection of ``User`` objects
         """
 
         logging.info('Fetching user list...')
-
-        all_users = pwd.getpwall()
         uid_blacklist = ApplicationSettings.get('uid_blacklist')
         gid_blacklist = ApplicationSettings.get('gid_blacklist')
 
         allowed_users = []
-        for user_entry in all_users:
-            user = User(user_entry.pw_name)
-            if (user.uid not in uid_blacklist) and (user.gid not in gid_blacklist):
+        for user in User.iter_all_users():
+            if not (cls._id_in_blacklist(user.uid, uid_blacklist) or cls._id_in_blacklist(user.gid, gid_blacklist)):
                 allowed_users.append(user)
 
-        logging.debug(f'Found {len(allowed_users)}/{len(all_users)} non-blacklisted users')
+        logging.debug(f'Found {len(allowed_users)} non-blacklisted users')
         return allowed_users
+
+    @staticmethod
+    def _id_in_blacklist(id_value: int, blacklist: Set[Union[int, Tuple[int, int]]]) -> bool:
+        """Return whether an ID is in a black list of ID values
+
+        Args:
+            id_value: The ID value to check
+            blacklist: A collection of ID values and ID ranges
+
+        Returns:
+            Whether the ID is in the blacklist
+        """
+
+        for id_def in blacklist:
+            if isinstance(id_def, int) and id_value == id_def:
+                return True
+
+            elif isinstance(id_def, tuple) and (id_def[0] <= id_value <= id_def[1]):
+                return True
+
+        return False
 
     @staticmethod
     def get_user_quotas(user: User) -> Iterable[AbstractQuota]:

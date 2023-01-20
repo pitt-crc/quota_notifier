@@ -7,7 +7,7 @@ Module Contents
 
 import logging
 from pathlib import Path
-from typing import Any, List, Set
+from typing import Any, List, Union, Tuple, Set
 from typing import Literal
 
 from pydantic import BaseSettings, Field, validator
@@ -103,16 +103,16 @@ class SettingsSchema(BaseSettings):
         default=list(),
         description='List of additional settings that define which file systems to examine.')
 
-    uid_blacklist: Set[int] = Field(
+    uid_blacklist: Set[Union[int, Tuple[int, int]]] = Field(
         title='Blacklisted User IDs',
-        type=Set[int],
-        default={0, },
+        type=Set[Union[int, Tuple[int, int]]],
+        default=[0],
         description='Do not notify users with these ID values.')
 
-    gid_blacklist: Set[int] = Field(
+    gid_blacklist: Set[Union[int, Tuple[int, int]]] = Field(
         title='Blacklisted Group IDs',
-        type=Set[int],
-        default={0, },
+        type=Set[Union[int, Tuple[int, int]]],
+        default=[0],
         description='Do not notify groups with these ID values.')
 
     disk_timeout: int = Field(
