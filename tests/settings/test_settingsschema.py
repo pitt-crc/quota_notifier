@@ -38,6 +38,28 @@ class VerbosityValidation(TestCase):
                 SettingsSchema(verbosity=value)
 
 
+class BlacklistValidation(TestCase):
+    """Test validation for the ``uid_blacklist`` and ``gid_blacklist`` fields"""
+
+    def test_error_on_id_range_len_1(self) -> None:
+        """Test a ``ValueError`` is raised for UID and GID ranges with 1 element"""
+
+        with self.assertRaisesRegex(ValueError, 'actual_length=1; expected_length=2'):
+            SettingsSchema(uid_blacklist=[[1], ])
+
+        with self.assertRaisesRegex(ValueError, 'actual_length=1; expected_length=2'):
+            SettingsSchema(gid_blacklist=[[1], ])
+
+    def test_error_on_id_range_len_3(self) -> None:
+        """Test a ``ValueError`` is raised for UID and GID ranges with 3 elements"""
+
+        with self.assertRaisesRegex(ValueError, 'actual_length=3; expected_length=2'):
+            SettingsSchema(uid_blacklist=[[1, 2, 3], ])
+
+        with self.assertRaisesRegex(ValueError, 'actual_length=3; expected_length=2'):
+            SettingsSchema(gid_blacklist=[[1, 2, 3], ])
+
+
 class FileSystemValidation(TestCase):
     """Test validation for the ``file_systems`` field"""
 
