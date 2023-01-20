@@ -95,7 +95,7 @@ class UserNotifier:
         logging.info('Fetching user list...')
 
         all_users = pwd.getpwall()
-        uid_blacklist = ApplicationSettings.get('blacklist')
+        uid_blacklist = ApplicationSettings.get('uid_blacklist')
         gid_blacklist = ApplicationSettings.get('gid_blacklist')
 
         allowed_users = []

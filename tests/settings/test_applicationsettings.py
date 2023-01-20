@@ -22,7 +22,7 @@ class Defaults(TestCase):
     def test_blacklisted_users(self) -> None:
         """Test root is in blacklisted users"""
 
-        self.assertEqual({0,}, ApplicationSettings.get('blacklist'))
+        self.assertEqual({0,}, ApplicationSettings.get('uid_blacklist'))
 
     def test_blacklisted_groups(self) -> None:
         """Test root is in blacklisted groups"""
@@ -36,9 +36,9 @@ class ResetDefaults(TestCase):
     def test_blacklist_is_reset(self) -> None:
         """Test settings values are overwritten/reset by the ``reset_defaults`` method"""
 
-        ApplicationSettings.set(blacklist=['fake_username'])
+        ApplicationSettings.set(uid_blacklist=['fake_username'])
         ApplicationSettings.reset_defaults()
-        self.assertEqual({0,}, ApplicationSettings.get('blacklist'))
+        self.assertEqual({0,}, ApplicationSettings.get('uid_blacklist'))
 
     def test_database_connection_is_reconfigured(self) -> None:
         """Test the database connection is reconfigured after resetting defaults"""
@@ -58,7 +58,7 @@ class ConfigureFromFile(TestCase):
     def test_setting_are_overwritten(self) -> None:
         """Test settings are overwritten with values from the file"""
 
-        settings = dict(blacklist=[3, 4, 5])
+        settings = dict(uid_blacklist=[3, 4, 5])
 
         with NamedTemporaryFile() as temp_file:
             path_obj = Path(temp_file.name)
@@ -66,7 +66,7 @@ class ConfigureFromFile(TestCase):
                 json.dump(settings, io)
 
             ApplicationSettings.set_from_file(path_obj)
-            self.assertEqual({3, 4, 5}, ApplicationSettings.get('blacklist'))
+            self.assertEqual({3, 4, 5}, ApplicationSettings.get('uid_blacklist'))
 
     def test_invalid_file(self) -> None:
         """Test a ``ValidationError`` is raised for an invalid settings file"""
