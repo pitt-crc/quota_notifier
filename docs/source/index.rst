@@ -17,8 +17,8 @@ Quota Notification Utility
    :caption: Getting Started
    :glob:
 
-   getting_started/command_line
    getting_started/usage
+   getting_started/command_line
 
 
 .. Put the most important modules towards the top.
