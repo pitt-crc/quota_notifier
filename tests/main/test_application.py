@@ -1,5 +1,5 @@
 """Tests for the ``Application`` class."""
-
+import json
 import logging
 from argparse import Namespace
 from json import JSONDecodeError
@@ -18,7 +18,7 @@ class SettingsValidation(TestCase):
     def test_error_missing_file(self) -> None:
         """Test ``FileNotFoundError`` is raised when the settings file does not exist"""
 
-        args = Namespace(validate=True, verbose=0, debug=False, settings=Path('fake/file/path.json'))
+        args = Namespace(validate=True, verbose=0, debug=True, settings=Path('fake/file/path.json'))
         with self.assertRaises(FileNotFoundError):
             Application.run(args)
 
@@ -26,14 +26,14 @@ class SettingsValidation(TestCase):
         """Test ``JSONDecodeError`` is raised when the settings file is empty"""
 
         with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
-            args = Namespace(validate=True, verbose=0, debug=False, settings=Path(temp.name))
+            args = Namespace(validate=True, verbose=0, debug=True, settings=Path(temp.name))
             Application.run(args)
 
     @staticmethod
     def test_no_error_on_defaults() -> None:
         """Test no error is raised when validating default application settings"""
 
-        args = Namespace(validate=True, verbose=0, debug=False, settings=DEFAULT_SETTINGS_PATH)
+        args = Namespace(validate=True, verbose=0, debug=True, settings=DEFAULT_SETTINGS_PATH)
         Application.run(args)
 
 
@@ -53,31 +53,31 @@ class LoggingConfiguration(TestCase):
     def test_verbose_level_zero(self):
         """Test setting ``verbose=0`` blocks all logging"""
 
-        Application.execute([])
+        Application.execute(['--debug'])
         self.assertEqual(100, logging.getLogger().level)
 
     def test_verbose_level_one(self):
         """Test setting ``verbose=1`` sets the logging level to ``WARNING``"""
 
-        Application.execute(['-v'])
+        Application.execute(['--debug', '-v'])
         self.assertEqual(logging.WARNING, logging.getLogger().level)
 
     def test_verbose_level_two(self):
         """Test setting ``verbose=2`` sets the logging level to ``INFO``"""
 
-        Application.execute(['-vv'])
+        Application.execute(['--debug', '-vv'])
         self.assertEqual(logging.INFO, logging.getLogger().level)
 
     def test_verbose_level_three(self):
         """Test setting ``verbose=3`` sets the logging level to ``DEBUG``"""
 
-        Application.execute(['-vvv'])
+        Application.execute(['--debug', '-vvv'])
         self.assertEqual(logging.DEBUG, logging.getLogger().level)
 
     def test_verbose_level_many(self):
         """Test setting ``verbose`` to a very high number sets the logging level to ``DEBUG``"""
 
-        Application.execute(['-vvvvvvvvvv'])
+        Application.execute(['--debug', '-vvvvvvvvvv'])
         self.assertEqual(logging.DEBUG, logging.getLogger().level)
 
 
@@ -94,4 +94,8 @@ class DatabaseConfiguration(TestCase):
         """Test the memory URL defaults to the default application settings"""
 
         Application.execute([])
+
+        # Remove the empty DB file generated automatically by application.execute
+        Path(ApplicationSettings.get('db_url').lstrip('sqlite:')).unlink()
+
         self.assertEqual(ApplicationSettings.get('db_url'), DBConnection.url)
