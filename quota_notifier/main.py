@@ -86,9 +86,12 @@ class Application:
             args: Parsed commandline arguments
         """
 
+        # Map the verbosity argument onto a logging level
+        verbosity = {0: 'CRITICAL', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(args.verbose, 'DEBUG')
+
         # Update application settings
         cls._load_settings(args.settings, error_on_missing_file=args.validate)
-        ApplicationSettings.set(debug=args.debug, verbosity=args.verbose)
+        ApplicationSettings.set(debug=args.debug, verbosity=verbosity)
 
         if args.validate:
             return

@@ -42,44 +42,49 @@ class LoggingConfiguration(TestCase):
     """Test the configuration of application logging"""
 
     def setUp(self) -> None:
-        """Reset any existing logging configuration to defaults
+        """Reset any existing logging configuration to defaults"""
 
-        Prevents application state from bleeding over from other tests.
-        """
+        ApplicationSettings.reset_defaults()
 
-        root = logging.getLogger()
-        list(map(root.removeHandler, root.handlers[:]))
-        list(map(root.removeFilter, root.filters[:]))
+    @staticmethod
+    def get_stream_handler() -> logging.StreamHandler:
+        """Return the ``StreamHandler`` instance used by the application when logging to the console"""
+
+        for handler in logging.getLogger().handlers:
+            if isinstance(handler, logging.StreamHandler):
+                return handler
+
+        raise RuntimeError('Stream handler not found')
 
     def test_verbose_level_zero(self):
-        """Test setting ``verbose=0`` blocks all logging"""
+        """Test setting ``verbose=0`` sets the logging level to ``CRITICAL``"""
 
         Application.execute(['--debug'])
-        self.assertEqual(100, logging.getLogger().level)
+        self.assertEqual(logging.CRITICAL, self.get_stream_handler().level)
 
     def test_verbose_level_one(self):
         """Test setting ``verbose=1`` sets the logging level to ``WARNING``"""
 
         Application.execute(['--debug', '-v'])
-        self.assertEqual(logging.WARNING, logging.getLogger().level)
+        self.assertEqual(logging.WARNING, self.get_stream_handler().level)
 
     def test_verbose_level_two(self):
         """Test setting ``verbose=2`` sets the logging level to ``INFO``"""
 
         Application.execute(['--debug', '-vv'])
-        self.assertEqual(logging.INFO, logging.getLogger().level)
+        self.assertEqual(logging.INFO, self.get_stream_handler().level)
 
     def test_verbose_level_three(self):
         """Test setting ``verbose=3`` sets the logging level to ``DEBUG``"""
 
         Application.execute(['--debug', '-vvv'])
-        self.assertEqual(logging.DEBUG, logging.getLogger().level)
+        self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
 
     def test_verbose_level_many(self):
         """Test setting ``verbose`` to a very high number sets the logging level to ``DEBUG``"""
 
         Application.execute(['--debug', '-vvvvvvvvvv'])
-        self.assertEqual(logging.DEBUG, logging.getLogger().level)
+        self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
 
 
 class DatabaseConfiguration(TestCase):

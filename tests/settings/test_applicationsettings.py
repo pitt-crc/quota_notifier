@@ -108,6 +108,46 @@ class Set(TestCase):
             self.assertEqual(tem_db_path, DBConnection.url)
 
 
+class VerbosityConfiguration(TestCase):
+    """Test the configuration of application verbosity"""
+
+    def setUp(self) -> None:
+        """Reset application settings to defaults"""
+
+        ApplicationSettings.reset_defaults()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Reset application settings to defaults"""
+
+        ApplicationSettings.reset_defaults()
+
+    @staticmethod
+    def get_stream_handler() -> logging.StreamHandler:
+        """Return the ``StreamHandler`` instance used by the application when logging to the console"""
+
+        for handler in logging.getLogger().handlers:
+            if isinstance(handler, logging.StreamHandler):
+                return handler
+
+        raise RuntimeError('Stream handler not found')
+
+    def test_logging_format(self):
+        """Test the console logging format has been customized"""
+
+        log_format = self.get_stream_handler().formatter._fmt
+        self.assertEqual('%(levelname)8s - %(message)s', log_format)
+
+    def test_logging_level(self):
+        """Test the console logging level is updated to reflect application settings"""
+
+        for level in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):
+            ApplicationSettings.set(verbosity=level)
+            stream_handler = self.get_stream_handler()
+            handler_level = logging.getLevelName(stream_handler.level)
+            self.assertEqual(level, handler_level)
+
+
 class LoggingConfiguration(TestCase):
     """Test the configuration of application logging"""
 
@@ -122,41 +162,42 @@ class LoggingConfiguration(TestCase):
 
         ApplicationSettings.reset_defaults()
 
-    def test_logging_format_set(self):
-        """Test the logging format is configured"""
+    @staticmethod
+    def get_file_handler() -> logging.FileHandler:
+        """Return the ``FileHandler`` instance used by the application to log to file"""
 
-        log_format = logging.getLogger().handlers[0].formatter._fmt
-        self.assertEqual('%(levelname)8s - %(message)s', log_format)
+        for handler in logging.getLogger().handlers:
+            if isinstance(handler, logging.FileHandler):
+                return handler
 
-    def test_verbose_level_zero(self):
-        """Test setting ``verbose=0`` blocks all logging"""
+        raise RuntimeError('File handler not found')
 
-        ApplicationSettings.set(verbosity=0)
-        self.assertEqual(100, logging.getLogger().level)
+    def test_no_logger_by_default(self) -> None:
+        """Test a file logger is not configured by default"""
 
-    def test_verbose_level_one(self):
-        """Test setting ``verbose=1`` sets the logging level to ``WARNING``"""
+        self.assertIsNone(ApplicationSettings.get('log_path'))
+        with self.assertRaises(RuntimeError):
+            self.get_file_handler()
 
-        ApplicationSettings.set(verbosity=1)
-        self.assertEqual(logging.WARNING, logging.getLogger().level)
+    def test_logging_format(self):
+        """Test the console logging format has been customized"""
 
-    def test_verbose_level_two(self):
-        """Test setting ``verbose=2`` sets the logging level to ``INFO``"""
+        with NamedTemporaryFile(suffix='.log') as temp_log_file:
+            ApplicationSettings.set(log_path=temp_log_file.name)
 
-        ApplicationSettings.set(verbosity=2)
-        self.assertEqual(logging.INFO, logging.getLogger().level)
+            log_format = self.get_file_handler().formatter._fmt
+            self.assertEqual('%(levelname)8s - %(message)s', log_format)
 
-    def test_verbose_level_three(self):
-        """Test setting ``verbose=3`` sets the logging level to ``DEBUG``"""
+    def test_logging_level(self):
+        """Test the logging level is updated to reflect application settings"""
 
-        ApplicationSettings.set(verbosity=3)
-        self.assertEqual(logging.DEBUG, logging.getLogger().level)
+        for level in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):
+            with NamedTemporaryFile(suffix='.log') as temp_log_file:
+                ApplicationSettings.set(log_path=temp_log_file.name, log_level=level)
 
-    def test_verbose_level_100(self):
-        """Test setting ``verbose=100`` sets the logging level to ``DEBUG``"""
-
-        ApplicationSettings.set(verbosity=100)
-        self.assertEqual(logging.DEBUG, logging.getLogger().level)
+                file_handler = self.get_file_handler()
+                handler_level = logging.getLevelName(file_handler.level)
+                self.assertEqual(level, handler_level)
 
 
 class DatabaseConfiguration(TestCase):
