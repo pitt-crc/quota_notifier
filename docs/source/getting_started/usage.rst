@@ -77,4 +77,4 @@ the application output to a system log:
 
 .. code-block:: bash
 
-   notifier -vv >> notifier.log
+   notifier -vv >> notifier.log 2>&1
