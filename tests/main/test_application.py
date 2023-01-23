@@ -1,4 +1,5 @@
 """Tests for the ``Application`` class."""
+
 import json
 import logging
 from argparse import Namespace
@@ -99,3 +100,16 @@ class DatabaseConfiguration(TestCase):
         Path(ApplicationSettings.get('db_url').lstrip('sqlite:')).unlink()
 
         self.assertEqual(ApplicationSettings.get('db_url'), DBConnection.url)
+
+    def test_db_matches_custom_settings(self) -> None:
+        """Test the memory URL is updated to reflect custom application settings"""
+
+        with NamedTemporaryFile(suffix='.db') as temp_db, NamedTemporaryFile(suffix='.json') as temp_settings:
+            # Generate a custom settings file pointing at a custom DB path
+            settings_str = json.dumps({'db_url': f'sqlite:///{temp_db.name}'})
+            with open(temp_settings.name, 'w') as f:
+                f.write(settings_str)
+
+            # Check the DB url matches the custom DB path
+            Application.execute(['-s', temp_settings.name])
+            self.assertEqual(f'sqlite:///{temp_db.name}', DBConnection.url)
