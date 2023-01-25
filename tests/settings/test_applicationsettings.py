@@ -108,46 +108,6 @@ class Set(TestCase):
             self.assertEqual(tem_db_path, DBConnection.url)
 
 
-class VerbosityConfiguration(TestCase):
-    """Test the configuration of application verbosity"""
-
-    def setUp(self) -> None:
-        """Reset application settings to defaults"""
-
-        ApplicationSettings.reset_defaults()
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        """Reset application settings to defaults"""
-
-        ApplicationSettings.reset_defaults()
-
-    @staticmethod
-    def get_stream_handler() -> logging.StreamHandler:
-        """Return the ``StreamHandler`` instance used by the application when logging to the console"""
-
-        for handler in logging.getLogger().handlers:
-            if isinstance(handler, logging.StreamHandler):
-                return handler
-
-        raise RuntimeError('Stream handler not found')
-
-    def test_logging_format(self):
-        """Test the console logging format has been customized"""
-
-        log_format = self.get_stream_handler().formatter._fmt
-        self.assertEqual('%(levelname)8s - %(message)s', log_format)
-
-    def test_logging_level(self):
-        """Test the console logging level is updated to reflect application settings"""
-
-        for level in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):
-            ApplicationSettings.set(verbosity=level)
-            stream_handler = self.get_stream_handler()
-            handler_level = logging.getLevelName(stream_handler.level)
-            self.assertEqual(level, handler_level)
-
-
 class LoggingConfiguration(TestCase):
     """Test the configuration of application logging"""
 

@@ -129,12 +129,6 @@ class SettingsSchema(BaseSettings):
         default=None,
         description='Optionally log application events to a file.')
 
-    verbosity: Literal['DEBUG', 'INFO', 'WARNING', 'CRITICAL'] = Field(
-        title='Verbosity Level',
-        type=Literal['DEBUG', 'INFO', 'WARNING', 'CRITICAL'],
-        default='CRITICAL',
-        description='Application commandline verbosity (defaults to warning)')
-
     # Settings for the smtp host/port
     smtp_host: str = Field(
         title='SMTP Server Host Name',
@@ -242,31 +236,24 @@ class ApplicationSettings:
     def _configure_logging(cls) -> None:
         """Configure python logging to the given level"""
 
+        app_logger = logging.getLogger()
+
         # Fetch application settings for file logging
         log_path = cls.get('log_path')
-        log_format = logging.Formatter('%(levelname)8s - %(message)s')
+        log_format = logging.Formatter('%(levelname)8s | %(asctime)s | %(message)s')
         log_level = cls.get('log_level')
-        stream_level = cls.get('verbosity')
 
-        # Remove existing logging settings
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
+        # Remove the old file logger
+        for handler in app_logger.handlers:
+            if isinstance(handler, logging.FileHandler):
+                app_logger.removeHandler(handler)
 
-        # Get the application logger
-        app_log = logging.getLogger()
-
-        # File logging
+        # Add a new file logger if specified in application settings
         if log_path is not None:
             file_handler = logging.FileHandler(log_path)
             file_handler.setFormatter(log_format)
             file_handler.setLevel(log_level)
-            app_log.addHandler(file_handler)
-
-        # Stream logging
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(log_format)
-        stream_handler.setLevel(stream_level)
-        app_log.addHandler(stream_handler)
+            app_logger.addHandler(file_handler)
 
     @classmethod
     def _configure_database(cls) -> None:

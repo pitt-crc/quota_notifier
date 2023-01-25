@@ -38,11 +38,17 @@ class SettingsValidation(TestCase):
         Application.run(args)
 
 
-class LoggingConfiguration(TestCase):
-    """Test the configuration of application logging"""
+class VerbosityConfiguration(TestCase):
+    """Test the application verbosity"""
 
     def setUp(self) -> None:
-        """Reset any existing logging configuration to defaults"""
+        """Reset application settings to defaults"""
+
+        ApplicationSettings.reset_defaults()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Reset application settings to defaults"""
 
         ApplicationSettings.reset_defaults()
 
@@ -56,34 +62,40 @@ class LoggingConfiguration(TestCase):
 
         raise RuntimeError('Stream handler not found')
 
+    def test_output_format(self):
+        """Test the console logging format has been customized"""
+
+        log_format = self.get_stream_handler().formatter._fmt
+        self.assertEqual('%(levelname)8s - %(message)s', log_format)
+
     def test_verbose_level_zero(self):
         """Test setting ``verbose=0`` sets the logging level to ``CRITICAL``"""
 
-        Application.execute(['--debug'])
+        Application.execute([])
         self.assertEqual(logging.CRITICAL, self.get_stream_handler().level)
 
     def test_verbose_level_one(self):
-        """Test setting ``verbose=1`` sets the logging level to ``WARNING``"""
+        """Test a single verbose flag sets the logging level to ``WARNING``"""
 
-        Application.execute(['--debug', '-v'])
+        Application.execute(['-v'])
         self.assertEqual(logging.WARNING, self.get_stream_handler().level)
 
     def test_verbose_level_two(self):
-        """Test setting ``verbose=2`` sets the logging level to ``INFO``"""
+        """Test two verbose flags sets the logging level to ``INFO``"""
 
-        Application.execute(['--debug', '-vv'])
+        Application.execute(['-vv'])
         self.assertEqual(logging.INFO, self.get_stream_handler().level)
 
     def test_verbose_level_three(self):
-        """Test setting ``verbose=3`` sets the logging level to ``DEBUG``"""
+        """Test three verbose flags sets the logging level to ``DEBUG``"""
 
-        Application.execute(['--debug', '-vvv'])
+        Application.execute(['-vvv'])
         self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
 
     def test_verbose_level_many(self):
-        """Test setting ``verbose`` to a very high number sets the logging level to ``DEBUG``"""
+        """Test several verbose flags sets the logging level to ``DEBUG``"""
 
-        Application.execute(['--debug', '-vvvvvvvvvv'])
+        Application.execute(['-vvvvvvvvvv'])
         self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
 
 
@@ -93,7 +105,7 @@ class DatabaseConfiguration(TestCase):
     def test_db_in_memory(self) -> None:
         """Test debug mode forces an in-memory database"""
 
-        Application.execute(['--debug'])
+        Application.execute([])
         self.assertEqual('sqlite:///:memory:', DBConnection.url)
 
     def test_db_matches_default_settings(self) -> None:

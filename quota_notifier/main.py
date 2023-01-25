@@ -8,6 +8,7 @@ Module Contents
 """
 
 import logging
+import sys
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import List
@@ -86,19 +87,24 @@ class Application:
             args: Parsed commandline arguments
         """
 
-        # Map the verbosity argument onto a logging level
-        verbosity = {0: 'CRITICAL', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(args.verbose, 'DEBUG')
+        # Set verbosity for console output
+        if args.verbose > 0:
+            log_format = logging.Formatter('%(levelname)8s - %(message)s')
+            verbosity = {1: 'INFO', 2: 'DEBUG', 3: 'DEBUG'}.get(args.verbose, 'DEBUG')
+
+            stream_handler = logging.StreamHandler(sys.stdout)
+            stream_handler.setFormatter(log_format)
+            stream_handler.setLevel(verbosity)
+            logging.getLogger().addHandler(stream_handler)
 
         # Update application settings
         cls._load_settings(args.settings, error_on_missing_file=args.validate)
-        ApplicationSettings.set(debug=args.debug, verbosity=verbosity)
-
-        if args.validate:
-            return
+        ApplicationSettings.set(debug=args.debug)
 
         # Run core application logic
-        UserNotifier().send_notifications()
-        logging.info('Exiting application successfully')
+        if not args.validate:
+            UserNotifier().send_notifications()
+            logging.info('Exiting application successfully')
 
     @classmethod
     def execute(cls, arg_list: List[str] = None) -> None:
