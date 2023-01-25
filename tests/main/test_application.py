@@ -105,7 +105,7 @@ class DatabaseConfiguration(TestCase):
     def test_db_in_memory(self) -> None:
         """Test debug mode forces an in-memory database"""
 
-        Application.execute([])
+        Application.execute(['--debug'])
         self.assertEqual('sqlite:///:memory:', DBConnection.url)
 
     def test_db_matches_default_settings(self) -> None:
