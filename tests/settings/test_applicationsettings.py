@@ -146,7 +146,7 @@ class LoggingConfiguration(TestCase):
             ApplicationSettings.set(log_path=temp_log_file.name)
 
             log_format = self.get_file_handler().formatter._fmt
-            self.assertEqual('%(levelname)8s - %(message)s', log_format)
+            self.assertEqual('%(levelname)8s | %(asctime)s | %(message)s', log_format)
 
     def test_logging_level(self):
         """Test the logging level is updated to reflect application settings"""

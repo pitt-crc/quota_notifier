@@ -90,7 +90,7 @@ class Application:
         # Set verbosity for console output
         if args.verbose > 0:
             log_format = logging.Formatter('%(levelname)8s - %(message)s')
-            verbosity = {1: 'INFO', 2: 'DEBUG', 3: 'DEBUG'}.get(args.verbose, 'DEBUG')
+            verbosity = {1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(args.verbose, 'DEBUG')
 
             stream_handler = logging.StreamHandler(sys.stdout)
             stream_handler.setFormatter(log_format)
