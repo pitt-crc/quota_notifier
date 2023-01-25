@@ -11,7 +11,7 @@ import logging
 import sys
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from . import __version__
 from .notify import UserNotifier
@@ -51,6 +51,29 @@ class Parser(ArgumentParser):
 class Application:
     """Entry point for instantiating and executing the application"""
 
+    @classmethod
+    def _set_console_verbosity(cls, verbosity: Optional[str]) -> None:
+        """Set the output verbosity for console messages
+
+        verbosity: Log level to set verbosity at or ``None`` for silent
+        """
+
+        app_logger = logging.getLogger()
+
+        # Remove any old stream loggers
+        for handler in app_logger.handlers:
+            if isinstance(handler, logging.StreamHandler):
+                app_logger.removeHandler(handler)
+
+        # Set the verbosity for console outputs
+        if verbosity is not None:
+            log_format = logging.Formatter('%(levelname)8s - %(message)s')
+
+            stream_handler = logging.StreamHandler(sys.stdout)
+            stream_handler.setFormatter(log_format)
+            stream_handler.setLevel(verbosity)
+            app_logger.addHandler(stream_handler)
+
     @staticmethod
     def _load_settings(settings_path: Path, error_on_missing_file: bool = False) -> None:
         """Load application settings from the given file path
@@ -87,15 +110,9 @@ class Application:
             args: Parsed commandline arguments
         """
 
-        # Set verbosity for console output
-        if args.verbose > 0:
-            log_format = logging.Formatter('%(levelname)8s - %(message)s')
-            verbosity = {1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(args.verbose, 'DEBUG')
-
-            stream_handler = logging.StreamHandler(sys.stdout)
-            stream_handler.setFormatter(log_format)
-            stream_handler.setLevel(verbosity)
-            logging.getLogger().addHandler(stream_handler)
+        # Update verbosity of console logging
+        verbosity = {0: None, 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(args.verbose, 'DEBUG')
+        cls._set_console_verbosity(verbosity)
 
         # Update application settings
         cls._load_settings(args.settings, error_on_missing_file=args.validate)

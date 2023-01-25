@@ -56,23 +56,28 @@ class VerbosityConfiguration(TestCase):
     def get_stream_handler() -> logging.StreamHandler:
         """Return the ``StreamHandler`` instance used by the application when logging to the console"""
 
-        for handler in logging.getLogger().handlers:
-            if isinstance(handler, logging.StreamHandler):
-                return handler
+        handlers = [handler for handler in logging.getLogger().handlers if isinstance(handler, logging.StreamHandler)]
+        if not handlers:
+            raise RuntimeError('Stream handler not found')
 
-        raise RuntimeError('Stream handler not found')
+        if len(handlers) > 1:
+            raise RuntimeError('Multiple stream handlers found')
+
+        return handlers[0]
 
     def test_output_format(self):
         """Test the console logging format has been customized"""
 
+        Application.execute(['-v'])
         log_format = self.get_stream_handler().formatter._fmt
         self.assertEqual('%(levelname)8s - %(message)s', log_format)
 
     def test_verbose_level_zero(self):
-        """Test setting ``verbose=0`` sets the logging level to ``CRITICAL``"""
+        """Test the application is silent by default"""
 
         Application.execute([])
-        self.assertEqual(logging.CRITICAL, self.get_stream_handler().level)
+        with self.assertRaisesRegex(RuntimeError, 'Stream handler not found'):
+            self.get_stream_handler()
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""
