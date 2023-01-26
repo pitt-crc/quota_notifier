@@ -8,7 +8,7 @@ Module Contents
 """
 
 import logging
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import List
 
@@ -79,18 +79,21 @@ class Application:
             logging.info('Using default settings')
 
     @classmethod
-    def run(cls, args: Namespace) -> None:
+    def run(cls, settings: Path = None, validate: bool = False, verbose: int = 0, debug: bool = False) -> None:
         """Run the application using parsed commandline arguments
 
         Args:
-            args: Parsed commandline arguments
+            settings: Path to an application settings file
+            validate: Validate application settings without issuing user notifications
+            verbose: Console output verbosity
+            debug: Run the application in debug mode
         """
 
         # Update application settings
-        cls._load_settings(args.settings, error_on_missing_file=args.validate)
-        ApplicationSettings.set(debug=args.debug, verbosity=args.verbose)
+        cls._load_settings(settings, error_on_missing_file=validate)
+        ApplicationSettings.set(debug=debug, verbosity=verbose)
 
-        if args.validate:
+        if validate:
             return
 
         # Run core application logic
@@ -111,7 +114,12 @@ class Application:
         args = parser.parse_args(arg_list)
 
         try:
-            cls.run(args)
+            cls.run(
+                settings=args.settings,
+                validate=args.validate,
+                verbose=args.verbose,
+                debug=args.debug,
+            )
 
         except Exception as caught:
             parser.error(str(caught))
