@@ -1,6 +1,5 @@
 version: 2
 updates:
-  # Maintain dependencies for Python
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -9,7 +8,6 @@ updates:
     ignore:
       - dependency-name: "sphinx-jsonschema"  # Newer versions of sphinx-jsonschema have compatibility issues
 
-  # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
