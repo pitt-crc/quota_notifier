@@ -9,7 +9,7 @@ Module Contents
 
 import logging
 import sys
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import List
 
