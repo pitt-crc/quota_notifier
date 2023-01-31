@@ -118,12 +118,12 @@ class Application:
         """
 
         # Configure the application
-        cls._set_console_verbosity(args.verbose)
-        cls._load_settings(args.settings, error_on_missing_file=args.validate)
-        ApplicationSettings.set(debug=args.debug)
+        cls._set_console_verbosity(verbose)
+        cls._load_settings(settings, error_on_missing_file=validate)
+        ApplicationSettings.set(debug=debug)
 
         # Run core application logic
-        if not args.validate:
+        if not validate:
             UserNotifier().send_notifications()
             logging.info('Exiting application successfully')
 
