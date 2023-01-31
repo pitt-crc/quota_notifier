@@ -32,7 +32,7 @@ jobs:
       - name: Cache lock file
         uses: actions/upload-pages-artifact@v1
         with:
-          path: poetry.lock
+          path: ./*.lock
 
       - name: Build Docs
         working-directory: docs
