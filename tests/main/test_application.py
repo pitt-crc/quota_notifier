@@ -56,7 +56,11 @@ class VerbosityConfiguration(TestCase):
     def get_stream_handler() -> logging.StreamHandler:
         """Return the ``StreamHandler`` instance used by the application when logging to the console"""
 
-        handlers = [handler for handler in logging.getLogger().handlers if isinstance(handler, logging.StreamHandler)]
+        handlers = []
+        for handler in logging.getLogger().handlers:
+            if isinstance(handler, logging.StreamHandler) and handler.level != logging.NOTSET:
+                handlers.append(handler)
+
         if not handlers:
             raise RuntimeError('Stream handler not found')
 

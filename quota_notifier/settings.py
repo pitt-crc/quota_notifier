@@ -236,7 +236,6 @@ class ApplicationSettings:
     def _configure_logging(cls) -> None:
         """Configure python logging to the given level"""
 
-        print(logging.getLogger().handlers)
         app_logger = logging.getLogger()
 
         # Fetch application settings for file logging

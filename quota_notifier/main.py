@@ -11,7 +11,7 @@ import logging
 import sys
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from . import __version__
 from .notify import UserNotifier
@@ -42,7 +42,8 @@ class Parser(ArgumentParser):
         self.add_argument('--validate', action='store_true', help='validate settings without sending notifications')
         self.add_argument('--debug', action='store_true', help='run the application but do not send any emails')
         self.add_argument(
-            '-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH, help='path to a app settings file')
+            '-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH,
+            help='path to the application settings file')
         self.add_argument(
             '-v', action='count', dest='verbose', default=0,
             help='set output verbosity to warning (-v), info (-vv), or debug (-vvv)')
@@ -52,10 +53,11 @@ class Application:
     """Entry point for instantiating and executing the application"""
 
     @classmethod
-    def _set_console_verbosity(cls, verbosity: Optional[str]) -> None:
+    def _set_console_verbosity(cls, verbosity: int) -> None:
         """Set the output verbosity for console messages
 
-        verbosity: Log level to set verbosity at or ``None`` for silent
+        Args:
+            verbosity: Number of commandline verbosity flags
         """
 
         app_logger = logging.getLogger()
@@ -64,6 +66,8 @@ class Application:
         for handler in app_logger.handlers:
             if isinstance(handler, logging.StreamHandler):
                 app_logger.removeHandler(handler)
+
+        verbosity = {0: None, 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(verbosity, 'DEBUG')
 
         # Set the verbosity for console outputs
         if verbosity is not None:
@@ -110,11 +114,8 @@ class Application:
             args: Parsed commandline arguments
         """
 
-        # Update verbosity of console logging
-        verbosity = {0: None, 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(args.verbose, 'DEBUG')
-        cls._set_console_verbosity(verbosity)
-
-        # Update application settings
+        # Configure the application
+        cls._set_console_verbosity(args.verbose)
         cls._load_settings(args.settings, error_on_missing_file=args.validate)
         ApplicationSettings.set(debug=args.debug)
 
