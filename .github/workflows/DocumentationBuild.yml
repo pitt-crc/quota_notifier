@@ -29,6 +29,11 @@ jobs:
       - name: Install dependencies
         run: poetry install --with docs
 
+      - name: Cache lock file
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: poetry.lock
+
       - name: Build Docs
         working-directory: docs
         run: make html SPHINXOPTS="-W"
