@@ -2,7 +2,6 @@
 
 import json
 import logging
-from argparse import Namespace
 from json import JSONDecodeError
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -19,23 +18,20 @@ class SettingsValidation(TestCase):
     def test_error_missing_file(self) -> None:
         """Test ``FileNotFoundError`` is raised when the settings file does not exist"""
 
-        args = Namespace(validate=True, verbose=0, debug=True, settings=Path('fake/file/path.json'))
         with self.assertRaises(FileNotFoundError):
-            Application.run(args)
+            Application.run(validate=True, verbose=0, debug=True, settings=Path('fake/file/path.json'))
 
     def test_error_on_empty_file(self) -> None:
         """Test ``JSONDecodeError`` is raised when the settings file is empty"""
 
         with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
-            args = Namespace(validate=True, verbose=0, debug=True, settings=Path(temp.name))
-            Application.run(args)
+            Application.run(validate=True, verbose=0, debug=True, settings=Path(temp.name))
 
     @staticmethod
     def test_no_error_on_defaults() -> None:
         """Test no error is raised when validating default application settings"""
 
-        args = Namespace(validate=True, verbose=0, debug=True, settings=DEFAULT_SETTINGS_PATH)
-        Application.run(args)
+        Application.run(validate=True, verbose=0, debug=True, settings=DEFAULT_SETTINGS_PATH)
 
 
 class VerbosityConfiguration(TestCase):

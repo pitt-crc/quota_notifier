@@ -107,11 +107,14 @@ class Application:
             logging.info('Using default settings')
 
     @classmethod
-    def run(cls, args: Namespace) -> None:
+    def run(cls, settings: Path = None, validate: bool = False, verbose: int = 0, debug: bool = False) -> None:
         """Run the application using parsed commandline arguments
 
         Args:
-            args: Parsed commandline arguments
+            settings: Path to an application settings file
+            validate: Validate application settings without issuing user notifications
+            verbose: Console output verbosity
+            debug: Run the application in debug mode
         """
 
         # Configure the application
@@ -138,7 +141,12 @@ class Application:
         args = parser.parse_args(arg_list)
 
         try:
-            cls.run(args)
+            cls.run(
+                settings=args.settings,
+                validate=args.validate,
+                verbose=args.verbose,
+                debug=args.debug,
+            )
 
         except Exception as caught:
             parser.error(str(caught))

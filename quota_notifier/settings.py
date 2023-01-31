@@ -14,7 +14,7 @@ from pydantic import BaseSettings, Field, validator
 
 from quota_notifier.orm import DBConnection
 
-DEFAULT_DB_PATH = Path.cwd().resolve() / 'app_data.db'
+DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
 
 
 class FileSystemSchema(BaseSettings):
