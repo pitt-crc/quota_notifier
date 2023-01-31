@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.11
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -28,11 +28,6 @@ jobs:
 
       - name: Install dependencies
         run: poetry install --with docs
-
-      - name: Cache lock file
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: ./*.lock
 
       - name: Build Docs
         working-directory: docs
