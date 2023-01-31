@@ -7,7 +7,7 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 100
     ignore:
-      - dependency-name: "express"  # Newer versions of sphinx-jsonschema have compatibility issues
+      - dependency-name: "sphinx-jsonschema"  # Newer versions of sphinx-jsonschema have compatibility issues
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
