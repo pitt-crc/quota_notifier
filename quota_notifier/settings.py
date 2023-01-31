@@ -7,8 +7,7 @@ Module Contents
 
 import logging
 from pathlib import Path
-from typing import Any, List, Union, Tuple, Set, Optional
-from typing import Literal
+from typing import Any, List, Union, Tuple, Set, Optional, Literal
 
 from pydantic import BaseSettings, Field, validator
 
@@ -125,7 +124,7 @@ class SettingsSchema(BaseSettings):
 
     log_path: Optional[Path] = Field(
         title='Log Path',
-        tpye=Optional[Path],
+        type=Optional[Path],
         default=None,
         description='Optionally log application events to a file.')
 
