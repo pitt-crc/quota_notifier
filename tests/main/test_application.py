@@ -34,48 +34,74 @@ class SettingsValidation(TestCase):
         Application.run(validate=True, verbose=0, debug=True, settings=DEFAULT_SETTINGS_PATH)
 
 
-class LoggingConfiguration(TestCase):
-    """Test the configuration of application logging"""
+class VerbosityConfiguration(TestCase):
+    """Test the application verbosity"""
 
     def setUp(self) -> None:
-        """Reset any existing logging configuration to defaults
+        """Reset application settings to defaults"""
 
-        Prevents application state from bleeding over from other tests.
-        """
+        ApplicationSettings.reset_defaults()
 
-        root = logging.getLogger()
-        list(map(root.removeHandler, root.handlers[:]))
-        list(map(root.removeFilter, root.filters[:]))
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Reset application settings to defaults"""
+
+        ApplicationSettings.reset_defaults()
+
+    @staticmethod
+    def get_stream_handler() -> logging.StreamHandler:
+        """Return the ``StreamHandler`` instance used by the application when logging to the console"""
+
+        handlers = []
+        for handler in logging.getLogger().handlers:
+            if isinstance(handler, logging.StreamHandler) and handler.level != logging.NOTSET:
+                handlers.append(handler)
+
+        if not handlers:
+            raise RuntimeError('Stream handler not found')
+
+        if len(handlers) > 1:
+            raise RuntimeError('Multiple stream handlers found')
+
+        return handlers[0]
+
+    def test_output_format(self):
+        """Test the console logging format has been customized"""
+
+        Application.execute(['-v'])
+        log_format = self.get_stream_handler().formatter._fmt
+        self.assertEqual('%(levelname)8s - %(message)s', log_format)
 
     def test_verbose_level_zero(self):
-        """Test setting ``verbose=0`` blocks all logging"""
+        """Test the application is silent by default"""
 
-        Application.execute(['--debug'])
-        self.assertEqual(100, logging.getLogger().level)
+        Application.execute([])
+        with self.assertRaisesRegex(RuntimeError, 'Stream handler not found'):
+            self.get_stream_handler()
 
     def test_verbose_level_one(self):
-        """Test setting ``verbose=1`` sets the logging level to ``WARNING``"""
+        """Test a single verbose flag sets the logging level to ``WARNING``"""
 
-        Application.execute(['--debug', '-v'])
-        self.assertEqual(logging.WARNING, logging.getLogger().level)
+        Application.execute(['-v'])
+        self.assertEqual(logging.WARNING, self.get_stream_handler().level)
 
     def test_verbose_level_two(self):
-        """Test setting ``verbose=2`` sets the logging level to ``INFO``"""
+        """Test two verbose flags sets the logging level to ``INFO``"""
 
-        Application.execute(['--debug', '-vv'])
-        self.assertEqual(logging.INFO, logging.getLogger().level)
+        Application.execute(['-vv'])
+        self.assertEqual(logging.INFO, self.get_stream_handler().level)
 
     def test_verbose_level_three(self):
-        """Test setting ``verbose=3`` sets the logging level to ``DEBUG``"""
+        """Test three verbose flags sets the logging level to ``DEBUG``"""
 
-        Application.execute(['--debug', '-vvv'])
-        self.assertEqual(logging.DEBUG, logging.getLogger().level)
+        Application.execute(['-vvv'])
+        self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
 
     def test_verbose_level_many(self):
-        """Test setting ``verbose`` to a very high number sets the logging level to ``DEBUG``"""
+        """Test several verbose flags sets the logging level to ``DEBUG``"""
 
-        Application.execute(['--debug', '-vvvvvvvvvv'])
-        self.assertEqual(logging.DEBUG, logging.getLogger().level)
+        Application.execute(['-vvvvvvvvvv'])
+        self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
 
 
 class DatabaseConfiguration(TestCase):

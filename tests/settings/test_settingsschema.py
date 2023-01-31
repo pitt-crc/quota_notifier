@@ -7,37 +7,6 @@ from unittest import TestCase
 from quota_notifier.settings import FileSystemSchema, SettingsSchema
 
 
-class VerbosityValidation(TestCase):
-    """Test validation for the ``verbosity`` field"""
-
-    def test_valid_integers(self) -> None:
-        """Test integers 0 through 2 are valid options"""
-
-        for value in range(3):
-            self.assertEqual(value, SettingsSchema(verbosity=value).verbosity)
-
-    def test_float_error(self) -> None:
-        """Test a ``ValueError`` is raised for float values"""
-
-        for value in (1.1, 3.5, 10.7):
-            with self.assertRaises(ValueError):
-                SettingsSchema(verbosity=value)
-
-    def test_negative_error(self) -> None:
-        """Test a ``ValueError`` is raised for negative integers"""
-
-        for value in (-1, -5, -100):
-            with self.assertRaises(ValueError):
-                SettingsSchema(verbosity=value)
-
-    def test_large_integer_error(self) -> None:
-        """Test a ``ValueError`` is raised for integers over 2"""
-
-        for value in (3, 10, 100):
-            with self.assertRaises(ValueError):
-                SettingsSchema(verbosity=value)
-
-
 class BlacklistValidation(TestCase):
     """Test validation for the ``uid_blacklist`` and ``gid_blacklist`` fields"""
 

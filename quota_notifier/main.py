@@ -8,6 +8,7 @@ Module Contents
 """
 
 import logging
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import List
@@ -41,7 +42,8 @@ class Parser(ArgumentParser):
         self.add_argument('--validate', action='store_true', help='validate settings without sending notifications')
         self.add_argument('--debug', action='store_true', help='run the application but do not send any emails')
         self.add_argument(
-            '-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH, help='path to a app settings file')
+            '-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH,
+            help='path to the application settings file')
         self.add_argument(
             '-v', action='count', dest='verbose', default=0,
             help='set output verbosity to warning (-v), info (-vv), or debug (-vvv)')
@@ -49,6 +51,32 @@ class Parser(ArgumentParser):
 
 class Application:
     """Entry point for instantiating and executing the application"""
+
+    @classmethod
+    def _set_console_verbosity(cls, verbosity: int) -> None:
+        """Set the output verbosity for console messages
+
+        Args:
+            verbosity: Number of commandline verbosity flags
+        """
+
+        app_logger = logging.getLogger()
+
+        # Remove any old stream loggers
+        for handler in app_logger.handlers:
+            if isinstance(handler, logging.StreamHandler):
+                app_logger.removeHandler(handler)
+
+        verbosity = {0: None, 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(verbosity, 'DEBUG')
+
+        # Set the verbosity for console outputs
+        if verbosity is not None:
+            log_format = logging.Formatter('%(levelname)8s - %(message)s')
+
+            stream_handler = logging.StreamHandler(sys.stdout)
+            stream_handler.setFormatter(log_format)
+            stream_handler.setLevel(verbosity)
+            app_logger.addHandler(stream_handler)
 
     @staticmethod
     def _load_settings(settings_path: Path, error_on_missing_file: bool = False) -> None:
@@ -89,16 +117,15 @@ class Application:
             debug: Run the application in debug mode
         """
 
-        # Update application settings
+        # Configure the application
+        cls._set_console_verbosity(verbose)
         cls._load_settings(settings, error_on_missing_file=validate)
-        ApplicationSettings.set(debug=debug, verbosity=verbose)
-
-        if validate:
-            return
+        ApplicationSettings.set(debug=debug)
 
         # Run core application logic
-        UserNotifier().send_notifications()
-        logging.info('Exiting application successfully')
+        if not validate:
+            UserNotifier().send_notifications()
+            logging.info('Exiting application successfully')
 
     @classmethod
     def execute(cls, arg_list: List[str] = None) -> None:

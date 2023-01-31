@@ -4,7 +4,7 @@ quota exceeds a certain percentage.
 Overview
 --------
 
-Multitenant computing environments commonly enforce user/group limits on
+Multi-tenant computing environments commonly enforce user/group limits on
 shared storage resources. Enforcing storage quotas ensures resources
 are shared fairly among users and is often necessary for establishing
 broader system policies. However, quota enforcement can also come as a

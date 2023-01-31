@@ -7,8 +7,7 @@ Module Contents
 
 import logging
 from pathlib import Path
-from typing import Any, List, Union, Tuple, Set
-from typing import Literal
+from typing import Any, List, Union, Tuple, Set, Optional, Literal
 
 from pydantic import BaseSettings, Field, validator
 
@@ -79,12 +78,7 @@ class FileSystemSchema(BaseSettings):
 class SettingsSchema(BaseSettings):
     """Defines the schema and default values for top level application settings"""
 
-    verbosity: Literal[0, 1, 2] = Field(
-        title='Verbosity Level',
-        type=Literal[0, 1, 2],
-        default=0,
-        description='Application verbosity (defaults to silent)')
-
+    # General application settings
     ihome_quota_path: Path = Field(
         title='Ihome Quota Path',
         type=Path,
@@ -120,6 +114,19 @@ class SettingsSchema(BaseSettings):
         type=int,
         default=30,
         description='Give up on checking a file system after the given number of seconds.')
+
+    # Settings for application logging
+    log_level: Literal['DEBUG', 'INFO', 'WARNING'] = Field(
+        title='Logging Level',
+        type=Literal['DEBUG', 'INFO', 'WARNING'],
+        default='INFO',
+        description='Application logging level.')
+
+    log_path: Optional[Path] = Field(
+        title='Log Path',
+        type=Optional[Path],
+        default=None,
+        description='Optionally log application events to a file.')
 
     # Settings for the smtp host/port
     smtp_host: str = Field(
@@ -183,6 +190,7 @@ class SettingsSchema(BaseSettings):
             "The CRC Quota Bot"
         ))
 
+    # Settings for debug / dry-runs
     debug: bool = Field(
         title='Debug Mode',
         type=bool,
@@ -225,35 +233,26 @@ class ApplicationSettings:
 
     @classmethod
     def _configure_logging(cls) -> None:
-        """Configure python logging to the given level
+        """Configure python logging to the given level"""
 
-        Arguments for the ``level`` argument are NOT the same as the
-        default integer values used by Python to enumerate logging levels.
-        Accepted values are 0 (no logging information displayed),
-        1 (information level logging) and 2 (debug level logging).
-        """
+        app_logger = logging.getLogger()
 
-        # Remove existing logging settings
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
+        # Fetch application settings for file logging
+        log_path = cls.get('log_path')
+        log_format = logging.Formatter('%(levelname)8s | %(asctime)s | %(message)s')
+        log_level = cls.get('log_level')
 
-        verbosity = cls.get('verbosity')
-        log_format = '%(levelname)8s - %(message)s'
+        # Remove the old file logger
+        for handler in app_logger.handlers:
+            if isinstance(handler, logging.FileHandler):
+                app_logger.removeHandler(handler)
 
-        if verbosity == 0:
-            logging.basicConfig(level=100, format=log_format)
-
-        elif verbosity == 1:
-            logging.basicConfig(level=logging.WARNING, format=log_format)
-
-        elif verbosity == 2:
-            logging.basicConfig(level=logging.INFO, format=log_format)
-
-        elif verbosity > 2:
-            logging.basicConfig(level=logging.DEBUG, format=log_format)
-
-        else:
-            raise RuntimeError('Unrecognized verbosity level')
+        # Add a new file logger if specified in application settings
+        if log_path is not None:
+            file_handler = logging.FileHandler(log_path)
+            file_handler.setFormatter(log_format)
+            file_handler.setLevel(log_level)
+            app_logger.addHandler(file_handler)
 
     @classmethod
     def _configure_database(cls) -> None:
