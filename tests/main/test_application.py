@@ -3,11 +3,8 @@
 import json
 import logging
 import os
-from json import JSONDecodeError
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
-
-from pydantic import ValidationError
 
 from quota_notifier.main import Application, DEFAULT_SETTINGS_PATH
 from quota_notifier.orm import DBConnection
