@@ -7,6 +7,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
+from pydantic import ValidationError
+
 from quota_notifier.main import Application, DEFAULT_SETTINGS_PATH
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
@@ -27,10 +29,28 @@ class SettingsValidation(TestCase):
         with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
             Application.run(validate=True, verbose=0, debug=True, settings=Path(temp.name))
 
-    @staticmethod
-    def test_no_error_on_defaults() -> None:
-        """Test no error is raised when validating default application settings"""
+    def test_error_on_invalid_file(self) -> None:
+        """Test ``JSONDecodeError`` is raised when the settings file is not valid json"""
 
+        with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
+            with open(temp.name, 'w') as f:
+                f.write('notjson')
+
+            Application.run(validate=True, verbose=0, debug=True, settings=Path(temp.name))
+
+    def test_error_on_invalid_settings(self) -> None:
+        """Test ``ValidationError`` is raised when the settings file has extra settings"""
+
+        with self.assertRaises(ValidationError), NamedTemporaryFile() as temp:
+            with open(temp.name, 'w') as f:
+                f.write('{"extra": "field"}')
+
+            Application.run(validate=True, verbose=0, debug=True, settings=Path(temp.name))
+
+    def test_no_error_on_defaults(self) -> None:
+        """Test no error is raised when validating the default application settings path"""
+
+        self.assertFalse(DEFAULT_SETTINGS_PATH.exists())
         Application.run(validate=True, verbose=0, debug=True, settings=DEFAULT_SETTINGS_PATH)
 
 
@@ -54,6 +74,8 @@ class VerbosityConfiguration(TestCase):
 
         handlers = []
         for handler in logging.getLogger().handlers:
+            # Keep any stream handlers with a configured logging level
+            # A default, NOTSET level stream handler is created when calling ``logging.get_logger()``
             if isinstance(handler, logging.StreamHandler) and handler.level != logging.NOTSET:
                 handlers.append(handler)
 
