@@ -117,9 +117,9 @@ class SettingsSchema(BaseSettings):
         description='Give up on checking a file system after the given number of seconds.')
 
     # Settings for application logging
-    log_level: Literal['DEBUG', 'INFO', 'WARNING'] = Field(
+    log_level: Literal['DEBUG', 'INFO', 'WARNING', 'ERROR'] = Field(
         title='Logging Level',
-        type=Literal['DEBUG', 'INFO', 'WARNING'],
+        type=Literal['DEBUG', 'INFO', 'WARNING', 'ERROR'],
         default='INFO',
         description='Application logging level.')
 

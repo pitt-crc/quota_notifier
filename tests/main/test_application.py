@@ -93,9 +93,8 @@ class VerbosityConfiguration(TestCase):
     def test_verbose_level_zero(self):
         """Test the application is silent by default"""
 
-        Application.execute(['--debug'])
-        with self.assertRaisesRegex(RuntimeError, 'Stream handler not found'):
-            self.get_stream_handler()
+        Application.execute([])
+        self.assertEqual(100, self.get_stream_handler().level)
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""
