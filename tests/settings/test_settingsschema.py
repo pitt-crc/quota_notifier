@@ -28,6 +28,15 @@ class BlacklistValidation(TestCase):
         with self.assertRaisesRegex(ValueError, 'actual_length=3; expected_length=2'):
             SettingsSchema(gid_blacklist=[[1, 2, 3], ])
 
+    def test_error_on_account_names(self) -> None:
+        """Test a useful error message is raised when users provide account names instead of IDs"""
+
+        with self.assertRaisesRegex(ValueError, 'value is not a valid integer'):
+            SettingsSchema(uid_blacklist=['root', ])
+
+        with self.assertRaisesRegex(ValueError, 'value is not a valid integer'):
+            SettingsSchema(gid_blacklist=['root', ])
+
 
 class FileSystemValidation(TestCase):
     """Test validation for the ``file_systems`` field"""
