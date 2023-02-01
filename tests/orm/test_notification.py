@@ -44,7 +44,7 @@ class RequiredFields(TestCase):
         Notification.file_system,
     )
 
-    def test_not_nullable(self) -> None:
+    def runTest(self) -> None:
         """Test required columns are not nullable"""
 
         for column in self.required_columns:
