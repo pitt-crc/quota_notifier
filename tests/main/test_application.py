@@ -4,7 +4,6 @@ import json
 import logging
 import os
 from json import JSONDecodeError
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
@@ -19,34 +18,34 @@ class SettingsValidation(TestCase):
     """Test the validation of application settings files when ``validate=True``"""
 
     def test_error_missing_file(self) -> None:
-        """Test ``FileNotFoundError`` is raised when the settings file does not exist"""
+        """Test ``SystemExit`` is raised when the settings file does not exist"""
 
-        with self.assertRaises(FileNotFoundError):
-            Application.run(validate=True, debug=True, settings=Path('fake/file/path.json'))
+        with self.assertRaisesRegex(SystemExit, 'No settings file at fake/file/path.json'):
+            Application.execute(['--validate', '-s', 'fake/file/path.json'])
 
     def test_error_on_empty_file(self) -> None:
-        """Test ``JSONDecodeError`` is raised when the settings file is empty"""
+        """Test ``SystemExit`` is raised when the settings file is empty"""
 
-        with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
-            Application.run(validate=True, debug=True, settings=Path(temp.name))
+        with self.assertRaises(SystemExit), NamedTemporaryFile() as temp:
+            Application.execute(['--validate', '-s', temp.name])
 
     def test_error_on_invalid_file(self) -> None:
-        """Test ``JSONDecodeError`` is raised when the settings file is not valid json"""
+        """Test ``SystemExit`` is raised when the settings file is not valid json"""
 
-        with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
+        with self.assertRaises(SystemExit), NamedTemporaryFile() as temp:
             with open(temp.name, 'w') as f:
                 f.write('notjson')
 
-            Application.run(validate=True, debug=True, settings=Path(temp.name))
+            Application.execute(['--validate', '-s', temp.name])
 
     def test_error_on_invalid_settings(self) -> None:
-        """Test ``ValidationError`` is raised when the settings file has extra settings"""
+        """Test ``SystemExit`` is raised when the settings file has extra settings"""
 
-        with self.assertRaises(ValidationError), NamedTemporaryFile() as temp:
+        with self.assertRaises(SystemExit), NamedTemporaryFile() as temp:
             with open(temp.name, 'w') as f:
                 f.write('{"extra": "field"}')
 
-            Application.run(validate=True, debug=True, settings=Path(temp.name))
+            Application.execute(['--validate', '-s', temp.name])
 
     def test_no_error_on_defaults(self) -> None:
         """Test no error is raised when validating the default application settings path"""

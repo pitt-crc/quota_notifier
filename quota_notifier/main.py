@@ -48,6 +48,11 @@ class Parser(ArgumentParser):
             '-v', action='count', dest='verbose', default=0,
             help='set output verbosity to warning (-v), info (-vv), or debug (-vvv)')
 
+    def error(self, message: str) -> None:
+        """Exit the application and provide the given message"""
+
+        raise SystemExit(f'{self.prog} error: {message}')
+
 
 class Application:
     """Entry point for instantiating and executing the application"""
