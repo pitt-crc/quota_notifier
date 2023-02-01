@@ -7,7 +7,7 @@ from quota_notifier.orm import DBConnection
 
 
 class DBConfiguration(TestCase):
-    """Test the configuration of the DB connection via the ``configure`` method"""
+    """Test configuration of the DB connection via the ``configure`` method"""
 
     def test_engine_is_configured(self) -> None:
         """Test the DB engine reflects the DB configuration"""
