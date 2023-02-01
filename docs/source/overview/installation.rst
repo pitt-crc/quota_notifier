@@ -31,16 +31,12 @@ A full list of available settings is provided in the :doc:`configuration` page.
 .. code-block:: json
 
    {
-     "thresholds": [75, 100],
-     "uid_blacklist": [0,],
-     "gid_blacklist": [0,],
-     "file_systems": [
-         {
-           "name": "main",
-           "path": "/some/filepath",
-           "type": "generic"
-         }
-     ]
+       "log_path": "/home/notifier.log",
+       "log_level": "INFO",
+       "db_url": "sqlite:///home/notifier_data.db",
+       "thresholds": [75, 100],
+       "uid_blacklist": [0],
+       "gid_blacklist": [0]
    }
 
 By default, the application looks for the settings file at ``/etc/notifier/settings.json``.
