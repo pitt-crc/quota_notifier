@@ -70,27 +70,28 @@ class Application:
             if isinstance(handler, logging.StreamHandler):
                 app_logger.removeHandler(handler)
 
-        verbosity = {0: 'ERROR', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(verbosity, 'DEBUG')
+        log_format = logging.Formatter('%(levelname)8s - %(message)s')
+        verbosity = {
+            0: 100,
+            1: logging.WARNING,
+            2: logging.INFO,
+            3: logging.DEBUG
+        }.get(verbosity, logging.DEBUG)
 
-        # Set the verbosity for console outputs
-        if verbosity is not None:
-            log_format = logging.Formatter('%(levelname)8s - %(message)s')
-
-            stream_handler = logging.StreamHandler(sys.stdout)
-            stream_handler.setFormatter(log_format)
-            stream_handler.setLevel(verbosity)
-            app_logger.addHandler(stream_handler)
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(log_format)
+        stream_handler.setLevel(verbosity)
+        app_logger.addHandler(stream_handler)
 
     @staticmethod
-    def _load_settings(settings_path: Path, error_on_missing_file: bool = False) -> None:
+    def _load_settings(settings_path: Path) -> None:
         """Load application settings from the given file path
 
         Args:
             settings_path: Path to the settings file
-            error_on_missing_file: Optionally raise an error if ``settings_path`` does not exist
 
         Raises:
-            FileNotFoundError: When ``error_on_missing_file`` is ``True`` and ``settings_path`` does not exist
+            FileNotFoundError: When ``settings_path`` does not exist
         """
 
         logging.info('Validating settings...')
@@ -101,7 +102,7 @@ class Application:
             ApplicationSettings.set_from_file(settings_path)
 
         # Raise an error if asked to validate a custom settings file that does not exist
-        elif error_on_missing_file and settings_path != DEFAULT_SETTINGS_PATH:
+        elif settings_path != DEFAULT_SETTINGS_PATH:
             logging.error(f'Custom settings file does not exist: {settings_path}')
             raise FileNotFoundError(f'No settings file at {settings_path}')
 
@@ -122,7 +123,7 @@ class Application:
 
         # Configure the application
         cls._set_console_verbosity(verbose)
-        cls._load_settings(settings, error_on_missing_file=validate)
+        cls._load_settings(settings)
         ApplicationSettings.set(debug=debug)
 
         # Run core application logic
@@ -152,5 +153,9 @@ class Application:
             )
 
         except Exception as caught:
-            err_string = str(caught).replace('\n', ' ')
-            logging.critical(err_string)
+            err_string = str(caught)
+            logging.critical(err_string.replace('\n', ' '))
+
+            # Avoid printing to stdout twice if verbose is enabled
+            if not args.verbose:
+                parser.error(err_string)
