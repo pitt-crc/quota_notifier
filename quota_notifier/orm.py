@@ -8,7 +8,7 @@ Module Contents
 from __future__ import annotations
 
 import logging
-from typing import Callable
+from typing import Callable, Optional
 
 from sqlalchemy import Column, DateTime, Integer, MetaData, String, UniqueConstraint, create_engine, func
 from sqlalchemy.engine import Connection, Engine
@@ -67,11 +67,11 @@ class DBConnection:
     propagate to the entire parent application.
     """
 
-    connection: Connection = None
     engine: Engine = None
     url: str = None
     metadata: MetaData = Base.metadata
-    session: Callable[[], Session] = None
+    connection: Optional[Connection] = None
+    _session_maker: Callable[[], Session] = None
 
     @classmethod
     def configure(cls, url: str) -> None:
@@ -86,7 +86,19 @@ class DBConnection:
         logging.info(f'Configuring database URL: {url}')
 
         cls.url = url
+        if cls.connection:
+            cls.connection.close()
+
+        cls.connection = None
         cls.engine = create_engine(cls.url)
+        cls._session_maker = sessionmaker(cls.engine)
+
+    @classmethod
+    def session(cls) -> Session:
+        """Connect to the database and return a new database session"""
+
+        if cls.connection is None:
+            cls.connection = cls.engine.connect()
+
         cls.metadata.create_all(cls.engine)
-        cls.connection = cls.engine.connect()
-        cls.session = sessionmaker(cls.engine)
+        return cls._session_maker()

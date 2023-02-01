@@ -57,11 +57,6 @@ class SettingsValidation(TestCase):
 class VerbosityConfiguration(TestCase):
     """Test the application verbosity"""
 
-    def setUp(self) -> None:
-        """Reset application settings to defaults"""
-
-        ApplicationSettings.reset_defaults()
-
     @classmethod
     def tearDownClass(cls) -> None:
         """Reset application settings to defaults"""
@@ -139,10 +134,6 @@ class DatabaseConfiguration(TestCase):
         """Test the memory URL defaults to the default application settings"""
 
         Application.execute([])
-
-        # Remove the empty DB file generated automatically by application.execute
-        Path(ApplicationSettings.get('db_url').lstrip('sqlite:')).unlink()
-
         self.assertEqual(ApplicationSettings.get('db_url'), DBConnection.url)
 
     def test_db_matches_custom_settings(self) -> None:

@@ -16,6 +16,7 @@ class DBConfiguration(TestCase):
         with NamedTemporaryFile(suffix='._db') as temp:
             custom_url = f'sqlite:///{temp.name}'
             DBConnection.configure(custom_url)
+            DBConnection.session()  # Calling session establishes a connection with the DB
 
         # Make sure the DB engine is pointing to the new URL
         self.assertIsNotNone(DBConnection.url)
@@ -31,7 +32,6 @@ class DBConfiguration(TestCase):
             DBConnection.engine, DBConnection.connection.engine,
             '`DBConnection.connection` bound to incorrect engine')
 
-        self.assertIsNotNone(DBConnection.session)
         self.assertEqual(
-            DBConnection.engine, DBConnection.session.kw['bind'],
+            DBConnection.engine, DBConnection.session().get_bind(),
             '`DBConnection.session` bound to incorrect engine')
