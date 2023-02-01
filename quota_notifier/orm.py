@@ -67,10 +67,9 @@ class DBConnection:
     propagate to the entire parent application.
     """
 
-    engine: Engine = None
     url: str = None
-    metadata: MetaData = Base.metadata
-    connection: Optional[Connection] = None
+    engine: Engine = None
+    _connection: Optional[Connection] = None
     _session_maker: Callable[[], Session] = None
 
     @classmethod
@@ -86,8 +85,8 @@ class DBConnection:
         logging.info(f'Configuring database URL: {url}')
 
         cls.url = url
-        if cls.connection:
-            cls.connection.close()
+        if cls._connection:
+            cls._connection.close()
 
         cls.connection = None
         cls.engine = create_engine(cls.url)
@@ -97,8 +96,8 @@ class DBConnection:
     def session(cls) -> Session:
         """Connect to the database and return a new database session"""
 
-        if cls.connection is None:
+        if cls._connection is None:
             cls.connection = cls.engine.connect()
 
-        cls.metadata.create_all(cls.engine)
+        Base.metadata.create_all(cls.engine)
         return cls._session_maker()
