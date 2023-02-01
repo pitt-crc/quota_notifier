@@ -23,9 +23,9 @@ class Notification(Base):
     Fields:
       - id           (Integer): Primary key for this table
       - username      (String): Unique account name
-      - last_update (DateTime): Datetime of the last user notification
       - threshold    (Integer): Disk usage threshold that triggered the notification
       - file_system   (String): Name of the file system triggering the notification
+      - last_update (DateTime): Datetime of the last user notification
     """
 
     __tablename__ = 'notification'
@@ -33,8 +33,8 @@ class Notification(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, nullable=False)
-    file_system = Column(String, nullable=False)
     threshold = Column(Integer, nullable=False)
+    file_system = Column(String, nullable=False)
     last_update = Column(DateTime, nullable=False, onupdate=func.now(), server_default=func.now())
 
     @validates('threshold')
