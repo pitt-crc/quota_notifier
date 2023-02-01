@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Callable, Optional
 
-from sqlalchemy import Column, DateTime, Integer, MetaData, String, UniqueConstraint, create_engine, func
+from sqlalchemy import Column, DateTime, Integer, String, UniqueConstraint, create_engine, func
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 
