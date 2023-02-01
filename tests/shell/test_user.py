@@ -1,4 +1,5 @@
 """Tests for the ``User`` class"""
+
 import pwd
 from unittest import TestCase
 

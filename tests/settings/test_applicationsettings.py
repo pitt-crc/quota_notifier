@@ -17,14 +17,16 @@ class Defaults(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        """Set application settings to default values"""
+
         ApplicationSettings.reset_defaults()
 
-    def test_blacklisted_users(self) -> None:
+    def test_blacklisted_root_user(self) -> None:
         """Test root is in blacklisted users"""
 
         self.assertEqual({0, }, ApplicationSettings.get('uid_blacklist'))
 
-    def test_blacklisted_groups(self) -> None:
+    def test_blacklisted_root_group(self) -> None:
         """Test root is in blacklisted groups"""
 
         self.assertEqual({0, }, ApplicationSettings.get('gid_blacklist'))
@@ -36,7 +38,7 @@ class ResetDefaults(TestCase):
     def test_blacklist_is_reset(self) -> None:
         """Test settings values are overwritten/reset by the ``reset_defaults`` method"""
 
-        ApplicationSettings.set(uid_blacklist=['fake_username'])
+        ApplicationSettings.set(uid_blacklist=[1])
         ApplicationSettings.reset_defaults()
         self.assertEqual({0, }, ApplicationSettings.get('uid_blacklist'))
 
@@ -50,6 +52,17 @@ class ResetDefaults(TestCase):
 
             ApplicationSettings.reset_defaults()
             self.assertEqual(ApplicationSettings.get('db_url'), DBConnection.url)
+
+    def test_logging_is_reconfigured(self) -> None:
+        """Test logging is reconfigured to ignore log files"""
+
+        with NamedTemporaryFile(suffix='.log') as temp_log_file:
+            ApplicationSettings.set(log_path=temp_log_file.name)
+            ApplicationSettings.reset_defaults()
+
+            for handler in logging.getLogger().handlers:
+                if isinstance(handler, logging.FileHandler):
+                    self.fail('Found a file logger configured for the application')
 
 
 class ConfigureFromFile(TestCase):

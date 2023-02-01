@@ -50,10 +50,11 @@ class FileSystemSchema(BaseSettings):
             The validated file system name
         """
 
-        if not value.strip():
+        stripped = value.strip()
+        if not stripped:
             raise ValueError(f'File system name cannot be blank')
 
-        return value
+        return stripped
 
     @validator('path')
     def validate_path(cls, value: Path) -> Path:
@@ -70,7 +71,7 @@ class FileSystemSchema(BaseSettings):
         """
 
         if not value.exists():
-            raise ValueError(f'File system does not exist {value}')
+            raise ValueError(f'File system path does not exist {value}')
 
         return value
 
