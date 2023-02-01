@@ -18,13 +18,13 @@ class SettingsValidation(TestCase):
         """Test ``SystemExit`` is raised when the settings file does not exist"""
 
         with self.assertRaisesRegex(SystemExit, 'No settings file at fake/file/path.json'):
-            Application.execute(['--validate', '-s', 'fake/file/path.json'])
+            Application.execute(['--debug', '--validate', '-s', 'fake/file/path.json'])
 
     def test_error_on_empty_file(self) -> None:
         """Test ``SystemExit`` is raised when the settings file is empty"""
 
         with self.assertRaises(SystemExit), NamedTemporaryFile() as temp:
-            Application.execute(['--validate', '-s', temp.name])
+            Application.execute(['--debug', '--validate', '-s', temp.name])
 
     def test_error_on_invalid_file(self) -> None:
         """Test ``SystemExit`` is raised when the settings file is not valid json"""
@@ -33,7 +33,7 @@ class SettingsValidation(TestCase):
             with open(temp.name, 'w') as f:
                 f.write('notjson')
 
-            Application.execute(['--validate', '-s', temp.name])
+            Application.execute(['--debug', '--validate', '-s', temp.name])
 
     def test_error_on_invalid_settings(self) -> None:
         """Test ``SystemExit`` is raised when the settings file has extra settings"""
@@ -42,7 +42,7 @@ class SettingsValidation(TestCase):
             with open(temp.name, 'w') as f:
                 f.write('{"extra": "field"}')
 
-            Application.execute(['--validate', '-s', temp.name])
+            Application.execute(['--debug', '--validate', '-s', temp.name])
 
     def test_no_error_on_defaults(self) -> None:
         """Test no error is raised when validating the default application settings path"""
@@ -82,14 +82,14 @@ class VerbosityConfiguration(TestCase):
     def test_output_format(self):
         """Test the console logging format has been customized"""
 
-        Application.execute(['-v', '--debug'])
+        Application.execute(['--debug', '-v', '--debug'])
         log_format = self.get_stream_handler().formatter._fmt
         self.assertEqual('%(levelname)8s - %(message)s', log_format)
 
     def test_verbose_level_zero(self):
         """Test the application is silent by default"""
 
-        Application.execute([])
+        Application.execute(['--debug'])
         self.assertEqual(100, self.get_stream_handler().level)
 
     def test_verbose_level_one(self):
