@@ -23,6 +23,12 @@ class NameValidation(TestCase):
             with self.assertRaisesRegex(ValueError, 'File system name cannot be blank'):
                 FileSystemSchema(name=char)
 
+    def test_whitespace_is_stripped(self) -> None:
+        """Test leading/trailing whitespace is stripped from filesystem names"""
+
+        file_system = FileSystemSchema(name=' abc ', path='/', type='generic')
+        self.assertEqual('abc', file_system.name)
+
 
 class PathValidation(TestCase):
     """Test validation of the ``path`` field"""
@@ -37,12 +43,12 @@ class PathValidation(TestCase):
     def test_nonexistent_path(self) -> None:
         """Test a ``ValueError`` is raised for non-existent paths"""
 
-        with self.assertRaisesRegex(ValueError, 'File system does not exist'):
+        with self.assertRaisesRegex(ValueError, 'File system path does not exist'):
             FileSystemSchema.validate_path(Path('/fake/path'))
 
 
 class TypeValidation(TestCase):
-    """Test validation of the ``type`` filed"""
+    """Test validation of the ``type`` field"""
 
     @staticmethod
     def test_valid_types_pass() -> None:
