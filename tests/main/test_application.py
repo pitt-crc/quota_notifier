@@ -2,12 +2,9 @@
 
 import json
 import logging
-from json import JSONDecodeError
-from pathlib import Path
+import os
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
-
-from pydantic import ValidationError
 
 from quota_notifier.main import Application, DEFAULT_SETTINGS_PATH
 from quota_notifier.orm import DBConnection
@@ -18,49 +15,44 @@ class SettingsValidation(TestCase):
     """Test the validation of application settings files when ``validate=True``"""
 
     def test_error_missing_file(self) -> None:
-        """Test ``FileNotFoundError`` is raised when the settings file does not exist"""
+        """Test ``SystemExit`` is raised when the settings file does not exist"""
 
-        with self.assertRaises(FileNotFoundError):
-            Application.run(validate=True, verbose=0, debug=True, settings=Path('fake/file/path.json'))
+        with self.assertRaisesRegex(SystemExit, 'No settings file at fake/file/path.json'):
+            Application.execute(['--debug', '--validate', '-s', 'fake/file/path.json'])
 
     def test_error_on_empty_file(self) -> None:
-        """Test ``JSONDecodeError`` is raised when the settings file is empty"""
+        """Test ``SystemExit`` is raised when the settings file is empty"""
 
-        with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
-            Application.run(validate=True, verbose=0, debug=True, settings=Path(temp.name))
+        with self.assertRaises(SystemExit), NamedTemporaryFile() as temp:
+            Application.execute(['--debug', '--validate', '-s', temp.name])
 
     def test_error_on_invalid_file(self) -> None:
-        """Test ``JSONDecodeError`` is raised when the settings file is not valid json"""
+        """Test ``SystemExit`` is raised when the settings file is not valid json"""
 
-        with self.assertRaises(JSONDecodeError), NamedTemporaryFile() as temp:
+        with self.assertRaises(SystemExit), NamedTemporaryFile() as temp:
             with open(temp.name, 'w') as f:
                 f.write('notjson')
 
-            Application.run(validate=True, verbose=0, debug=True, settings=Path(temp.name))
+            Application.execute(['--debug', '--validate', '-s', temp.name])
 
     def test_error_on_invalid_settings(self) -> None:
-        """Test ``ValidationError`` is raised when the settings file has extra settings"""
+        """Test ``SystemExit`` is raised when the settings file has extra settings"""
 
-        with self.assertRaises(ValidationError), NamedTemporaryFile() as temp:
+        with self.assertRaises(SystemExit), NamedTemporaryFile() as temp:
             with open(temp.name, 'w') as f:
                 f.write('{"extra": "field"}')
 
-            Application.run(validate=True, verbose=0, debug=True, settings=Path(temp.name))
+            Application.execute(['--debug', '--validate', '-s', temp.name])
 
     def test_no_error_on_defaults(self) -> None:
         """Test no error is raised when validating the default application settings path"""
 
         self.assertFalse(DEFAULT_SETTINGS_PATH.exists())
-        Application.run(validate=True, verbose=0, debug=True, settings=DEFAULT_SETTINGS_PATH)
+        Application.run(validate=True, debug=True, settings=DEFAULT_SETTINGS_PATH)
 
 
 class VerbosityConfiguration(TestCase):
     """Test the application verbosity"""
-
-    def setUp(self) -> None:
-        """Reset application settings to defaults"""
-
-        ApplicationSettings.reset_defaults()
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -90,38 +82,38 @@ class VerbosityConfiguration(TestCase):
     def test_output_format(self):
         """Test the console logging format has been customized"""
 
-        Application.execute(['-v'])
+        Application.execute(['--debug', '-v', '--debug'])
         log_format = self.get_stream_handler().formatter._fmt
         self.assertEqual('%(levelname)8s - %(message)s', log_format)
 
     def test_verbose_level_zero(self):
         """Test the application is silent by default"""
 
-        Application.execute([])
+        Application.execute(['--debug'])
         self.assertEqual(100, self.get_stream_handler().level)
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""
 
-        Application.execute(['-v'])
+        Application.execute(['-v', '--debug'])
         self.assertEqual(logging.WARNING, self.get_stream_handler().level)
 
     def test_verbose_level_two(self):
         """Test two verbose flags sets the logging level to ``INFO``"""
 
-        Application.execute(['-vv'])
+        Application.execute(['-vv', '--debug'])
         self.assertEqual(logging.INFO, self.get_stream_handler().level)
 
     def test_verbose_level_three(self):
         """Test three verbose flags sets the logging level to ``DEBUG``"""
 
-        Application.execute(['-vvv'])
+        Application.execute(['-vvv', '--debug'])
         self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
 
     def test_verbose_level_many(self):
         """Test several verbose flags sets the logging level to ``DEBUG``"""
 
-        Application.execute(['-vvvvvvvvvv'])
+        Application.execute(['-vvvvvvvvvv', '--debug'])
         self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
 
 
@@ -138,10 +130,7 @@ class DatabaseConfiguration(TestCase):
         """Test the memory URL defaults to the default application settings"""
 
         Application.execute([])
-
-        # Remove the empty DB file generated automatically by application.execute
-        Path(ApplicationSettings.get('db_url').lstrip('sqlite:')).unlink()
-
+        os.remove(ApplicationSettings.get('db_url').lstrip('sqlite:'))
         self.assertEqual(ApplicationSettings.get('db_url'), DBConnection.url)
 
     def test_db_matches_custom_settings(self) -> None:
