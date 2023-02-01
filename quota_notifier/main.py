@@ -60,14 +60,17 @@ class Application:
             verbosity: Number of commandline verbosity flags
         """
 
+        # Set the root logging level to log everything
+        # Apply additional filtering at the handler level
         app_logger = logging.getLogger()
+        app_logger.setLevel(0)
 
         # Remove any old stream loggers
         for handler in app_logger.handlers:
             if isinstance(handler, logging.StreamHandler):
                 app_logger.removeHandler(handler)
 
-        verbosity = {0: None, 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(verbosity, 'DEBUG')
+        verbosity = {0: 'ERROR', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(verbosity, 'DEBUG')
 
         # Set the verbosity for console outputs
         if verbosity is not None:
@@ -149,4 +152,5 @@ class Application:
             )
 
         except Exception as caught:
-            parser.error(str(caught))
+            err_string = str(caught).replace('\n', ' ')
+            logging.critical(err_string)
