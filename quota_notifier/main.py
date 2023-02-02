@@ -17,7 +17,7 @@ from . import __version__
 from .notify import UserNotifier
 from .settings import ApplicationSettings
 
-DEFAULT_SETTINGS_PATH = Path('/etc/notifier/settings.json')
+SETTINGS_PATH = Path('/etc/notifier/settings.json')
 
 
 class Parser(ArgumentParser):
@@ -41,9 +41,6 @@ class Parser(ArgumentParser):
         self.add_argument('--version', action='version', version=__version__)
         self.add_argument('--validate', action='store_true', help='validate settings without sending notifications')
         self.add_argument('--debug', action='store_true', help='run the application but do not send any emails')
-        self.add_argument(
-            '-s', '--settings', type=Path, default=DEFAULT_SETTINGS_PATH,
-            help='path to the application settings file')
         self.add_argument(
             '-v', action='count', dest='verbose', default=0,
             help='set output verbosity to warning (-v), info (-vv), or debug (-vvv)')
@@ -89,38 +86,24 @@ class Application:
         app_logger.addHandler(stream_handler)
 
     @staticmethod
-    def _load_settings(settings_path: Path) -> None:
-        """Load application settings from the given file path
-
-        Args:
-            settings_path: Path to the settings file
-
-        Raises:
-            FileNotFoundError: When ``settings_path`` does not exist
-        """
+    def _load_settings() -> None:
+        """Load application settings from the given file path"""
 
         logging.info('Validating settings...')
 
         # Load and validate custom application settings from disk
         # Implicitly raises an error if settings are invalid
-        if settings_path.exists():
-            ApplicationSettings.set_from_file(settings_path)
+        if SETTINGS_PATH.exists():
+            ApplicationSettings.set_from_file(SETTINGS_PATH)
 
-        # Raise an error if asked to validate a custom settings file that does not exist
-        elif settings_path != DEFAULT_SETTINGS_PATH:
-            logging.error(f'Custom settings file does not exist: {settings_path}')
-            raise FileNotFoundError(f'No settings file at {settings_path}')
-
-        # Load the default application settings
         else:
             logging.info('Using default settings')
 
     @classmethod
-    def run(cls, settings: Path = None, validate: bool = False, verbose: int = 0, debug: bool = False) -> None:
+    def run(cls, validate: bool = False, verbose: int = 0, debug: bool = False) -> None:
         """Run the application using parsed commandline arguments
 
         Args:
-            settings: Path to an application settings file
             validate: Validate application settings without issuing user notifications
             verbose: Console output verbosity
             debug: Run the application in debug mode
@@ -128,7 +111,7 @@ class Application:
 
         # Configure the application
         cls._set_console_verbosity(verbose)
-        cls._load_settings(settings)
+        cls._load_settings()
         ApplicationSettings.set(debug=debug)
 
         # Run core application logic
@@ -151,7 +134,6 @@ class Application:
 
         try:
             cls.run(
-                settings=args.settings,
                 validate=args.validate,
                 verbose=args.verbose,
                 debug=args.debug,
