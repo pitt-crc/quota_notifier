@@ -10,6 +10,8 @@ class DBConfiguration(TestCase):
     """Test configuration of the DB connection via the ``configure`` method"""
 
     def test_connection_is_reset(self) -> None:
+        """Test the database connection is reset when connecting to a new URL"""
+
         DBConnection.configure('sqlite:///:memory:')
         self.assertIsNone(DBConnection.connection)
 
