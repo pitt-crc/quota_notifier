@@ -1,9 +1,8 @@
 """Tests for the ``Parser`` class."""
 
-from pathlib import Path
 from unittest import TestCase
 
-from quota_notifier.main import DEFAULT_SETTINGS_PATH, Parser
+from quota_notifier.main import Parser
 
 
 class ParserHelpData(TestCase):
@@ -18,25 +17,6 @@ class ParserHelpData(TestCase):
         """Test the application description is not empty"""
 
         self.assertTrue(Parser().description)
-
-
-class SettingsOption(TestCase):
-    """Test parsing of the ``--settings`` option"""
-
-    def test_default_config_path(self) -> None:
-        """Test the default settings path matches globally defined values"""
-
-        args = Parser().parse_args([])
-        self.assertEqual(DEFAULT_SETTINGS_PATH, args.settings)
-
-    def test_stored_as_path(self) -> None:
-        """Test the parsed value is stored as a ``Path`` object"""
-
-        test_path_str = '/my/test/path'
-        test_path_obj = Path(test_path_str)
-
-        args = Parser().parse_args(['-s', test_path_str])
-        self.assertEqual(test_path_obj, args.settings)
 
 
 class ValidateOption(TestCase):

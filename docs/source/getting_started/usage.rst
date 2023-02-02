@@ -35,19 +35,13 @@ All ID ranges are treated as being inclusive.
 Validate Application Settings
 -----------------------------
 
-By default, the application looks for application settings at ``/etc/notifier/settings.json``.
-This path can be customized via the ``-s`` argument:
-
-.. code-block::
-
-      notifier -s [SETTINGS-PATH]
-
+Application settings can be customized via the ``/etc/notifier/settings.json`` file.
 The ``notifier`` utility will automatically validate the application settings file before issuing email notifications.
 However, the settings file can be validated without issuing email notifications by setting the ``--validate`` flag:
 
 .. code-block:: bash
 
-   notifier -s [SETTINGS-PATH] --validate
+   notifier --validate
 
 If the settings are valid, the application will exit silently.
 Otherwise, an error message will detail the invalid settings.

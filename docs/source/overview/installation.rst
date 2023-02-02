@@ -24,7 +24,7 @@ The ``notifier`` command line utility is installable via the `pip <https://pip.p
 Configuration
 -------------
 
-Application settings are configurable via JSON settings file.
+Application settings are configurable via a settings file at ``/etc/notifier/settings.json``.
 The example below includes a minimal subset of useful settings to get up and running.
 A full list of available settings is provided in the :doc:`configuration` page.
 
@@ -38,9 +38,6 @@ A full list of available settings is provided in the :doc:`configuration` page.
        "uid_blacklist": [0],
        "gid_blacklist": [0]
    }
-
-By default, the application looks for the settings file at ``/etc/notifier/settings.json``.
-This path can also be changed at runtime (see the :doc:`../getting_started/usage` page for more information).
 
 Once the application has been configured, you can check the configuration file is valid by running:
 
