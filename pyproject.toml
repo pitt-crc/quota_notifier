@@ -24,7 +24,7 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-notifier = "quota_notifier.main:Application.execute"
+notifier = "quota_notifier.cli:Application.execute"
 
 [tool.poetry.dependencies]
 python = ">=3.8"
