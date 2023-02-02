@@ -30,4 +30,9 @@ a threshold before exceeding the threshold a second time.
 
 import importlib.metadata
 
+from .settings import ApplicationSettings as _settings
+
 __version__ = importlib.metadata.version(__package__)
+
+# Automatically configure default application settings
+_settings.reset_defaults()
