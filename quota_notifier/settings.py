@@ -134,7 +134,7 @@ class SettingsSchema(BaseSettings):
         title='SMTP Server Host Name',
         type=str,
         default='',
-        description='Name of the remote SMTP host'
+        description='Name of the SMTP host server'
     )
 
     smtp_port: int = Field(
@@ -149,8 +149,8 @@ class SettingsSchema(BaseSettings):
         title='Database Path',
         type=str,
         default=f'sqlite:///{DEFAULT_DB_PATH}',
-        description=('Path to the application database. '
-                     'Default value varies by installed system but is always in the installation directory.'))
+        description=('URL for the application database. '
+                     'By default, a SQLITE database is created in the working directory.'))
 
     # Email notification settings
     email_from: str = Field(
