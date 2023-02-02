@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from quota_notifier.main import Parser
+from quota_notifier.cli import Parser
 
 
 class ParserHelpData(TestCase):
