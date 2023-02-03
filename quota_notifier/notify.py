@@ -178,8 +178,11 @@ class UserNotifier:
             The largest notification threshold that is less than the current usage or None
         """
 
+        # Get the notification thresholds for the given file system quota
+        file_systems = ApplicationSettings.get('file_systems')
+        thresholds = next(fs.hresholds for fs in file_systems if fs.name == quota.name)
+
         next_threshold = None
-        thresholds = ApplicationSettings.get('thresholds')
         if quota.percentage >= min(thresholds):
             index = bisect_right(thresholds, quota.percentage)
             next_threshold = thresholds[index - 1]
