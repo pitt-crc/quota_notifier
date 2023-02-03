@@ -67,12 +67,18 @@ class TypeValidation(TestCase):
 class ThresholdValidation(TestCase):
     """Test validation of the ``threshold`` field"""
 
-    def test_intermediate_values_apss(self) -> None:
+    def test_intermediate_values_pass(self) -> None:
         """Test values greater than 0 and less than 100 pass validation"""
 
         test_thresholds = [1, 25, 50, 75, 99]
         validated_value = FileSystemSchema.validate_thresholds(test_thresholds)
         self.assertCountEqual(test_thresholds, validated_value)
+
+    def test_empty_list_fails(self) -> None:
+        """Test an empty collection of thresholds fails validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'At least one threshold must be specified'):
+            FileSystemSchema(thresholds=[])
 
     def test_zero_percent(self) -> None:
         """Test the value ``0`` fails validation"""

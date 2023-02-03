@@ -81,15 +81,18 @@ class FileSystemSchema(BaseSettings):
         return value
 
     @validator('thresholds')
-    def validate_thresholds(cls, value: int) -> int:
+    def validate_thresholds(cls, value: list) -> list:
         """Validate threshold values are between 0 and 100 (exclusive)
 
         Args:
-            value: The threshold value to validate
+            value: List of threshold values to validate
 
         Returns:
-            The validated threshold value
+            The validated threshold values
         """
+
+        if not value:
+            raise ValueError(f'At least one threshold must be specified per file system')
 
         for threshold in value:
             if not (100 > threshold > 0):
