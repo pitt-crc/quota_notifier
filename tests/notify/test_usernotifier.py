@@ -135,41 +135,72 @@ class GetLastThreshold(TestCase):
         self.assertEqual(test_threshold, threshold)
 
 
+# TODO: Update docs for methods
+# TODO: Check behavior enforced by the last two tests is what we want
 class GetNextThreshold(TestCase):
     """Test determination of the next notification threshold"""
+
+    def setUp(self) -> None:
+        """Restore default application settings and run tests against a temporary DB in memory"""
+
+        ApplicationSettings.reset_defaults()
+        ApplicationSettings.set(db_url='sqlite:///:memory:')
+
+        self.test_file_system = FileSystemSchema(name='test', path='/', type='generic', thresholds=[50, 75])
+        ApplicationSettings.set(file_systems=[self.test_file_system])
 
     def test_usage_below_minimum_thresholds(self) -> None:
         """Test return is ``None`` when usage is below the minimum threshold"""
 
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), 0, 100)
+        quota = GenericQuota(
+            self.test_file_system.name,
+            self.test_file_system.path,
+            User('user1'),
+            0,
+            100)
+
         self.assertIsNone(UserNotifier.get_next_threshold(quota))
 
     def test_usage_at_thresholds(self) -> None:
         """Test return matches a threshold when usage equals a threshold"""
 
-        thresholds = ApplicationSettings.get('thresholds')
+        expected_threshold = self.test_file_system.thresholds[0]
+        quota = GenericQuota(
+            self.test_file_system.name,
+            self.test_file_system.path,
+            User('user1'),
+            expected_threshold,
+            100)
 
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), thresholds[0], 100)
-        self.assertEqual(thresholds[0], UserNotifier.get_next_threshold(quota))
-
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), thresholds[-1], 100)
-        self.assertEqual(thresholds[-1], UserNotifier.get_next_threshold(quota))
+        self.assertEqual(expected_threshold, UserNotifier.get_next_threshold(quota))
 
     def test_usage_between_thresholds(self) -> None:
         """Test return is the lower threshold when usage is between two thresholds"""
 
-        thresholds = ApplicationSettings.get('thresholds')
-        usage = (thresholds[0] + thresholds[1]) // 2
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), usage, 100)
-        self.assertEqual(thresholds[0], UserNotifier.get_next_threshold(quota))
+        lower_threshold = self.test_file_system.thresholds[0]
+        upper_threshold = self.test_file_system.thresholds[1]
+        median_usage = (lower_threshold + upper_threshold) // 2
+        quota = GenericQuota(
+            self.test_file_system.name,
+            self.test_file_system.path,
+            User('user1'),
+            median_usage,
+            100)
+
+        self.assertEqual(lower_threshold, UserNotifier.get_next_threshold(quota))
 
     def test_usage_above_max_threshold(self) -> None:
         """Test return is the maximum threshold when usage exceeds the maximum threshold"""
 
-        max_threshold = max(ApplicationSettings.get('thresholds'))
-        usage = max_threshold + 1
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), usage, 100)
-        self.assertEqual(max_threshold, UserNotifier.get_next_threshold(quota))
+        expected_threshold = self.test_file_system.thresholds[-1]
+        quota = GenericQuota(
+            self.test_file_system.name,
+            self.test_file_system.path,
+            User('user1'),
+            expected_threshold + 10,
+            100)
+
+        self.assertEqual(expected_threshold, UserNotifier.get_next_threshold(quota))
 
 
 @patch('quota_notifier.notify.SMTP')
@@ -183,7 +214,7 @@ class NotificationHistory(TestCase):
         self.mock_file_system = 'fs1'
         self.query = select(Notification).where(Notification.username == self.mock_user.username)
 
-        DBConnection.configure('sqlite:///:memory:')
+        ApplicationSettings.set(db_url='sqlite:///:memory:')
 
     def create_db_entry(self, threshold: int) -> None:
         """Create a database record representing a previous notification

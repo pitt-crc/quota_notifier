@@ -180,7 +180,7 @@ class UserNotifier:
 
         # Get the notification thresholds for the given file system quota
         file_systems = ApplicationSettings.get('file_systems')
-        thresholds = next(fs.hresholds for fs in file_systems if fs.name == quota.name)
+        thresholds = next(fs.thresholds for fs in file_systems if fs.name == quota.name)
 
         next_threshold = None
         if quota.percentage >= min(thresholds):
