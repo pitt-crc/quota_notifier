@@ -62,3 +62,38 @@ class TypeValidation(TestCase):
 
         with self.assertRaisesRegex(ValidationError, 'type\n  unexpected value;'):
             FileSystemSchema(type='fake_type')
+
+
+class ThresholdValidation(TestCase):
+    """Test validation of the ``threshold`` field"""
+
+    def test_intermediate_values_apss(self) -> None:
+        """Test values greater than 0 and less than 100 pass validation"""
+
+        test_thresholds = [1, 25, 50, 75, 99]
+        validated_value = FileSystemSchema.validate_thresholds(test_thresholds)
+        self.assertCountEqual(test_thresholds, validated_value)
+
+    def test_zero_percent(self) -> None:
+        """Test the value ``0`` fails validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+            FileSystemSchema(thresholds=[0, 50])
+
+    def test_100_percent(self) -> None:
+        """Test the value ``100`` fails validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+            FileSystemSchema(thresholds=[50, 100])
+
+    def test_negative_percent(self) -> None:
+        """Test negative values fail validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+            FileSystemSchema(thresholds=[-1, 50])
+
+    def test_over_100_percent(self) -> None:
+        """Test values over ``100`` fail validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+            FileSystemSchema(thresholds=[50, 101])

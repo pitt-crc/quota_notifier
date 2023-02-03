@@ -39,6 +39,12 @@ class FileSystemSchema(BaseSettings):
         type=Literal['ihome', 'generic', 'beegfs'],
         description='Type of the file system')
 
+    thresholds: List[int] = Field(
+        title='Notification Thresholds',
+        type=List[int],
+        default=[90, ],
+        description='Usage percentages to issue notifications for.')
+
     @validator('name')
     def validate_name(cls, value: str) -> str:
         """Ensure the given name is not blank
@@ -75,6 +81,23 @@ class FileSystemSchema(BaseSettings):
 
         return value
 
+    @validator('thresholds')
+    def validate_thresholds(cls, value: int) -> int:
+        """Validate threshold values are between 0 and 100 (exclusive)
+
+        Args:
+            value: The threshold value to validate
+
+        Returns:
+            The validated threshold value
+        """
+
+        for threshold in value:
+            if not (100 > threshold > 0):
+                raise ValueError(f'Notification threshold {threshold} must be greater than 0 and less than 100')
+
+        return value
+
 
 class SettingsSchema(BaseSettings):
     """Defines the schema and default values for top level application settings"""
@@ -85,12 +108,6 @@ class SettingsSchema(BaseSettings):
         type=Path,
         default=Path('/ihome/crc/scripts/ihome_quota.json'),
         description='Path to ihome storage information.')
-
-    thresholds: List[int] = Field(
-        title='Notification Thresholds',
-        type=List[int],
-        default=[98, 100],
-        description='Usage percentages to issue notifications for.')
 
     file_systems: List[FileSystemSchema] = Field(
         title='Monitored File Systems',
