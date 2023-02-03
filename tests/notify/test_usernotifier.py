@@ -16,7 +16,7 @@ from quota_notifier.shell import User
 
 
 class GetUsers(TestCase):
-    """Test the fetching of usernames to notify"""
+    """Test the ``get_users`` method"""
 
     def tearDown(self) -> None:
         """Reset any modifications to application settings after each test"""
