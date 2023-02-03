@@ -26,8 +26,8 @@ class NameValidation(TestCase):
     def test_whitespace_is_stripped(self) -> None:
         """Test leading/trailing whitespace is stripped from filesystem names"""
 
-        file_system = FileSystemSchema(name=' abc ', path='/', type='generic')
-        self.assertEqual('abc', file_system.name)
+        validated_name = FileSystemSchema.validate_name(' abc ')
+        self.assertEqual('abc', validated_name)
 
 
 class PathValidation(TestCase):
@@ -55,7 +55,7 @@ class TypeValidation(TestCase):
         """Test valid types do not raise errors"""
 
         for fs_type in QuotaFactory.QuotaType:
-            FileSystemSchema(name='name', type=fs_type.name, path='/')
+            FileSystemSchema(name='name', type=fs_type.name, path='/', thresholds=[50])
 
     def test_invalid_type_error(self) -> None:
         """Test a ``ValueError`` is raised for invalid types"""

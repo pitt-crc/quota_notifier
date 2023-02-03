@@ -42,7 +42,6 @@ class FileSystemSchema(BaseSettings):
     thresholds: List[int] = Field(
         title='Notification Thresholds',
         type=List[int],
-        default=[90, ],
         description='Usage percentages to issue notifications for.')
 
     @validator('name')
