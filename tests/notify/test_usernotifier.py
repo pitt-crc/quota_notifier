@@ -69,7 +69,7 @@ class GetUserQuotas(TestCase):
 
         # Register the current directory with the application
         self.current_dir = Path(__file__).parent
-        self.mock_file_system = FileSystemSchema(name='test', path=self.current_dir, type='generic')
+        self.mock_file_system = FileSystemSchema(name='test', path=self.current_dir, type='generic', thresholds=[50])
         ApplicationSettings.set(file_systems=[self.mock_file_system])
 
         # Create a subdirectory matching the current user's group
