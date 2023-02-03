@@ -97,24 +97,30 @@ class GetUserQuotas(TestCase):
 
 
 class GetLastThreshold(TestCase):
-    """Test fetching a quota's last notification threshold"""
+    """Test fetching a quota's last notification threshold via the ``get_last_threshold`` method"""
+
+    def setUp(self) -> None:
+        """Run tests against a temporary database in memory"""
+
+        ApplicationSettings.set(db_url='sqlite:///:memory:')
 
     def test_missing_notification_history(self) -> None:
-        """Test the first return value is ``None`` for a missing notification history"""
+        """Test the return value is ``None`` for a missing notification history"""
 
         quota = GenericQuota(name='fake', path=Path('/'), user=User('fake'), size_used=0, size_limit=100)
-        threshold = UserNotifier.get_next_threshold(quota)
+        threshold = UserNotifier.get_last_threshold(DBConnection.session(), quota)
         self.assertIsNone(threshold)
 
     def test_existing_notification_history(self) -> None:
-        """Test the first return matches the notification history"""
+        """Test the return value matches information from the database"""
 
+        # Test data for a previous notification at 50% usage
         test_path = '/'
         test_user = User('user1')
         test_filesystem = 'filesystem1'
-        test_threshold = ApplicationSettings.get('thresholds')[0]
+        test_threshold = 50
 
-        DBConnection.configure(url='sqlite:///:memory:')
+        # Populate database with test data
         with DBConnection.session() as session:
             session.add(Notification(
                 username=test_user.username,
@@ -123,6 +129,7 @@ class GetLastThreshold(TestCase):
             ))
             session.commit()
 
+        # Assume 0% usage and fetch last notification threshold
         quota = GenericQuota(test_filesystem, test_path, test_user, 0, 100)
         threshold = UserNotifier.get_last_threshold(session, quota)
         self.assertEqual(test_threshold, threshold)
