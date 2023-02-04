@@ -135,13 +135,15 @@ class GetLastThreshold(TestCase):
         self.assertEqual(test_threshold, threshold)
 
 
-# TODO: Update docs for methods
-# TODO: Check behavior enforced by the last two tests is what we want
 class GetNextThreshold(TestCase):
     """Test determination of the next notification threshold"""
 
     def setUp(self) -> None:
-        """Restore default application settings and run tests against a temporary DB in memory"""
+        """Set up testing constructs against a temporary DB in memory
+
+        Configures a single file system in application settings called test with
+        notification thresholds at 50 and 75 percent.
+        """
 
         ApplicationSettings.reset_defaults()
         ApplicationSettings.set(db_url='sqlite:///:memory:')
