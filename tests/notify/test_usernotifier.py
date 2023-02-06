@@ -219,9 +219,11 @@ class NotificationHistory(TestCase):
         ApplicationSettings.reset_defaults()
         ApplicationSettings.set(db_url='sqlite:///:memory:')
 
+        # Reusable database query for fetching user info
         self.mock_user = User('mock')
         self.query = select(Notification).where(Notification.username == self.mock_user.username)
 
+        # Configure a mock file system with the parent applicaion
         self.mock_file_system = FileSystemSchema(name='test', path='/', type='generic', thresholds=[50, 75])
         ApplicationSettings.set(file_systems=[self.mock_file_system])
 
@@ -300,7 +302,6 @@ class NotificationHistory(TestCase):
         self.run_application(usage=lowest_threshold)
 
         # Check the notification history was updated
-
         with DBConnection.session() as session:
             db_record = session.execute(self.query).scalars().first()
             self.assertEqual(lowest_threshold, db_record.threshold)
