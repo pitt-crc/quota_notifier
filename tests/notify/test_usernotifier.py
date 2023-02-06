@@ -3,6 +3,7 @@
 import os
 import pwd
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -16,18 +17,17 @@ from quota_notifier.shell import User
 
 
 class GetUsers(TestCase):
-    """Test the fetching of usernames to notify"""
+    """Test the ``get_users`` method"""
 
     def tearDown(self) -> None:
         """Reset any modifications to application settings after each test"""
 
         ApplicationSettings.reset_defaults()
 
-    def test_includes_all_users(self) -> None:
-        """Test all users except root are returned by default"""
+    def test_empty_blacklists(self) -> None:
+        """Test all users are returned for empty blacklists"""
 
         ApplicationSettings.set(uid_blacklist=[], gid_blacklist=[])
-
         returned_users = [user.username for user in UserNotifier().get_users()]
         all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertListEqual(all_users, returned_users)
@@ -67,54 +67,60 @@ class GetUserQuotas(TestCase):
     def setUp(self) -> None:
         """Create and register a temporary directory to generate quota objects for"""
 
-        # Register the current directory with the application
-        self.current_dir = Path(__file__).parent
-        self.mock_file_system = FileSystemSchema(name='test', path=self.current_dir, type='generic')
+        # Register a temporary directory with the application
+        self.temp_dir = TemporaryDirectory()
+        self.mock_file_system = FileSystemSchema(name='test', path=self.temp_dir.name, type='generic', thresholds=[50])
         ApplicationSettings.set(file_systems=[self.mock_file_system])
 
         # Create a subdirectory matching the current user's group
-        self.current_user = User(os.getenv('USER'))
-        self.temp_dir = self.current_dir / self.current_user.group
-        self.temp_dir.mkdir(exist_ok=True)
+        self.test_user = User(os.getenv('USER'))
+        group_dir = Path(self.temp_dir.name) / self.test_user.group
+        group_dir.mkdir(exist_ok=True)
 
     def tearDown(self) -> None:
         """Restore application settings and remove temporary directories"""
 
         ApplicationSettings.reset_defaults()
-        self.temp_dir.rmdir()
+        self.temp_dir.cleanup()
 
     def test_quota_matches_user(self) -> None:
         """Test the returned quotas match the given user"""
 
-        quota = next(UserNotifier().get_user_quotas(self.current_user))
-        self.assertEqual(self.current_user, quota.user)
+        quota = next(UserNotifier().get_user_quotas(self.test_user))
+        self.assertEqual(self.test_user, quota.user)
 
     def test_path_is_customized(self) -> None:
-        """Test the returned quotas match the given path"""
+        """Test the returned quotas match the group directory"""
 
-        quota = next(UserNotifier().get_user_quotas(self.current_user))
-        self.assertEqual(self.current_user.group, quota.path.name)
+        quota = next(UserNotifier().get_user_quotas(self.test_user))
+        self.assertEqual(self.test_user.group, quota.path.name)
 
 
 class GetLastThreshold(TestCase):
-    """Test fetching a quota's last notification threshold"""
+    """Test fetching a quota's last notification threshold via the ``get_last_threshold`` method"""
+
+    def setUp(self) -> None:
+        """Run tests against a temporary database in memory"""
+
+        ApplicationSettings.set(db_url='sqlite:///:memory:')
 
     def test_missing_notification_history(self) -> None:
-        """Test the first return value is ``None`` for a missing notification history"""
+        """Test the return value is ``None`` for a missing notification history"""
 
         quota = GenericQuota(name='fake', path=Path('/'), user=User('fake'), size_used=0, size_limit=100)
-        threshold = UserNotifier.get_next_threshold(quota)
+        threshold = UserNotifier.get_last_threshold(DBConnection.session(), quota)
         self.assertIsNone(threshold)
 
     def test_existing_notification_history(self) -> None:
-        """Test the first return matches the notification history"""
+        """Test the return value matches information from the database"""
 
+        # Test data for a previous notification at 50% usage
         test_path = '/'
         test_user = User('user1')
         test_filesystem = 'filesystem1'
-        test_threshold = ApplicationSettings.get('thresholds')[0]
+        test_threshold = 50
 
-        DBConnection.configure(url='sqlite:///:memory:')
+        # Populate database with test data
         with DBConnection.session() as session:
             session.add(Notification(
                 username=test_user.username,
@@ -123,6 +129,7 @@ class GetLastThreshold(TestCase):
             ))
             session.commit()
 
+        # Assume 0% usage and fetch last notification threshold
         quota = GenericQuota(test_filesystem, test_path, test_user, 0, 100)
         threshold = UserNotifier.get_last_threshold(session, quota)
         self.assertEqual(test_threshold, threshold)
@@ -131,38 +138,71 @@ class GetLastThreshold(TestCase):
 class GetNextThreshold(TestCase):
     """Test determination of the next notification threshold"""
 
+    def setUp(self) -> None:
+        """Set up testing constructs against a temporary DB in memory
+
+        Configures a single file system in application settings called test with
+        notification thresholds at 50 and 75 percent.
+        """
+
+        ApplicationSettings.reset_defaults()
+        ApplicationSettings.set(db_url='sqlite:///:memory:')
+
+        self.test_file_system = FileSystemSchema(name='test', path='/', type='generic', thresholds=[50, 75])
+        ApplicationSettings.set(file_systems=[self.test_file_system])
+
     def test_usage_below_minimum_thresholds(self) -> None:
         """Test return is ``None`` when usage is below the minimum threshold"""
 
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), 0, 100)
+        quota = GenericQuota(
+            self.test_file_system.name,
+            self.test_file_system.path,
+            User('user1'),
+            0,
+            100)
+
         self.assertIsNone(UserNotifier.get_next_threshold(quota))
 
     def test_usage_at_thresholds(self) -> None:
         """Test return matches a threshold when usage equals a threshold"""
 
-        thresholds = ApplicationSettings.get('thresholds')
+        expected_threshold = self.test_file_system.thresholds[0]
+        quota = GenericQuota(
+            self.test_file_system.name,
+            self.test_file_system.path,
+            User('user1'),
+            expected_threshold,
+            100)
 
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), thresholds[0], 100)
-        self.assertEqual(thresholds[0], UserNotifier.get_next_threshold(quota))
-
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), thresholds[-1], 100)
-        self.assertEqual(thresholds[-1], UserNotifier.get_next_threshold(quota))
+        self.assertEqual(expected_threshold, UserNotifier.get_next_threshold(quota))
 
     def test_usage_between_thresholds(self) -> None:
         """Test return is the lower threshold when usage is between two thresholds"""
 
-        thresholds = ApplicationSettings.get('thresholds')
-        usage = (thresholds[0] + thresholds[1]) // 2
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), usage, 100)
-        self.assertEqual(thresholds[0], UserNotifier.get_next_threshold(quota))
+        lower_threshold = self.test_file_system.thresholds[0]
+        upper_threshold = self.test_file_system.thresholds[1]
+        median_usage = (lower_threshold + upper_threshold) // 2
+        quota = GenericQuota(
+            self.test_file_system.name,
+            self.test_file_system.path,
+            User('user1'),
+            median_usage,
+            100)
+
+        self.assertEqual(lower_threshold, UserNotifier.get_next_threshold(quota))
 
     def test_usage_above_max_threshold(self) -> None:
         """Test return is the maximum threshold when usage exceeds the maximum threshold"""
 
-        max_threshold = max(ApplicationSettings.get('thresholds'))
-        usage = max_threshold + 1
-        quota = GenericQuota('filesystem1', Path('/'), User('user1'), usage, 100)
-        self.assertEqual(max_threshold, UserNotifier.get_next_threshold(quota))
+        expected_threshold = self.test_file_system.thresholds[-1]
+        quota = GenericQuota(
+            self.test_file_system.name,
+            self.test_file_system.path,
+            User('user1'),
+            expected_threshold + 10,
+            100)
+
+        self.assertEqual(expected_threshold, UserNotifier.get_next_threshold(quota))
 
 
 @patch('quota_notifier.notify.SMTP')
@@ -170,13 +210,22 @@ class NotificationHistory(TestCase):
     """Test the database updates after calling ``notify_user``"""
 
     def setUp(self) -> None:
-        """Set up a mock user and mock DB"""
+        """Set up testing constructs against a temporary DB in memory
 
+        Configures a single file system in application settings called test with
+        notification thresholds at 50 and 75 percent.
+        """
+
+        ApplicationSettings.reset_defaults()
+        ApplicationSettings.set(db_url='sqlite:///:memory:')
+
+        # Reusable database query for fetching user info
         self.mock_user = User('mock')
-        self.mock_file_system = 'fs1'
         self.query = select(Notification).where(Notification.username == self.mock_user.username)
 
-        DBConnection.configure('sqlite:///:memory:')
+        # Configure a mock file system with the parent applicaion
+        self.mock_file_system = FileSystemSchema(name='test', path='/', type='generic', thresholds=[50, 75])
+        ApplicationSettings.set(file_systems=[self.mock_file_system])
 
     def create_db_entry(self, threshold: int) -> None:
         """Create a database record representing a previous notification
@@ -188,7 +237,7 @@ class NotificationHistory(TestCase):
         with DBConnection.session() as session:
             session.add(Notification(
                 username=self.mock_user.username,
-                file_system=self.mock_file_system,
+                file_system=self.mock_file_system.name,
                 threshold=threshold
             ))
             session.commit()
@@ -200,7 +249,13 @@ class NotificationHistory(TestCase):
             usage: Storage quota usage between 0 and 100
         """
 
-        test_quota = GenericQuota(self.mock_file_system, Path('/'), self.mock_user, size_used=usage, size_limit=100)
+        test_quota = GenericQuota(
+            self.mock_file_system.name,
+            self.mock_file_system.path,
+            self.mock_user,
+            size_used=usage,
+            size_limit=100)
+
         with patch('quota_notifier.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
             UserNotifier().notify_user(self.mock_user)
 
@@ -208,7 +263,7 @@ class NotificationHistory(TestCase):
         """Test old notifications are deleted from the database"""
 
         # Create a notification history for a low threshold
-        lowest_threshold = ApplicationSettings.get('thresholds')[0]
+        lowest_threshold = self.mock_file_system.thresholds[0]
         self.create_db_entry(lowest_threshold)
 
         # Process a new notification for a usage below the minimum threshold
@@ -223,11 +278,11 @@ class NotificationHistory(TestCase):
         """Test new notifications are recorded in the database"""
 
         # Create a notification history for a low threshold
-        lowest_threshold = ApplicationSettings.get('thresholds')[0]
+        lowest_threshold = self.mock_file_system.thresholds[0]
         self.create_db_entry(lowest_threshold)
 
         # Process a new notification for a higher threshold
-        highest_threshold = ApplicationSettings.get('thresholds')[-1]
+        highest_threshold = self.mock_file_system.thresholds[-1]
         self.run_application(usage=highest_threshold)
 
         # Check the notification history was updated
@@ -239,15 +294,14 @@ class NotificationHistory(TestCase):
         """Test records are updated for quotas that have dropped to a new threshold"""
 
         # Create a notification history for a high threshold
-        highest_threshold = ApplicationSettings.get('thresholds')[-1]
+        highest_threshold = self.mock_file_system.thresholds[-1]
         self.create_db_entry(highest_threshold)
 
         # Process a new notification for a lower threshold
-        lowest_threshold = ApplicationSettings.get('thresholds')[0]
+        lowest_threshold = self.mock_file_system.thresholds[0]
         self.run_application(usage=lowest_threshold)
 
         # Check the notification history was updated
-
         with DBConnection.session() as session:
             db_record = session.execute(self.query).scalars().first()
             self.assertEqual(lowest_threshold, db_record.threshold)

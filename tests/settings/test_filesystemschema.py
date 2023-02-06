@@ -26,8 +26,8 @@ class NameValidation(TestCase):
     def test_whitespace_is_stripped(self) -> None:
         """Test leading/trailing whitespace is stripped from filesystem names"""
 
-        file_system = FileSystemSchema(name=' abc ', path='/', type='generic')
-        self.assertEqual('abc', file_system.name)
+        validated_name = FileSystemSchema.validate_name(' abc ')
+        self.assertEqual('abc', validated_name)
 
 
 class PathValidation(TestCase):
@@ -55,10 +55,51 @@ class TypeValidation(TestCase):
         """Test valid types do not raise errors"""
 
         for fs_type in QuotaFactory.QuotaType:
-            FileSystemSchema(name='name', type=fs_type.name, path='/')
+            FileSystemSchema(name='name', type=fs_type.name, path='/', thresholds=[50])
 
     def test_invalid_type_error(self) -> None:
         """Test a ``ValueError`` is raised for invalid types"""
 
         with self.assertRaisesRegex(ValidationError, 'type\n  unexpected value;'):
             FileSystemSchema(type='fake_type')
+
+
+class ThresholdValidation(TestCase):
+    """Test validation of the ``threshold`` field"""
+
+    def test_intermediate_values_pass(self) -> None:
+        """Test values greater than 0 and less than 100 pass validation"""
+
+        test_thresholds = [1, 25, 50, 75, 99]
+        validated_value = FileSystemSchema.validate_thresholds(test_thresholds)
+        self.assertCountEqual(test_thresholds, validated_value)
+
+    def test_empty_list_fails(self) -> None:
+        """Test an empty collection of thresholds fails validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'At least one threshold must be specified'):
+            FileSystemSchema(thresholds=[])
+
+    def test_zero_percent(self) -> None:
+        """Test the value ``0`` fails validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+            FileSystemSchema(thresholds=[0, 50])
+
+    def test_100_percent(self) -> None:
+        """Test the value ``100`` fails validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+            FileSystemSchema(thresholds=[50, 100])
+
+    def test_negative_percent(self) -> None:
+        """Test negative values fail validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+            FileSystemSchema(thresholds=[-1, 50])
+
+    def test_over_100_percent(self) -> None:
+        """Test values over ``100`` fail validation"""
+
+        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+            FileSystemSchema(thresholds=[50, 101])

@@ -34,9 +34,16 @@ A full list of available settings is provided in the :doc:`configuration` page.
        "log_path": "/home/notifier.log",
        "log_level": "INFO",
        "db_url": "sqlite:///home/notifier_data.db",
-       "thresholds": [75, 100],
        "uid_blacklist": [0],
-       "gid_blacklist": [0]
+       "gid_blacklist": [0],
+       "file_systems": [
+           {
+               "name": "Example File System",
+               "path": "/example",
+               "type": "generic",
+               "thresholds": [50, 75]
+           }
+       ]
    }
 
 Once the application has been configured, you can check the configuration file is valid by running:

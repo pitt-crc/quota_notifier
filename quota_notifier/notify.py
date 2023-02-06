@@ -148,6 +148,8 @@ class UserNotifier:
     def get_last_threshold(session: Session, quota: AbstractQuota) -> Optional[int]:
         """Return the last threshold a user was notified for
 
+        If no previous notification history can be found, the return calue is None
+
         Args:
             session: Active database session for performing select queries
             quota: The quota to get a threshold for
@@ -171,6 +173,9 @@ class UserNotifier:
     def get_next_threshold(quota: AbstractQuota) -> Optional[int]:
         """Return the next threshold a user should be notified for
 
+        The return value will be less than or equal to the current quota usage.
+        If there is no notification threshold less than the current usage, the return value is None.
+
         Args:
             quota: The quota to get a threshold for
 
@@ -178,8 +183,11 @@ class UserNotifier:
             The largest notification threshold that is less than the current usage or None
         """
 
+        # Get the notification thresholds for the given file system quota
+        file_systems = ApplicationSettings.get('file_systems')
+        thresholds = next(fs.thresholds for fs in file_systems if fs.name == quota.name)
+
         next_threshold = None
-        thresholds = ApplicationSettings.get('thresholds')
         if quota.percentage >= min(thresholds):
             index = bisect_right(thresholds, quota.percentage)
             next_threshold = thresholds[index - 1]

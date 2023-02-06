@@ -45,8 +45,8 @@ class FileSystemValidation(TestCase):
         """Test a ``ValueError`` is raised when file systems have duplicate paths"""
 
         # Test objects have different names but the same path
-        system_1 = FileSystemSchema(name='name1', path=Path('/'), type='generic')
-        system_2 = FileSystemSchema(name='name2', path=system_1.path, type='generic')
+        system_1 = FileSystemSchema(name='name1', path=Path('/'), type='generic', thresholds=[50])
+        system_2 = FileSystemSchema(name='name2', path=system_1.path, type='generic', thresholds=[50])
 
         with self.assertRaisesRegex(ValueError, 'File systems do not have unique paths'):
             SettingsSchema.validate_unique_file_systems([system_1, system_2])
@@ -56,8 +56,8 @@ class FileSystemValidation(TestCase):
 
         with tempfile.TemporaryDirectory() as tempdir1, tempfile.TemporaryDirectory() as tempdir2:
             # Test objects have different names but the same path
-            system_1 = FileSystemSchema(name='name', path=Path(tempdir1), type='generic')
-            system_2 = FileSystemSchema(name=system_1.name, path=Path(tempdir2), type='generic')
+            system_1 = FileSystemSchema(name='name', path=Path(tempdir1), type='generic', thresholds=[50])
+            system_2 = FileSystemSchema(name=system_1.name, path=Path(tempdir2), type='generic', thresholds=[50])
 
             with self.assertRaisesRegex(ValueError, 'File systems do not have unique names'):
                 SettingsSchema.validate_unique_file_systems([system_1, system_2])
@@ -65,7 +65,7 @@ class FileSystemValidation(TestCase):
     def test_valid_values_returned(self) -> None:
         """Test valid values are returned by the validator"""
 
-        valid_input = [FileSystemSchema(name='name1', path=Path('/'), type='generic')]
+        valid_input = [FileSystemSchema(name='name1', path=Path('/'), type='generic', thresholds=[50])]
         returned_value = SettingsSchema.validate_unique_file_systems(valid_input)
         self.assertEqual(valid_input, returned_value)
 
