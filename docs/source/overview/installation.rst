@@ -41,7 +41,7 @@ A full list of available settings is provided in the :doc:`configuration` page.
                "name": "Example File System",
                "path": "/example",
                "type": "generic",
-               "thresholds": [75, 100]
+               "thresholds": [50, 75]
            }
        ]
    }
