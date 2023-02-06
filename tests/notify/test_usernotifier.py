@@ -3,6 +3,7 @@
 import os
 import pwd
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -23,11 +24,10 @@ class GetUsers(TestCase):
 
         ApplicationSettings.reset_defaults()
 
-    def test_includes_all_users(self) -> None:
-        """Test all users except root are returned by default"""
+    def test_empty_blacklists(self) -> None:
+        """Test all users are returned for empty blacklists"""
 
         ApplicationSettings.set(uid_blacklist=[], gid_blacklist=[])
-
         returned_users = [user.username for user in UserNotifier().get_users()]
         all_users = [user.pw_name for user in pwd.getpwall()]
         self.assertListEqual(all_users, returned_users)
@@ -67,33 +67,33 @@ class GetUserQuotas(TestCase):
     def setUp(self) -> None:
         """Create and register a temporary directory to generate quota objects for"""
 
-        # Register the current directory with the application
-        self.current_dir = Path(__file__).parent
-        self.mock_file_system = FileSystemSchema(name='test', path=self.current_dir, type='generic', thresholds=[50])
+        # Register a temporary directory with the application
+        self.temp_dir = TemporaryDirectory()
+        self.mock_file_system = FileSystemSchema(name='test', path=self.temp_dir.name, type='generic', thresholds=[50])
         ApplicationSettings.set(file_systems=[self.mock_file_system])
 
         # Create a subdirectory matching the current user's group
-        self.current_user = User(os.getenv('USER'))
-        self.temp_dir = self.current_dir / self.current_user.group
-        self.temp_dir.mkdir(exist_ok=True)
+        self.test_user = User(os.getenv('USER'))
+        group_dir = Path(self.temp_dir.name) / self.test_user.group
+        group_dir.mkdir(exist_ok=True)
 
     def tearDown(self) -> None:
         """Restore application settings and remove temporary directories"""
 
         ApplicationSettings.reset_defaults()
-        self.temp_dir.rmdir()
+        self.temp_dir.cleanup()
 
     def test_quota_matches_user(self) -> None:
         """Test the returned quotas match the given user"""
 
-        quota = next(UserNotifier().get_user_quotas(self.current_user))
-        self.assertEqual(self.current_user, quota.user)
+        quota = next(UserNotifier().get_user_quotas(self.test_user))
+        self.assertEqual(self.test_user, quota.user)
 
     def test_path_is_customized(self) -> None:
-        """Test the returned quotas match the given path"""
+        """Test the returned quotas match the group directory"""
 
-        quota = next(UserNotifier().get_user_quotas(self.current_user))
-        self.assertEqual(self.current_user.group, quota.path.name)
+        quota = next(UserNotifier().get_user_quotas(self.test_user))
+        self.assertEqual(self.test_user.group, quota.path.name)
 
 
 class GetLastThreshold(TestCase):
