@@ -210,13 +210,20 @@ class NotificationHistory(TestCase):
     """Test the database updates after calling ``notify_user``"""
 
     def setUp(self) -> None:
-        """Set up a mock user and mock DB"""
+        """Set up testing constructs against a temporary DB in memory
+
+        Configures a single file system in application settings called test with
+        notification thresholds at 50 and 75 percent.
+        """
+
+        ApplicationSettings.reset_defaults()
+        ApplicationSettings.set(db_url='sqlite:///:memory:')
 
         self.mock_user = User('mock')
-        self.mock_file_system = 'fs1'
         self.query = select(Notification).where(Notification.username == self.mock_user.username)
 
-        ApplicationSettings.set(db_url='sqlite:///:memory:')
+        self.mock_file_system = FileSystemSchema(name='test', path='/', type='generic', thresholds=[50, 75])
+        ApplicationSettings.set(file_systems=[self.mock_file_system])
 
     def create_db_entry(self, threshold: int) -> None:
         """Create a database record representing a previous notification
@@ -228,7 +235,7 @@ class NotificationHistory(TestCase):
         with DBConnection.session() as session:
             session.add(Notification(
                 username=self.mock_user.username,
-                file_system=self.mock_file_system,
+                file_system=self.mock_file_system.name,
                 threshold=threshold
             ))
             session.commit()
@@ -240,7 +247,13 @@ class NotificationHistory(TestCase):
             usage: Storage quota usage between 0 and 100
         """
 
-        test_quota = GenericQuota(self.mock_file_system, Path('/'), self.mock_user, size_used=usage, size_limit=100)
+        test_quota = GenericQuota(
+            self.mock_file_system.name,
+            self.mock_file_system.path,
+            self.mock_user,
+            size_used=usage,
+            size_limit=100)
+
         with patch('quota_notifier.notify.UserNotifier.get_user_quotas', return_value=[test_quota]):
             UserNotifier().notify_user(self.mock_user)
 
@@ -248,7 +261,7 @@ class NotificationHistory(TestCase):
         """Test old notifications are deleted from the database"""
 
         # Create a notification history for a low threshold
-        lowest_threshold = ApplicationSettings.get('thresholds')[0]
+        lowest_threshold = self.mock_file_system.thresholds[0]
         self.create_db_entry(lowest_threshold)
 
         # Process a new notification for a usage below the minimum threshold
@@ -263,11 +276,11 @@ class NotificationHistory(TestCase):
         """Test new notifications are recorded in the database"""
 
         # Create a notification history for a low threshold
-        lowest_threshold = ApplicationSettings.get('thresholds')[0]
+        lowest_threshold = self.mock_file_system.thresholds[0]
         self.create_db_entry(lowest_threshold)
 
         # Process a new notification for a higher threshold
-        highest_threshold = ApplicationSettings.get('thresholds')[-1]
+        highest_threshold = self.mock_file_system.thresholds[-1]
         self.run_application(usage=highest_threshold)
 
         # Check the notification history was updated
@@ -279,11 +292,11 @@ class NotificationHistory(TestCase):
         """Test records are updated for quotas that have dropped to a new threshold"""
 
         # Create a notification history for a high threshold
-        highest_threshold = ApplicationSettings.get('thresholds')[-1]
+        highest_threshold = self.mock_file_system.thresholds[-1]
         self.create_db_entry(highest_threshold)
 
         # Process a new notification for a lower threshold
-        lowest_threshold = ApplicationSettings.get('thresholds')[0]
+        lowest_threshold = self.mock_file_system.thresholds[0]
         self.run_application(usage=lowest_threshold)
 
         # Check the notification history was updated
