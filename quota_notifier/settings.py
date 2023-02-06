@@ -95,7 +95,7 @@ class FileSystemSchema(BaseSettings):
             raise ValueError(f'At least one threshold must be specified per file system')
 
         for threshold in value:
-            if not (100 > threshold > 0):
+            if not 100 > threshold > 0:
                 raise ValueError(f'Notification threshold {threshold} must be greater than 0 and less than 100')
 
         return value
