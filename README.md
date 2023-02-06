@@ -5,6 +5,6 @@
 [![](https://github.com/pitt-crc/quota_notifier/actions/workflows/PackageTest.yml/badge.svg)](https://github.com/pitt-crc/quota_notifier/actions/workflows/PackageTest.yml)
 [![](https://github.com/pitt-crc/quota_notifier/actions/workflows/PackagePublish.yml/badge.svg)](https://github.com/pitt-crc/quota_notifier/actions/workflows/PackagePublish.yml)
 
-A simple command line utility for emailing users when they exceed disk usage thresholds.
+A command line utility for emailing users when they exceed disk usage thresholds.
 
 See the [official documentation](https://crc-pages.pitt.edu/quota_notifier/).
