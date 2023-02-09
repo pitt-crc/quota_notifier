@@ -98,6 +98,8 @@ class AbstractQuota(object):
         return f'{final_size} {size_units[base_2_power]}'
 
     def __str__(self) -> str:
+        """A human-readable string indicating the file system name and usage percentage"""
+
         used_str = self.bytes_to_str(self.size_used)
         limit_str = self.bytes_to_str(self.size_limit)
         return f"{self.name}: {used_str} / {limit_str} ({self.percentage}%)"

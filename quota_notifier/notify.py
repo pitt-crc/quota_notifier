@@ -8,6 +8,7 @@ Module Contents
 import logging
 from bisect import bisect_right
 from email.message import EmailMessage
+from pathlib import Path
 from smtplib import SMTP
 from typing import Collection, Optional, Set, Union, Tuple
 from typing import Iterable
@@ -27,8 +28,7 @@ class EmailTemplate:
 
     email_subject = ApplicationSettings.get('email_subject')
     email_from = ApplicationSettings.get('email_from')
-    header = ApplicationSettings.get('email_header')
-    footer = ApplicationSettings.get('email_footer')
+    email_template = ApplicationSettings.get('email_template').read_text()
 
     def __init__(self, quotas: Collection[AbstractQuota]) -> None:
         """Generate a formatted instance of the email template
@@ -38,7 +38,7 @@ class EmailTemplate:
         """
 
         quota_str = '\n'.join(map(str, quotas))
-        self.message = '\n\n'.join((self.header, quota_str, self.footer))
+        self.message = self.email_template.format(usage_summary=quota_str)
 
     def send_to_user(self, user: User, smtp: Optional[SMTP] = None) -> EmailMessage:
         """Send the formatted email to the given username
@@ -62,6 +62,7 @@ class EmailTemplate:
         """
 
         email = EmailMessage()
+        email.add_header('Content-Type','text/html')
         email.set_content(self.message)
         email["Subject"] = self.email_subject
         email["From"] = self.email_from

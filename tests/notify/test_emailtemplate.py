@@ -29,20 +29,6 @@ class TemplateFormatting(TestCase):
 
         cls.template = EmailTemplate([cls.quota])
 
-    def test_starts_with_header(self) -> None:
-        """Test the formatted message starts with the template header"""
-
-        self.assertTrue(
-            self.template.message.startswith(EmailTemplate.header),
-            'Email message does not start with template header.')
-
-    def test_ends_with_footer(self) -> None:
-        """Test the formatted message ends with the template footer"""
-
-        self.assertTrue(
-            self.template.message.endswith(EmailTemplate.footer),
-            'Email message does not end with template footer.')
-
     def test_includes_quota_information(self) -> None:
         """Test the formatted message include quota information"""
 
@@ -71,7 +57,7 @@ class MessageSending(TestCase):
         sent_message = self.template.send(to_address, mock_smtp)
 
         # The rstrip removes a newline character that is added automatically in the delivered message
-        body = sent_message.get_body().get_content().rstrip()
+        body = sent_message.get_body().get_content()
         self.assertEqual(self.template.message, body)
 
         self.assertEqual(to_address, sent_message['To'])
