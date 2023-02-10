@@ -27,6 +27,7 @@ Configuration
 Application settings are configurable via a settings file at ``/etc/notifier/settings.json``.
 The example below includes a minimal subset of useful settings to get up and running.
 A full list of available settings is provided in the :doc:`configuration` page.
+The :doc:`file_systems` page provides an overview of supported file system types.
 
 .. code-block:: json
 
