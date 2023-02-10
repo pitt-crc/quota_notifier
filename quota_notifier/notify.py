@@ -9,7 +9,7 @@ import logging
 from bisect import bisect_right
 from email.message import EmailMessage
 from smtplib import SMTP
-from typing import Collection, Optional, Set, Union, Tuple
+from typing import Collection, Optional, Set, Union, Tuple, List
 from typing import Iterable
 
 from sqlalchemy import delete, insert, select
@@ -125,7 +125,7 @@ class UserNotifier:
         return False
 
     @staticmethod
-    def get_user_quotas(user: User) -> Iterable[AbstractQuota]:
+    def get_user_quotas(user: User) -> List[AbstractQuota]:
         """Return a tuple of quotas assigned to a given user
 
         Args:
@@ -135,6 +135,7 @@ class UserNotifier:
             An iterable collection of quota objects
         """
 
+        quota_list = []
         for file_sys in ApplicationSettings.get('file_systems'):
             user_path = file_sys.path
             if file_sys.type == 'generic':
@@ -142,13 +143,15 @@ class UserNotifier:
 
             quota = QuotaFactory(quota_type=file_sys.type, name=file_sys.name, path=user_path, user=user)
             if quota:
-                yield quota
+                quota_list.append(quota)
+
+        return quota_list
 
     @staticmethod
     def get_last_threshold(session: Session, quota: AbstractQuota) -> Optional[int]:
         """Return the last threshold a user was notified for
 
-        If no previous notification history can be found, the return calue is None
+        If no previous notification history can be found, the return value is None
 
         Args:
             session: Active database session for performing select queries
@@ -201,11 +204,12 @@ class UserNotifier:
             user: The user to send a notification to
         """
 
-        quotas_to_notify = []  # Track which quotas need email notifications
-
         logging.debug(f'Checking quotas for {user}...')
+
+        notify_user = False
         with DBConnection.session() as session:
-            for quota in self.get_user_quotas(user):
+            quota_list = self.get_user_quotas(user)
+            for quota in quota_list:
                 next_threshold = self.get_next_threshold(quota)
                 last_threshold = self.get_last_threshold(session, quota)
 
@@ -222,7 +226,7 @@ class UserNotifier:
                 # There was no previous notification
                 # Mark the quota as needing a notification and create a DB record
                 elif last_threshold is None or next_threshold > last_threshold:
-                    quotas_to_notify.append(quota)
+                    notify_user = True
                     session.execute(
                         insert(Notification).values(
                             username=user.username,
@@ -243,9 +247,9 @@ class UserNotifier:
                     )
 
             # Issue email notification if necessary
-            if quotas_to_notify:
-                logging.info(f'{user} has {len(quotas_to_notify)} pending notifications')
-                EmailTemplate(quotas_to_notify).send_to_user(user)
+            if notify_user:
+                logging.info(f'{user} has quotas pending notifications')
+                EmailTemplate(quota_list).send_to_user(user)
 
             else:
                 logging.debug(f'{user} has no quotas pending notification')
