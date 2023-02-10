@@ -19,8 +19,12 @@ from sqlalchemy.orm import Session
 from quota_notifier.disk_utils import AbstractQuota
 from quota_notifier.settings import ApplicationSettings
 from quota_notifier.shell import User
+from . import __file__ as package_init_path
 from .disk_utils import BeeGFSQuota, QuotaFactory
 from .orm import DBConnection, Notification
+
+DEFAULT_TEMPLATE_PATH = Path(package_init_path).parent / 'data' / 'template.html'
+CUSTOM_TEMPLATE_PATH = Path('/etc/notifier/template.html')
 
 
 class EmailTemplate:
@@ -28,7 +32,12 @@ class EmailTemplate:
 
     email_subject = ApplicationSettings.get('email_subject')
     email_from = ApplicationSettings.get('email_from')
-    email_template = ApplicationSettings.get('email_template').read_text()
+
+    if CUSTOM_TEMPLATE_PATH.exists():
+        email_template = CUSTOM_TEMPLATE_PATH.read_text()
+
+    else:
+        email_template = DEFAULT_TEMPLATE_PATH.read_text()
 
     def __init__(self, quotas: Collection[AbstractQuota]) -> None:
         """Generate a formatted instance of the email template
@@ -62,7 +71,7 @@ class EmailTemplate:
         """
 
         email = EmailMessage()
-        email.add_header('Content-Type','text/html')
+        email.add_header('Content-Type', 'text/html')
         email.set_content(self.message)
         email["Subject"] = self.email_subject
         email["From"] = self.email_from

@@ -12,10 +12,8 @@ from typing import Any, List, Union, Tuple, Set, Optional, Literal
 from pydantic import BaseSettings, Field, validator
 
 from quota_notifier.orm import DBConnection
-from . import __file__ as package_init_path
 
 DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
-DEFAULT_TEMPLATE_PATH = Path(package_init_path).parent / 'data' / 'template.html'
 
 
 class FileSystemSchema(BaseSettings):
@@ -192,12 +190,6 @@ class SettingsSchema(BaseSettings):
         default='@pitt.edu',
         description=('String to append to usernames when generating user email addresses. '
                      'The leading `@` is optional.'))
-
-    email_template: Path = Field(
-        title='Email Template Path',
-        type=Path,
-        description='Path to the HTML email template to use when notifying users.',
-        default=DEFAULT_TEMPLATE_PATH)
 
     # Settings for debug / dry-runs
     debug: bool = Field(
