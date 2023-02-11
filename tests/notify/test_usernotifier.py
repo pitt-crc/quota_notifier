@@ -86,13 +86,13 @@ class GetUserQuotas(TestCase):
     def test_quota_matches_user(self) -> None:
         """Test the returned quotas match the given user"""
 
-        quota = next(UserNotifier().get_user_quotas(self.test_user))
+        quota = UserNotifier().get_user_quotas(self.test_user)[0]
         self.assertEqual(self.test_user, quota.user)
 
     def test_path_is_customized(self) -> None:
         """Test the returned quotas match the group directory"""
 
-        quota = next(UserNotifier().get_user_quotas(self.test_user))
+        quota = UserNotifier().get_user_quotas(self.test_user)[0]
         self.assertEqual(self.test_user.group, quota.path.name)
 
 
