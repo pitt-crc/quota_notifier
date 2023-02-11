@@ -248,7 +248,7 @@ class UserNotifier:
 
             # Issue email notification if necessary
             if notify_user:
-                logging.info(f'{user} has quotas pending notifications')
+                logging.info(f'{user} has one or more quotas pending notification')
                 EmailTemplate(quota_list).send_to_user(user)
 
             else:
