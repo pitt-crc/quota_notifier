@@ -71,8 +71,7 @@ class EmailTemplate:
         """
 
         email = EmailMessage()
-        email.add_header('Content-Type', 'text/html')
-        email.set_content(self.message)
+        email.set_content(self.message, subtype='html')
         email["Subject"] = self.email_subject
         email["From"] = self.email_from
         email["To"] = address
