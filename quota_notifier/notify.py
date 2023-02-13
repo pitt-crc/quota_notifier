@@ -46,7 +46,7 @@ class EmailTemplate:
             quotas: Disk quotas to mention in the email
         """
 
-        quota_str = r'<\br>'.join(map(str, quotas))
+        quota_str = r'<br>'.join(map(str, quotas))
         self.message = self.email_template.format(usage_summary=quota_str)
 
     def send_to_user(self, user: User, smtp: Optional[SMTP] = None) -> EmailMessage:
