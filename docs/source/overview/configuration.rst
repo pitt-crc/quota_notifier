@@ -2,7 +2,6 @@ Configuration
 =============
 
 After installation, the ``notifier`` utility needs to be configured via the application settings file.
-Without proper configuration, the application may not work as intended.
 At any time, the ``notifier --validate`` command can be run to validate the current application settings.
 
 Email Notification Template
