@@ -169,10 +169,12 @@ class BeeGFSQuota(AbstractQuota):
 
         cached_quota = cls._cached_quotas.get(path, dict()).get(user.gid, None)
         if cached_quota:
+            logging.debug(f'Found cached quota for {user.gid} under {path}')
             quota = copy(cached_quota)
             quota.user = user
 
         else:
+            logging.debug(f'No cached quota for {user.gid} under {path}')
             bgfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.gid}"
             quota_info_cmd = ShellCmd(bgfs_command)
             if quota_info_cmd.err:
