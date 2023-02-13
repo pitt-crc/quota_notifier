@@ -191,25 +191,6 @@ class SettingsSchema(BaseSettings):
         description=('String to append to usernames when generating user email addresses. '
                      'The leading `@` is optional.'))
 
-    email_header: str = Field(
-        title='Email Header Text',
-        type=str,
-        description='Opening email paragraph(s) displayed before the automated quota summary.',
-        default=("This is an automated notification concerning your storage quota on H2P. "
-                 "One or more of your quotas have surpassed a usage threshold triggering an automated notification. "
-                 "Your storage usage is as follows:"))
-
-    email_footer: str = Field(
-        title='Email Footer Text',
-        type=str,
-        description='Ending email paragraph(s) displayed after the automated quota summary.',
-        default=(
-            "If you need additional storage, please submit a request via the CRC ticketing system. "
-            "Our storage policies are described in https://crc.pitt.edu/user-support/data-storage-guidelines.\n\n"
-            "Sincerely,\n"
-            "The CRC Quota Bot"
-        ))
-
     # Settings for debug / dry-runs
     debug: bool = Field(
         title='Debug Mode',

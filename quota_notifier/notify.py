@@ -8,6 +8,7 @@ Module Contents
 import logging
 from bisect import bisect_right
 from email.message import EmailMessage
+from pathlib import Path
 from smtplib import SMTP
 from typing import Collection, Optional, Set, Union, Tuple, List
 from typing import Iterable
@@ -18,8 +19,12 @@ from sqlalchemy.orm import Session
 from quota_notifier.disk_utils import AbstractQuota
 from quota_notifier.settings import ApplicationSettings
 from quota_notifier.shell import User
+from . import __file__ as package_init_path
 from .disk_utils import BeeGFSQuota, QuotaFactory
 from .orm import DBConnection, Notification
+
+DEFAULT_TEMPLATE_PATH = Path(package_init_path).parent / 'data' / 'template.html'
+CUSTOM_TEMPLATE_PATH = Path('/etc/notifier/template.html')
 
 
 class EmailTemplate:
@@ -27,8 +32,12 @@ class EmailTemplate:
 
     email_subject = ApplicationSettings.get('email_subject')
     email_from = ApplicationSettings.get('email_from')
-    header = ApplicationSettings.get('email_header')
-    footer = ApplicationSettings.get('email_footer')
+
+    if CUSTOM_TEMPLATE_PATH.exists():
+        email_template = CUSTOM_TEMPLATE_PATH.read_text()
+
+    else:
+        email_template = DEFAULT_TEMPLATE_PATH.read_text()
 
     def __init__(self, quotas: Collection[AbstractQuota]) -> None:
         """Generate a formatted instance of the email template
@@ -38,7 +47,7 @@ class EmailTemplate:
         """
 
         quota_str = '\n'.join(map(str, quotas))
-        self.message = '\n\n'.join((self.header, quota_str, self.footer))
+        self.message = self.email_template.format(usage_summary=quota_str)
 
     def send_to_user(self, user: User, smtp: Optional[SMTP] = None) -> EmailMessage:
         """Send the formatted email to the given username
@@ -62,6 +71,7 @@ class EmailTemplate:
         """
 
         email = EmailMessage()
+        email.add_header('Content-Type', 'text/html')
         email.set_content(self.message)
         email["Subject"] = self.email_subject
         email["From"] = self.email_from

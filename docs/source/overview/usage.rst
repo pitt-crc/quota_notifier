@@ -15,7 +15,7 @@ In the application settings file (located at ``/etc/notifier/settings.json`` by 
 
    {
      "uid_blacklist": [0, 4, 7],
-     "gid_blacklist": [0, 1, 5],
+     "gid_blacklist": [0, 1, 5]
    }
 
 The ``uid_blacklist`` and ``gid_blacklist`` fields also accept ID ranges.
@@ -65,10 +65,3 @@ To send any pending email notifications, call the ``notifier`` utility without a
 .. code-block:: bash
 
    notifier
-
-If running the application on an automatic schedule, you may find it useful to increase the verbosity and write
-the application output to a system log:
-
-.. code-block:: bash
-
-   notifier -vv >> notifier.log 2>&1
