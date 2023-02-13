@@ -26,8 +26,9 @@ class TemplateFormatting(TestCase):
                 name='testquota1',
                 path=Path('/'),
                 user=User('test_user'),
-                size_used=10, size_limit=100)
-            , GenericQuota(
+                size_used=10, size_limit=100),
+
+            GenericQuota(
                 name='testquota2',
                 path=Path('/'),
                 user=User('test_user'),
