@@ -21,18 +21,27 @@ class TemplateFormatting(TestCase):
     def setUpClass(cls) -> None:
         """Create a formatted email template"""
 
-        cls.quota = GenericQuota(
-            name='testquota',
-            path=Path('/'),
-            user=User('test_user'),
-            size_used=10, size_limit=100)
+        cls.quotas = [
+            GenericQuota(
+                name='testquota1',
+                path=Path('/'),
+                user=User('test_user'),
+                size_used=10, size_limit=100),
 
-        cls.template = EmailTemplate([cls.quota])
+            GenericQuota(
+                name='testquota2',
+                path=Path('/'),
+                user=User('test_user'),
+                size_used=10, size_limit=100)
+        ]
+
+        cls.template = EmailTemplate(cls.quotas)
 
     def test_includes_quota_information(self) -> None:
         """Test the formatted message include quota information"""
 
-        self.assertIn(str(self.quota), self.template.message)
+        quota_text = '<br>'.join(str(q) for q in self.quotas)
+        self.assertIn(quota_text, self.template.message)
 
 
 class MessageSending(TestCase):
@@ -63,6 +72,16 @@ class MessageSending(TestCase):
         self.assertEqual(to_address, sent_message['To'])
         self.assertEqual(EmailTemplate.email_from, sent_message['From'])
         self.assertEqual(EmailTemplate.email_subject, sent_message['Subject'])
+
+    @patch('smtplib.SMTP')
+    def test_content_type_is_html(self, mock_smtp) -> None:
+        """Test email content is specified as being HTML"""
+
+        to_address = 'fake_recipient@fake_domain.com'
+        sent_message = self.template.send(to_address, mock_smtp)
+
+        self.assertEqual('text/html', sent_message.get_content_type())
+        self.assertEqual('html', sent_message.get_content_subtype())
 
     @patch('smtplib.SMTP')
     def test_message_is_sent(self, mock_smtp) -> None:
