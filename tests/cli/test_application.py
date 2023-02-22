@@ -4,6 +4,7 @@ import logging
 import os
 from unittest import TestCase
 
+from quota_notifier.app_logging import ApplicationLog
 from quota_notifier.cli import Application
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
@@ -17,25 +18,6 @@ class VerbosityConfiguration(TestCase):
         """Reset application settings to defaults"""
 
         ApplicationSettings.reset_defaults()
-
-    @staticmethod
-    def get_stream_handler() -> logging.StreamHandler:
-        """Return the ``StreamHandler`` instance used by the application when logging to the console"""
-
-        handlers = []
-        for handler in logging.getLogger().handlers:
-            # Keep any stream handlers with a configured logging level
-            # A default, NOTSET level stream handler is created when calling ``logging.get_logger()``
-            if isinstance(handler, logging.StreamHandler) and handler.level != logging.NOTSET:
-                handlers.append(handler)
-
-        if not handlers:
-            raise RuntimeError('Stream handler not found')
-
-        if len(handlers) > 1:
-            raise RuntimeError('Multiple stream handlers found')
-
-        return handlers[0]
 
     def test_output_format(self):
         """Test the console logging format has been customized"""

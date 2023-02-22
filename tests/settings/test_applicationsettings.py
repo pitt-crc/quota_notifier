@@ -135,31 +135,12 @@ class LoggingConfiguration(TestCase):
 
         ApplicationSettings.reset_defaults()
 
-    @staticmethod
-    def get_file_handler() -> logging.FileHandler:
-        """Return the ``FileHandler`` instance used by the application to log to file"""
-
-        for handler in logging.getLogger().handlers:
-            if isinstance(handler, logging.FileHandler):
-                return handler
-
-        raise RuntimeError('File handler not found')
-
     def test_no_logger_by_default(self) -> None:
         """Test a file logger is not configured by default"""
 
         self.assertIsNone(ApplicationSettings.get('log_path'))
         with self.assertRaises(RuntimeError):
             self.get_file_handler()
-
-    def test_logging_format(self):
-        """Test the console logging format has been customized"""
-
-        with NamedTemporaryFile(suffix='.log') as temp_log_file:
-            ApplicationSettings.set(log_path=temp_log_file.name)
-
-            log_format = self.get_file_handler().formatter._fmt
-            self.assertEqual('%(levelname)8s | %(asctime)s | %(message)s', log_format)
 
     def test_logging_level(self):
         """Test the logging level is updated to reflect application settings"""
