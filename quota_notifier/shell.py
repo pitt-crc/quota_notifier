@@ -13,8 +13,7 @@ from shlex import split
 from subprocess import PIPE, Popen
 from typing import Optional, Iterator
 
-from .app_logging import ApplicationLog
-from .settings import ApplicationSettings
+from quota_notifier.settings import ApplicationSettings
 
 
 class ShellCmd:
@@ -41,7 +40,7 @@ class ShellCmd:
         if not cmd.strip():
             raise ValueError('Command string cannot be empty')
 
-        ApplicationLog.log(logging.DEBUG, f'running {cmd}')
+        logging.debug(f'running {cmd}')
         for char in self.prohibited_characters:
             if char in cmd:
                 raise RuntimeError(f'Special characters are not allowed in piped commands ({char})')

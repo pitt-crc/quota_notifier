@@ -75,7 +75,7 @@ class Application:
     def _load_settings() -> None:
         """Load application settings from the given file path"""
 
-        ApplicationLog.log(logging.INFO, 'Validating settings...')
+        logging.info('Validating settings...')
 
         # Load and validate custom application settings from disk
         # Implicitly raises an error if settings are invalid
@@ -83,7 +83,7 @@ class Application:
             ApplicationSettings.set_from_file(SETTINGS_PATH)
 
         else:
-            ApplicationLog.log(logging.INFO, 'Using default settings')
+            logging.info('Using default settings')
 
     @classmethod
     def run(cls, validate: bool = False, verbose: int = 0, debug: bool = False) -> None:
@@ -103,7 +103,7 @@ class Application:
         # Run core application logic
         if not validate:
             UserNotifier().send_notifications()
-            ApplicationLog.log(logging.INFO, 'Exiting application successfully')
+            logging.info('Exiting application successfully')
 
     @classmethod
     def execute(cls, arg_list: List[str] = None) -> None:
@@ -127,8 +127,8 @@ class Application:
 
         except Exception as caught:
             err_string = str(caught)
-            ApplicationLog.log_to_file(logging.CRITICAL, err_string)
+            logging.critical(err_string.replace('\n', ' '))
 
             # Avoid printing to stdout twice if verbose is enabled
             if not args.verbose:
-                ApplicationLog.log_to_console(logging.CRITICAL, err_string)
+                parser.error(err_string)

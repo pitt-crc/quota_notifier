@@ -11,8 +11,8 @@ from typing import Any, List, Union, Tuple, Set, Optional, Literal
 
 from pydantic import BaseSettings, Field, validator
 
-from .app_logging import ApplicationLog
-from .orm import DBConnection
+from quota_notifier.logging import ApplicationLog
+from quota_notifier.orm import DBConnection
 
 DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
 
@@ -247,7 +247,7 @@ class ApplicationSettings:
         """Configure the application database connection"""
 
         if cls.get('debug'):
-            ApplicationLog.log(logging.WARNING, 'Running in debug mode')
+            logging.warning('Running in debug mode')
             DBConnection.configure('sqlite:///:memory:')
 
         else:
@@ -270,17 +270,17 @@ class ApplicationSettings:
             path: Path to load settings from
         """
 
-        ApplicationLog.log(logging.DEBUG, f'Looking for settings file: {path.resolve()}')
+        logging.debug(f'Looking for settings file: {path.resolve()}')
 
         try:
             cls._parsed_settings = SettingsSchema.parse_file(path)
             cls._configure_application()
 
         except Exception:
-            ApplicationLog.log(logging.ERROR, 'settings file is invalid')
+            logging.error('settings file is invalid')
             raise
 
-        ApplicationLog.log(logging.INFO, f'Loaded settings from file: {path.resolve()}')
+        logging.info(f'Loaded settings from file: {path.resolve()}')
 
     @classmethod
     def set(cls, **kwargs) -> None:
