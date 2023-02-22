@@ -8,12 +8,12 @@ Module Contents
 """
 
 import logging
-import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import List
 
 from . import __version__
+from .app_logging import ApplicationLog
 from .notify import UserNotifier
 from .settings import ApplicationSettings
 
@@ -62,28 +62,14 @@ class Application:
             verbosity: Number of commandline verbosity flags
         """
 
-        # Set the root logging level to log everything
-        # Apply additional filtering at the handler level
-        app_logger = logging.getLogger()
-        app_logger.setLevel(0)
-
-        # Remove any old stream loggers
-        for handler in app_logger.handlers:
-            if isinstance(handler, logging.StreamHandler):
-                app_logger.removeHandler(handler)
-
-        log_format = logging.Formatter('%(levelname)8s - %(message)s')
-        verbosity = {
+        log_level = {
             0: 100,
             1: logging.WARNING,
             2: logging.INFO,
             3: logging.DEBUG
         }.get(verbosity, logging.DEBUG)
 
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setFormatter(log_format)
-        stream_handler.setLevel(verbosity)
-        app_logger.addHandler(stream_handler)
+        ApplicationLog.configure_console(log_level)
 
     @staticmethod
     def _load_settings() -> None:

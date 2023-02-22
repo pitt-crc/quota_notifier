@@ -11,6 +11,7 @@ from typing import Any, List, Union, Tuple, Set, Optional, Literal
 
 from pydantic import BaseSettings, Field, validator
 
+from quota_notifier.logging import ApplicationLog
 from quota_notifier.orm import DBConnection
 
 DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
@@ -236,24 +237,10 @@ class ApplicationSettings:
     def _configure_logging(cls) -> None:
         """Configure python logging to the given level"""
 
-        app_logger = logging.getLogger()
-
-        # Fetch application settings for file logging
         log_path = cls.get('log_path')
-        log_format = logging.Formatter('%(levelname)8s | %(asctime)s | %(message)s')
         log_level = cls.get('log_level')
-
-        # Remove the old file logger
-        for handler in app_logger.handlers:
-            if isinstance(handler, logging.FileHandler):
-                app_logger.removeHandler(handler)
-
-        # Add a new file logger if specified in application settings
         if log_path is not None:
-            file_handler = logging.FileHandler(log_path)
-            file_handler.setFormatter(log_format)
-            file_handler.setLevel(log_level)
-            app_logger.addHandler(file_handler)
+            ApplicationLog.configure_log_file(log_level, log_path)
 
     @classmethod
     def _configure_database(cls) -> None:
