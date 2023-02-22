@@ -36,13 +36,6 @@ class ConfigureConsoleLogging(TestCase):
         ApplicationLog.configure_console(level=None)
         self.assertFalse(ApplicationLog.console_logger.handlers)
 
-    def test_handler_assigned_to_app_logger(self) -> None:
-        """Test console log handlers are also assigned to the application log"""
-
-        ApplicationLog.configure_console(level=10)
-        for handler in ApplicationLog.console_logger.handlers:
-            self.assertIn(handler, ApplicationLog.app_logger.handlers)
-
     def test_logging_format(self):
         """Test the console logging format has been customized to match the class ``console_format`` attribute"""
 
@@ -88,13 +81,6 @@ class ConfigureFileLogging(TestCase):
 
         ApplicationLog.configure_log_file(level=None)
         self.assertFalse(ApplicationLog.file_logger.handlers)
-
-    def test_handler_assigned_to_app_logger(self) -> None:
-        """Test console log handlers are also assigned to the application log"""
-
-        ApplicationLog.configure_log_file(level=10, log_path=self.temp_file_path)
-        for handler in ApplicationLog.file_logger.handlers:
-            self.assertIn(handler, ApplicationLog.app_logger.handlers)
 
     def test_logging_format(self):
         """Test the file logging format has been customized to match the class ``file_format`` attribute"""

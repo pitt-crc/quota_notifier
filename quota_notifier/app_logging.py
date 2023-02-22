@@ -16,17 +16,17 @@ class ApplicationLog:
 
     # Set the base logging level to log everything (level 0)
     # and apply additional filtering at the handler level
-    app_logger = logging.getLogger('application_logger')
-    app_logger.setLevel(0)
 
-    file_logger = logging.getLogger('file_logger')
-    file_logger.setLevel(0)
-
+    # For logging to the console
     console_logger = logging.getLogger('console_logger')
     console_logger.setLevel(0)
 
+    # For logging to the log file
+    file_logger = logging.getLogger('file_logger')
+    file_logger.setLevel(0)
+
     # Remove the automatically generated handlers from each logger
-    for logger in (app_logger, console_logger, file_logger):
+    for logger in (console_logger, file_logger):
         for handler in logger.handlers:
             logger.removeHandler(handler)
 
@@ -44,10 +44,9 @@ class ApplicationLog:
         """
 
         # Remove any old stream handlers
-        for logger in (cls.app_logger, cls.console_logger):
-            for handler in logger.handlers:
-                if isinstance(handler, logging.StreamHandler):
-                    logger.removeHandler(handler)
+        for handler in cls.console_logger.handlers:
+            if isinstance(handler, logging.StreamHandler):
+                cls.console_logger.removeHandler(handler)
 
         if level is None:
             return
@@ -56,9 +55,6 @@ class ApplicationLog:
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setFormatter(cls.console_format)
         stream_handler.setLevel(level)
-
-        # Add the stream handler to the appropriate loggers
-        cls.app_logger.addHandler(stream_handler)
         cls.console_logger.addHandler(stream_handler)
 
     @classmethod
@@ -73,10 +69,9 @@ class ApplicationLog:
         """
 
         # Remove any old file handlers
-        for logger in (cls.app_logger, cls.file_logger):
-            for handler in logger.handlers:
-                if isinstance(handler, logging.FileHandler):
-                    logger.removeHandler(handler)
+        for handler in cls.file_logger.handlers:
+            if isinstance(handler, logging.FileHandler):
+                cls.file_logger.removeHandler(handler)
 
         if level is None:
             return
@@ -85,16 +80,14 @@ class ApplicationLog:
         file_handler = logging.FileHandler(log_path)
         file_handler.setFormatter(cls.file_format)
         file_handler.setLevel(level)
-
-        # Add the file handler to the appropriate loggers
-        cls.app_logger.addHandler(file_handler)
         cls.file_logger.addHandler(file_handler)
 
     @classmethod
     def log(cls, *args, **kwargs) -> None:
         """Write a log message to all configured destinations"""
 
-        cls.app_logger.log(*args, **kwargs)
+        cls.console_logger.log(*args, **kwargs)
+        cls.file_logger.log(*args, **kwargs)
 
     @classmethod
     def log_to_console(cls, *args, **kwargs) -> None:
