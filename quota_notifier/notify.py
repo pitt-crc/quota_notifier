@@ -20,6 +20,7 @@ from quota_notifier.disk_utils import AbstractQuota
 from quota_notifier.settings import ApplicationSettings
 from quota_notifier.shell import User
 from . import __file__ as package_init_path
+from .app_logging import ApplicationLog
 from .disk_utils import BeeGFSQuota, QuotaFactory
 from .orm import DBConnection, Notification
 
@@ -76,7 +77,7 @@ class EmailTemplate:
         email["From"] = self.email_from
         email["To"] = address
 
-        logging.debug(f'Sending email notification to {address}')
+        ApplicationLog.log(logging.DEBUG, f'Sending email notification to {address}')
         if ApplicationSettings.get('debug'):
             return email
 
@@ -100,7 +101,7 @@ class UserNotifier:
             An iterable collection of ``User`` objects
         """
 
-        logging.info('Fetching user list...')
+        ApplicationLog.log(logging.INFO, 'Fetching user list...')
         uid_blacklist = ApplicationSettings.get('uid_blacklist')
         gid_blacklist = ApplicationSettings.get('gid_blacklist')
 
@@ -109,7 +110,7 @@ class UserNotifier:
             if not (cls._id_in_blacklist(user.uid, uid_blacklist) or cls._id_in_blacklist(user.gid, gid_blacklist)):
                 allowed_users.append(user)
 
-        logging.debug(f'Found {len(allowed_users)} non-blacklisted users')
+        ApplicationLog.log(logging.INFO, f'Found {len(allowed_users)} non-blacklisted users')
         return allowed_users
 
     @staticmethod
@@ -213,7 +214,7 @@ class UserNotifier:
             user: The user to send a notification to
         """
 
-        logging.debug(f'Checking quotas for {user}...')
+        ApplicationLog.log(logging.DEBUG, f'Checking quotas for {user}...')
 
         notify_user = False
         with DBConnection.session() as session:
@@ -257,11 +258,11 @@ class UserNotifier:
 
             # Issue email notification if necessary
             if notify_user:
-                logging.info(f'{user} has one or more quotas pending notification')
+                ApplicationLog.log(logging.INFO, f'{user} has one or more quotas pending notification')
                 EmailTemplate(quota_list).send_to_user(user)
 
             else:
-                logging.debug(f'{user} has no quotas pending notification')
+                ApplicationLog.log(logging.DEBUG, f'{user} has no quotas pending notification')
 
             # Wait to commit until the email sends
             session.commit()
@@ -272,7 +273,7 @@ class UserNotifier:
         users = self.get_users()
 
         # Cache queries for BeeGFS file systems
-        logging.info('Checking for cachable file system queries...')
+        ApplicationLog.log(logging.INFO, 'Checking for cachable file system queries...')
         cachable_systems_found = False
 
         for file_system in ApplicationSettings.get('file_systems'):
@@ -281,8 +282,8 @@ class UserNotifier:
                 BeeGFSQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
 
         if not cachable_systems_found:
-            logging.debug('No cachable system queries found')
+            ApplicationLog.log(logging.DEBUG, 'No cachable system queries found')
 
-        logging.info('Scanning user quotas...')
+        ApplicationLog.log(logging.INFO, 'Scanning user quotas...')
         for user in users:
             self.notify_user(user)

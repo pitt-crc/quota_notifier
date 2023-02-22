@@ -26,6 +26,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Iterable, Optional
 
+from .app_logging import ApplicationLog
 from .settings import ApplicationSettings
 from .shell import ShellCmd, User
 
@@ -124,19 +125,19 @@ class GenericQuota(AbstractQuota):
             RuntimeError: If something goes wrong communicating with the file system
         """
 
-        logging.debug(f'fetching generic quota for {user.username} at {path}')
+        ApplicationLog.log(logging.DEBUG, f'fetching generic quota for {user.username} at {path}')
         if not path.exists():
-            logging.debug(f'Could not file path: {path}')
+            ApplicationLog.log(logging.DEBUG, f'Could not file path: {path}')
             return None
 
         df_command = ShellCmd(f"df {path}")
         if df_command.err:
-            logging.error(df_command.err)
+            ApplicationLog.log(logging.ERROR, df_command.err)
             return None
 
         result = df_command.out.splitlines()[1].split()
         quota = cls(name, path, user, int(result[2]) * 1024, int(result[1]) * 1024)
-        logging.debug(str(quota))
+        ApplicationLog.log(logging.DEBUG, str(quota))
         return quota
 
 
@@ -164,29 +165,29 @@ class BeeGFSQuota(AbstractQuota):
             RuntimeError: If something goes wrong communicating with the file system
         """
 
-        logging.debug(f'fetching BeeGFS quota for {user.username} at {path}')
+        ApplicationLog.log(logging.DEBUG, f'fetching BeeGFS quota for {user.username} at {path}')
         if not path.exists():
-            logging.debug(f'Could not file path: {path}')
+            ApplicationLog.log(logging.DEBUG, f'Could not file path: {path}')
             return None
 
         cached_quota = cls._cached_quotas.get(path, dict()).get(user.gid, None)
         if cached_quota:
-            logging.debug(f'Found cached quota for {user.gid} under {path}')
+            ApplicationLog.log(logging.DEBUG, f'Found cached quota for {user.gid} under {path}')
             quota = copy(cached_quota)
             quota.user = user
 
         else:
-            logging.debug(f'No cached quota for {user.gid} under {path}')
+            ApplicationLog.log(logging.DEBUG, f'No cached quota for {user.gid} under {path}')
             bgfs_command = f"beegfs-ctl --getquota --csv --mount={path} --storagepoolid={storage_pool} --gid {user.gid}"
             quota_info_cmd = ShellCmd(bgfs_command)
             if quota_info_cmd.err:
-                logging.error(quota_info_cmd.err)
+                ApplicationLog.log(logging.ERROR, quota_info_cmd.err)
                 return None
 
             result = quota_info_cmd.out.splitlines()[1].split(',')
             quota = cls(name, path, user, int(result[2]), int(result[3]))
 
-        logging.debug(str(quota))
+        ApplicationLog.log(logging.DEBUG, str(quota))
         return quota
 
     @classmethod
@@ -207,7 +208,7 @@ class BeeGFSQuota(AbstractQuota):
             Quota objects for each user having a quota
         """
 
-        logging.info(f'Caching quota information for path {path}')
+        ApplicationLog.log(logging.INFO, f'Caching quota information for path {path}')
 
         group_ids = ','.join(map(str, set(user.gid for user in users)))  # CSV string of unique group IDs
         cmd_str = f"beegfs-ctl --getquota  --csv --mount={path} --storagepoolid={storage_pool} --gid --list {group_ids}"
@@ -215,7 +216,7 @@ class BeeGFSQuota(AbstractQuota):
         # Fetch quota data from BeeGFS via the underlying shell
         quota_info_cmd = ShellCmd(cmd_str, timeout=60 * 5)
         if quota_info_cmd.err:
-            logging.error(quota_info_cmd.err)
+            ApplicationLog.log(logging.ERROR, quota_info_cmd.err)
             raise RuntimeError(quota_info_cmd.err)
 
         # Cache returned values for future use
@@ -241,7 +242,7 @@ class IhomeQuota(AbstractQuota):
         # Get the information from Isilon
         if cls._parsed_quota_data is None:
             ihome_data_path = ApplicationSettings.get('ihome_quota_path')
-            logging.debug(f'Parsing {ihome_data_path}')
+            ApplicationLog.log(logging.DEBUG, f'Parsing {ihome_data_path}')
             with ihome_data_path.open('r') as infile:
                 cls._parsed_quota_data = json.load(infile)
 
@@ -260,7 +261,7 @@ class IhomeQuota(AbstractQuota):
             An instance of the parent class or None if the allocation does not exist
         """
 
-        logging.debug(f'fetching Ihome quota for {user.username} at {path}')
+        ApplicationLog.log(logging.DEBUG, f'fetching Ihome quota for {user.username} at {path}')
 
         quota_data = cls._get_quota_data()
         persona = f"UID:{user.uid}"
@@ -268,7 +269,7 @@ class IhomeQuota(AbstractQuota):
             if item["persona"] is not None:
                 if item["persona"]["id"] == persona:
                     quota = cls(name, path, user, item["usage"]["logical"], item["thresholds"]["hard"])
-                    logging.debug(str(quota))
+                    ApplicationLog.log(logging.DEBUG, str(quota))
                     return quota
 
 
@@ -303,7 +304,7 @@ class QuotaFactory:
             quota_class = cls.QuotaType[quota_type].value
 
         except KeyError:
-            logging.error(f'Could not create quota object ')
+            ApplicationLog.log(logging.ERROR, f'Could not create quota object ')
             raise ValueError(f'Unknown quota type quota_type: {quota_type}, path: {path}, user: {user}')
 
         return quota_class.get_quota(name, path, user, **kwargs)

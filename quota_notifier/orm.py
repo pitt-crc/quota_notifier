@@ -12,6 +12,8 @@ from sqlalchemy import Column, DateTime, Integer, String, UniqueConstraint, crea
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 
+from quota_notifier.app_logging import ApplicationLog
+
 Base = declarative_base()
 
 
@@ -80,7 +82,7 @@ class DBConnection:
             url: URL information for the application database
         """
 
-        logging.info(f'Configuring database URL: {url}')
+        ApplicationLog.log(logging.INFO, f'Configuring database URL: {url}')
 
         cls.url = url
         if cls.connection:
