@@ -63,6 +63,7 @@ class ApplicationLog:
         stream_handler.setFormatter(cls.console_format)
         stream_handler.setLevel(level)
 
+        cls.console_logger.setLevel(level)
         cls.console_logger.addHandler(stream_handler)
         _root_logger.addHandler(stream_handler)
 
@@ -91,5 +92,6 @@ class ApplicationLog:
         file_handler.setFormatter(cls.file_format)
         file_handler.setLevel(level)
 
+        cls.file_logger.setLevel(level)
         cls.file_logger.addHandler(file_handler)
         _root_logger.addHandler(file_handler)

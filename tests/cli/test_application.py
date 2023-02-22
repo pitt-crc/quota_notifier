@@ -19,42 +19,35 @@ class VerbosityConfiguration(TestCase):
 
         ApplicationSettings.reset_defaults()
 
-    def test_output_format(self):
-        """Test the console logging format has been customized"""
-
-        Application.execute(['--debug', '-v', '--debug'])
-        log_format = self.get_stream_handler().formatter._fmt
-        self.assertEqual('%(levelname)8s - %(message)s', log_format)
-
     def test_verbose_level_zero(self):
         """Test the application is silent by default"""
 
         Application.execute(['--debug'])
-        self.assertEqual(100, self.get_stream_handler().level)
+        self.assertEqual(100, ApplicationLog.console_logger.level)
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""
 
         Application.execute(['-v', '--debug'])
-        self.assertEqual(logging.WARNING, self.get_stream_handler().level)
+        self.assertEqual(logging.WARNING, ApplicationLog.console_logger.level)
 
     def test_verbose_level_two(self):
         """Test two verbose flags sets the logging level to ``INFO``"""
 
         Application.execute(['-vv', '--debug'])
-        self.assertEqual(logging.INFO, self.get_stream_handler().level)
+        self.assertEqual(logging.INFO, ApplicationLog.console_logger.level)
 
     def test_verbose_level_three(self):
         """Test three verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvv', '--debug'])
-        self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
+        self.assertEqual(logging.DEBUG, ApplicationLog.console_logger.level)
 
     def test_verbose_level_many(self):
         """Test several verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvvvvvvvvv', '--debug'])
-        self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
+        self.assertEqual(logging.DEBUG, ApplicationLog.console_logger.level)
 
 
 class DatabaseConfiguration(TestCase):

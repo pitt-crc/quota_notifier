@@ -8,6 +8,7 @@ from unittest import TestCase
 
 from pydantic import ValidationError
 
+from quota_notifier.app_logging import ApplicationLog
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
 
@@ -139,8 +140,7 @@ class LoggingConfiguration(TestCase):
         """Test a file logger is not configured by default"""
 
         self.assertIsNone(ApplicationSettings.get('log_path'))
-        with self.assertRaises(RuntimeError):
-            self.get_file_handler()
+        self.assertIsNone(ApplicationLog.get_log_file_level())
 
     def test_logging_level(self):
         """Test the logging level is updated to reflect application settings"""
