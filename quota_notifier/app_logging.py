@@ -10,12 +10,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+# Set the base logging level to log everything (level 0)
+# and apply additional filtering at the handler level
+_root_logger = logging.getLogger()
+_root_logger.setLevel(0)
+
 
 class ApplicationLog:
     """Configure and handle application logging tasks"""
-
-    # Set the base logging level to log everything (level 0)
-    # and apply additional filtering at the handler level
 
     # For logging to the console
     console_logger = logging.getLogger('console_logger')
@@ -44,9 +46,10 @@ class ApplicationLog:
         """
 
         # Remove any old stream handlers
-        for handler in cls.console_logger.handlers:
-            if isinstance(handler, logging.StreamHandler):
-                cls.console_logger.removeHandler(handler)
+        for logger in (_root_logger, cls.console_logger):
+            for handler in logger.handlers:
+                if isinstance(handler, logging.StreamHandler):
+                    logger.removeHandler(handler)
 
         if level is None:
             return
@@ -56,6 +59,7 @@ class ApplicationLog:
         stream_handler.setFormatter(cls.console_format)
         stream_handler.setLevel(level)
         cls.console_logger.addHandler(stream_handler)
+        _root_logger.addHandler(stream_handler)
 
     @classmethod
     def configure_log_file(cls, level: Optional[int], log_path: Path = None) -> None:
@@ -69,9 +73,10 @@ class ApplicationLog:
         """
 
         # Remove any old file handlers
-        for handler in cls.file_logger.handlers:
-            if isinstance(handler, logging.FileHandler):
-                cls.file_logger.removeHandler(handler)
+        for logger in (_root_logger, cls.file_logger):
+            for handler in logger.handlers:
+                if isinstance(handler, logging.FileHandler):
+                    logger.removeHandler(handler)
 
         if level is None:
             return
@@ -81,22 +86,4 @@ class ApplicationLog:
         file_handler.setFormatter(cls.file_format)
         file_handler.setLevel(level)
         cls.file_logger.addHandler(file_handler)
-
-    @classmethod
-    def log(cls, *args, **kwargs) -> None:
-        """Write a log message to all configured destinations"""
-
-        cls.console_logger.log(*args, **kwargs)
-        cls.file_logger.log(*args, **kwargs)
-
-    @classmethod
-    def log_to_console(cls, *args, **kwargs) -> None:
-        """Write a log message only to the console"""
-
-        cls.console_logger.log(*args, **kwargs)
-
-    @classmethod
-    def log_to_file(cls, *args, **kwargs) -> None:
-        """Write a log message only to the log file"""
-
-        cls.file_logger.log(*args, **kwargs)
+        _root_logger.addHandler(file_handler)

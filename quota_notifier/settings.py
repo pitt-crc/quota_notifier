@@ -11,8 +11,8 @@ from typing import Any, List, Union, Tuple, Set, Optional, Literal
 
 from pydantic import BaseSettings, Field, validator
 
-from quota_notifier.logging import ApplicationLog
-from quota_notifier.orm import DBConnection
+from .app_logging import ApplicationLog
+from .orm import DBConnection
 
 DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
 

@@ -126,9 +126,6 @@ class Application:
             )
 
         except Exception as caught:
-            err_string = str(caught)
-            logging.critical(err_string.replace('\n', ' '))
-
-            # Avoid printing to stdout twice if verbose is enabled
+            ApplicationLog.file_logger.exception(level=logging.CRITICAL)
             if not args.verbose:
-                parser.error(err_string)
+                ApplicationLog.console_logger.critical(str(caught))
