@@ -30,6 +30,12 @@ class ConfigureConsoleLogging(TestCase):
             for handler in ApplicationLog.console_logger.handlers:
                 self.assertEqual(log_level, handler.level)
 
+    def test_logging_level_none(self) -> None:
+        """Test logging is disabled when the logging level is None"""
+
+        ApplicationLog.configure_console(level=None)
+        self.assertFalse(ApplicationLog.console_logger.handlers)
+
     def test_handler_assigned_to_app_logger(self) -> None:
         """Test console log handlers are also assigned to the application log"""
 
@@ -76,6 +82,12 @@ class ConfigureFileLogging(TestCase):
             ApplicationLog.configure_log_file(log_level, self.temp_file_path)
             for handler in ApplicationLog.file_logger.handlers:
                 self.assertEqual(log_level, handler.level)
+
+    def test_logging_level_none(self) -> None:
+        """Test logging is disabled when the logging level is None"""
+
+        ApplicationLog.configure_log_file(level=None)
+        self.assertFalse(ApplicationLog.file_logger.handlers)
 
     def test_handler_assigned_to_app_logger(self) -> None:
         """Test console log handlers are also assigned to the application log"""
