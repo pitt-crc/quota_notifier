@@ -1,4 +1,6 @@
-"""The ``notify`` module provides logic for checking if users have pending
+"""Handling of user notifications and notification history.
+
+The ``notify`` module provides logic for checking if users have pending
 notifications and issuing those notifications via email.
 
 Module Contents

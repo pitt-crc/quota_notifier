@@ -1,5 +1,8 @@
-"""The ``settings`` module is responsible for managing application settings.
-Class definitions directly reflect the settings file schema.
+"""Application settings management.
+
+Class definitions inheriting from ``BaseSettings`` directly define
+the settings file schema.  The ``ApplicationSettings`` class is used to manage
+application settings in memory.
 
 Module Contents
 ---------------

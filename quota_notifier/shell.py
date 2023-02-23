@@ -1,4 +1,4 @@
-"""Tools for running commands and fetching user data from the underlying system shell.
+"""Tools for running shell commands and fetching user data from the underlying system shell.
 
 Module Contents
 ---------------
