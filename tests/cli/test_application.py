@@ -24,7 +24,7 @@ class VerbosityConfiguration(TestCase):
 
         Application.execute(['--debug'])
         for handler in console_logger.handlers:
-            self.assertEqual(1000, handler.level)
+            self.assertEqual(logging.ERROR, handler.level)
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""

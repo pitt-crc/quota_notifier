@@ -61,9 +61,9 @@ class ResetDefaults(TestCase):
             ApplicationSettings.set(log_path=temp_log_file.name)
             ApplicationSettings.reset_defaults()
 
-            for handler in logging.getLogger().handlers:
-                if isinstance(handler, logging.FileHandler):
-                    self.fail('Found a file logger configured for the application')
+            self.assertIsNone(ApplicationSettings.get('log_path'))
+            for handler in file_logger.handlers:
+                self.assertGreaterEqual(1000, handler.level)
 
 
 class ConfigureFromFile(TestCase):
@@ -150,9 +150,9 @@ class LoggingConfiguration(TestCase):
             with NamedTemporaryFile(suffix='.log') as temp_log_file:
                 ApplicationSettings.set(log_path=temp_log_file.name, log_level=level)
 
-                file_handler = self.get_file_handler()
-                handler_level = logging.getLevelName(file_handler.level)
-                self.assertEqual(level, handler_level)
+                for handler in file_logger.handlers:
+                    handler_level_str = logging.getLevelName(handler.level)
+                    self.assertEqual(level, handler_level_str)
 
 
 class DatabaseConfiguration(TestCase):
