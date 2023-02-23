@@ -1,6 +1,18 @@
 """The ``app_logging`` module handles the configuration and execution of
 application logging.
 
+Three loggers are configured for logging to different locations.
+The ``file_logger`` is used to log messages to the application log file.
+The ``console_logger`` is used to log messages to STDOUT.
+The default ``root`` logger will log to both the console and the log file.
+
+Separate functions are provided for configuring the logging
+threshold used when recording messages to each location.
+Note that log levels are assigned at the handler level,
+and not at the parent logger level.
+This means the root logger will respect the logging thresholds configured
+for each location.
+
 Module Contents
 ---------------
 """
