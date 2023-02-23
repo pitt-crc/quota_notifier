@@ -1,5 +1,4 @@
-"""The ``app_logging`` module handles the configuration and execution of
-application logging.
+"""Utilities for configuring application logging.
 
 Three loggers are configured for logging to different locations.
 The ``file_logger`` is used to log messages to the application log file.

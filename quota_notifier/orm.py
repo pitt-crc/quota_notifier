@@ -1,5 +1,4 @@
-"""Object relational mapper for connecting to the application database and
-managing underlying database constructs.
+"""Object relational mapper for connecting to the application database.
 
 Module Contents
 ---------------
