@@ -26,8 +26,12 @@ root_logger = logging.getLogger()  # Default logger for logging everywhere
 file_logger = logging.getLogger('file_logger')  # Logger for only the console
 console_logger = logging.getLogger('console_logger')  # Logger for only the log file
 
+# Don't propagate log messages to higher level loggers
+file_logger.propagate = False
+console_logger.propagate = False
+
 # Format used for different logging destinations
-console_format = logging.Formatter('%(levelname)8s - %(message)s')
+console_format = logging.Formatter('%(levelname)8s: %(message)s')
 file_format = logging.Formatter('%(levelname)8s | %(asctime)s | %(message)s')
 
 
@@ -62,7 +66,7 @@ def configure_console(level: Optional[int]) -> None:
     if level is None:
         level = 1000
 
-    for logger in (root_logger, console_logger):
+    for logger in (root_logger, console_logger,):
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setFormatter(console_format)
         stream_handler.setLevel(level)

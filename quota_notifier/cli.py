@@ -63,7 +63,7 @@ class Application:
         """
 
         log_level = {
-            0: 1000,
+            0: logging.ERROR,
             1: logging.WARNING,
             2: logging.INFO,
             3: logging.DEBUG
@@ -122,9 +122,7 @@ class Application:
             cls.run(
                 validate=args.validate,
                 verbose=args.verbose,
-                debug=args.debug,
-            )
-            raise RuntimeError('asdf')
+                debug=args.debug)
 
         except Exception as caught:
             file_logger.exception(str(caught))
