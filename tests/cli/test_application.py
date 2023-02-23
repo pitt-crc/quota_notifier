@@ -4,7 +4,7 @@ import logging
 import os
 from unittest import TestCase
 
-from quota_notifier.app_logging import ApplicationLog
+from quota_notifier.log import console_logger
 from quota_notifier.cli import Application
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
@@ -23,31 +23,31 @@ class VerbosityConfiguration(TestCase):
         """Test the application is silent by default"""
 
         Application.execute(['--debug'])
-        self.assertEqual(100, ApplicationLog.console_logger.level)
+        self.assertEqual(100, console_logger.level)
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""
 
         Application.execute(['-v', '--debug'])
-        self.assertEqual(logging.WARNING, ApplicationLog.console_logger.level)
+        self.assertEqual(logging.WARNING, console_logger.level)
 
     def test_verbose_level_two(self):
         """Test two verbose flags sets the logging level to ``INFO``"""
 
         Application.execute(['-vv', '--debug'])
-        self.assertEqual(logging.INFO, ApplicationLog.console_logger.level)
+        self.assertEqual(logging.INFO, console_logger.level)
 
     def test_verbose_level_three(self):
         """Test three verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvv', '--debug'])
-        self.assertEqual(logging.DEBUG, ApplicationLog.console_logger.level)
+        self.assertEqual(logging.DEBUG, console_logger.level)
 
     def test_verbose_level_many(self):
         """Test several verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvvvvvvvvv', '--debug'])
-        self.assertEqual(logging.DEBUG, ApplicationLog.console_logger.level)
+        self.assertEqual(logging.DEBUG, console_logger.level)
 
 
 class DatabaseConfiguration(TestCase):

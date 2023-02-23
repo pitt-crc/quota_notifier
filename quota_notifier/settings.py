@@ -11,7 +11,7 @@ from typing import Any, List, Union, Tuple, Set, Optional, Literal
 
 from pydantic import BaseSettings, Field, validator
 
-from .app_logging import ApplicationLog
+from .log import configure_log_file
 from .orm import DBConnection
 
 DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
@@ -240,7 +240,7 @@ class ApplicationSettings:
         log_path = cls.get('log_path')
         log_level = cls.get('log_level')
         if log_path is not None:
-            ApplicationLog.configure_log_file(log_level, log_path)
+            configure_log_file(log_level, log_path)
 
     @classmethod
     def _configure_database(cls) -> None:

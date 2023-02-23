@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import List
 
 from . import __version__
-from .app_logging import ApplicationLog
+from .log import configure_console, file_logger, console_logger
 from .notify import UserNotifier
 from .settings import ApplicationSettings
 
@@ -69,7 +69,7 @@ class Application:
             3: logging.DEBUG
         }.get(verbosity, logging.DEBUG)
 
-        ApplicationLog.configure_console(log_level)
+        configure_console(log_level)
 
     @staticmethod
     def _load_settings() -> None:
@@ -124,8 +124,8 @@ class Application:
                 verbose=args.verbose,
                 debug=args.debug,
             )
+            raise RuntimeError('asdf')
 
         except Exception as caught:
-            ApplicationLog.file_logger.exception(level=logging.CRITICAL)
-            if not args.verbose:
-                ApplicationLog.console_logger.critical(str(caught))
+            file_logger.exception(str(caught))
+            console_logger.critical(str(caught))
