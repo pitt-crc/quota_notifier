@@ -16,14 +16,12 @@ from typing import Iterable
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
 
-from quota_notifier.disk_utils import AbstractQuota
-from quota_notifier.settings import ApplicationSettings
-from quota_notifier.shell import User
-from . import __file__ as package_init_path
-from .disk_utils import BeeGFSQuota, QuotaFactory
+from .disk_utils import AbstractQuota, BeeGFSQuota, QuotaFactory
 from .orm import DBConnection, Notification
+from .settings import ApplicationSettings
+from .shell import User
 
-DEFAULT_TEMPLATE_PATH = Path(package_init_path).parent / 'data' / 'template.html'
+DEFAULT_TEMPLATE_PATH = Path(__file__).parent / 'data' / 'template.html'
 CUSTOM_TEMPLATE_PATH = Path('/etc/notifier/template.html')
 
 

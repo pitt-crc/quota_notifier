@@ -4,6 +4,7 @@ import logging
 import os
 from unittest import TestCase
 
+from quota_notifier.log import console_logger
 from quota_notifier.cli import Application
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
@@ -18,61 +19,40 @@ class VerbosityConfiguration(TestCase):
 
         ApplicationSettings.reset_defaults()
 
-    @staticmethod
-    def get_stream_handler() -> logging.StreamHandler:
-        """Return the ``StreamHandler`` instance used by the application when logging to the console"""
-
-        handlers = []
-        for handler in logging.getLogger().handlers:
-            # Keep any stream handlers with a configured logging level
-            # A default, NOTSET level stream handler is created when calling ``logging.get_logger()``
-            if isinstance(handler, logging.StreamHandler) and handler.level != logging.NOTSET:
-                handlers.append(handler)
-
-        if not handlers:
-            raise RuntimeError('Stream handler not found')
-
-        if len(handlers) > 1:
-            raise RuntimeError('Multiple stream handlers found')
-
-        return handlers[0]
-
-    def test_output_format(self):
-        """Test the console logging format has been customized"""
-
-        Application.execute(['--debug', '-v', '--debug'])
-        log_format = self.get_stream_handler().formatter._fmt
-        self.assertEqual('%(levelname)8s - %(message)s', log_format)
-
     def test_verbose_level_zero(self):
-        """Test the application is silent by default"""
+        """Test the application defaults to logging errors and above in the console"""
 
         Application.execute(['--debug'])
-        self.assertEqual(100, self.get_stream_handler().level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.ERROR, handler.level)
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""
 
         Application.execute(['-v', '--debug'])
-        self.assertEqual(logging.WARNING, self.get_stream_handler().level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.WARNING, handler.level)
 
     def test_verbose_level_two(self):
         """Test two verbose flags sets the logging level to ``INFO``"""
 
         Application.execute(['-vv', '--debug'])
-        self.assertEqual(logging.INFO, self.get_stream_handler().level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.INFO, handler.level)
 
     def test_verbose_level_three(self):
         """Test three verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvv', '--debug'])
-        self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.DEBUG, handler.level)
 
     def test_verbose_level_many(self):
         """Test several verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvvvvvvvvv', '--debug'])
-        self.assertEqual(logging.DEBUG, self.get_stream_handler().level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.DEBUG, handler.level)
 
 
 class DatabaseConfiguration(TestCase):

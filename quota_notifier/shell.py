@@ -13,7 +13,7 @@ from shlex import split
 from subprocess import PIPE, Popen
 from typing import Optional, Iterator
 
-from quota_notifier.settings import ApplicationSettings
+from .settings import ApplicationSettings
 
 
 class ShellCmd:

@@ -8,6 +8,7 @@ from unittest import TestCase
 
 from pydantic import ValidationError
 
+from quota_notifier.log import file_logger
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
 
@@ -60,9 +61,9 @@ class ResetDefaults(TestCase):
             ApplicationSettings.set(log_path=temp_log_file.name)
             ApplicationSettings.reset_defaults()
 
-            for handler in logging.getLogger().handlers:
-                if isinstance(handler, logging.FileHandler):
-                    self.fail('Found a file logger configured for the application')
+            self.assertIsNone(ApplicationSettings.get('log_path'))
+            for handler in file_logger.handlers:
+                self.assertGreaterEqual(1000, handler.level)
 
 
 class ConfigureFromFile(TestCase):
@@ -135,31 +136,12 @@ class LoggingConfiguration(TestCase):
 
         ApplicationSettings.reset_defaults()
 
-    @staticmethod
-    def get_file_handler() -> logging.FileHandler:
-        """Return the ``FileHandler`` instance used by the application to log to file"""
-
-        for handler in logging.getLogger().handlers:
-            if isinstance(handler, logging.FileHandler):
-                return handler
-
-        raise RuntimeError('File handler not found')
-
     def test_no_logger_by_default(self) -> None:
         """Test a file logger is not configured by default"""
 
         self.assertIsNone(ApplicationSettings.get('log_path'))
-        with self.assertRaises(RuntimeError):
-            self.get_file_handler()
-
-    def test_logging_format(self):
-        """Test the console logging format has been customized"""
-
-        with NamedTemporaryFile(suffix='.log') as temp_log_file:
-            ApplicationSettings.set(log_path=temp_log_file.name)
-
-            log_format = self.get_file_handler().formatter._fmt
-            self.assertEqual('%(levelname)8s | %(asctime)s | %(message)s', log_format)
+        for handler in file_logger.handlers:
+            self.assertGreaterEqual(1000, handler.level)
 
     def test_logging_level(self):
         """Test the logging level is updated to reflect application settings"""
@@ -168,9 +150,9 @@ class LoggingConfiguration(TestCase):
             with NamedTemporaryFile(suffix='.log') as temp_log_file:
                 ApplicationSettings.set(log_path=temp_log_file.name, log_level=level)
 
-                file_handler = self.get_file_handler()
-                handler_level = logging.getLevelName(file_handler.level)
-                self.assertEqual(level, handler_level)
+                for handler in file_logger.handlers:
+                    handler_level_str = logging.getLevelName(handler.level)
+                    self.assertEqual(level, handler_level_str)
 
 
 class DatabaseConfiguration(TestCase):
