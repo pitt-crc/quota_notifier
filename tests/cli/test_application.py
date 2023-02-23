@@ -20,34 +20,39 @@ class VerbosityConfiguration(TestCase):
         ApplicationSettings.reset_defaults()
 
     def test_verbose_level_zero(self):
-        """Test the application is silent by default"""
+        """Test the application defaults to logging errors and above in the console"""
 
         Application.execute(['--debug'])
-        self.assertEqual(100, console_logger.level)
+        for handler in console_logger.handlers:
+            self.assertEqual(1000, handler.level)
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""
 
         Application.execute(['-v', '--debug'])
-        self.assertEqual(logging.WARNING, console_logger.level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.WARNING, handler.level)
 
     def test_verbose_level_two(self):
         """Test two verbose flags sets the logging level to ``INFO``"""
 
         Application.execute(['-vv', '--debug'])
-        self.assertEqual(logging.INFO, console_logger.level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.INFO, handler.level)
 
     def test_verbose_level_three(self):
         """Test three verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvv', '--debug'])
-        self.assertEqual(logging.DEBUG, console_logger.level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.DEBUG, handler.level)
 
     def test_verbose_level_many(self):
         """Test several verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvvvvvvvvv', '--debug'])
-        self.assertEqual(logging.DEBUG, console_logger.level)
+        for handler in console_logger.handlers:
+            self.assertEqual(logging.DEBUG, handler.level)
 
 
 class DatabaseConfiguration(TestCase):

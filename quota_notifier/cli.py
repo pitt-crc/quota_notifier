@@ -63,7 +63,7 @@ class Application:
         """
 
         log_level = {
-            0: 100,
+            0: 1000,
             1: logging.WARNING,
             2: logging.INFO,
             3: logging.DEBUG
