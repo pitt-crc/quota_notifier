@@ -65,7 +65,7 @@ class DatabaseConfiguration(TestCase):
         self.assertEqual('sqlite:///:memory:', DBConnection.url)
 
     def test_db_matches_default_settings(self) -> None:
-        """Test the memory URL defaults to the default application settings"""
+        """Test the DB URL defaults to the default application settings"""
 
         Application.execute([])
         os.remove(ApplicationSettings.get('db_url').lstrip('sqlite:'))
