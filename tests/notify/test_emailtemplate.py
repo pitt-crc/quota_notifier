@@ -65,7 +65,6 @@ class MessageSending(TestCase):
         to_address = 'fake_recipient@fake_domain.com'
         sent_message = self.template.send(to_address, mock_smtp)
 
-        # The rstrip removes a newline character that is added automatically in the delivered message
         body = sent_message.get_body().get_content()
         self.assertEqual(self.template.message, body)
 
