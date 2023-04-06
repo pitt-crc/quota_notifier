@@ -106,6 +106,11 @@ class MessageSending(TestCase):
 class SendingByUsername(TestCase):
     """Test sending emails via username instead of address"""
 
+    def tearDown(self) -> None:
+        """Reset application settings to default values"""
+
+        ApplicationSettings.reset_defaults()
+
     @patch('smtplib.SMTP')
     def test_domain_matches_settings(self, mock_smtp) -> None:
         """Test the generated destination address matches application settings"""
@@ -116,3 +121,19 @@ class SendingByUsername(TestCase):
 
         self.assertEqual(user.username, username)
         self.assertEqual('@' + domain, ApplicationSettings.get('email_domain'))
+
+    @patch('smtplib.SMTP')
+    def test_at_symbols_ignored(self, mock_smtp) -> None:
+        """Test extra or missing @ symbols defined in application settings are ignored"""
+
+        user = User('myuser')
+        test_domain = 'domain.com'
+        for i in range(0, 3):
+            domain_with_at_symbols = (i * '@') + test_domain
+            ApplicationSettings.set(email_domain=domain_with_at_symbols)
+
+            sent_message = EmailTemplate([]).send_to_user(user, mock_smtp)
+            username, domain = sent_message['To'].split('@')
+
+            self.assertEqual(user.username, username)
+            self.assertEqual(test_domain, domain)
