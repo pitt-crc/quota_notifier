@@ -282,6 +282,9 @@ class ApplicationSettings:
     def get(cls, item: str) -> Any:
         """Return a value from application settings
 
+        Valid arguments include any attribute name for the
+        ``SettingsSchema`` class.
+
         Args:
             item: Name of the settings value to retrieve
 
