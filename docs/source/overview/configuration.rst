@@ -2,6 +2,7 @@ Configuration
 =============
 
 After installation, the ``notifier`` utility needs to be configured via the application settings file.
+Instructions for customizing the application are provided below.
 At any time, the ``notifier --validate`` command can be run to validate the current application settings.
 
 Email Notification Template
@@ -25,7 +26,7 @@ Application Settings
 
 Application settings are configurable via a settings file at ``/etc/notifier/settings.json``.
 If this file does not exist, the application will run using the default settings.
-A full list of available settings and their defaults is provided below:
+A full list of available settings and their defaults is provided below.
 
 
 .. important:: The top level ``file_systems`` field is a nested field and entries

@@ -44,7 +44,9 @@ The :doc:`file_systems` page provides an overview of supported file system types
                "type": "generic",
                "thresholds": [50, 75]
            }
-       ]
+       ],
+       "email_from": "no-reply@domain.com",
+       "email_domain": "@domain.com"
    }
 
 Once the application has been configured, you can check the configuration file is valid by running:

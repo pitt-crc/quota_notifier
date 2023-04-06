@@ -176,7 +176,7 @@ class SettingsSchema(BaseSettings):
     email_from: str = Field(
         title='Email From Address',
         type=str,
-        default='no-reply@crc.pitt.edu',
+        default='no-reply@domain.com',
         description='From address for automatically generated emails.')
 
     email_subject: str = Field(
@@ -188,7 +188,7 @@ class SettingsSchema(BaseSettings):
     email_domain: str = Field(
         title='User Email Address Domain',
         type=str,
-        default='@pitt.edu',
+        default='@domain.com',
         description=('String to append to usernames when generating user email addresses. '
                      'The leading `@` is optional.'))
 
