@@ -4,8 +4,8 @@ import logging
 import os
 from unittest import TestCase
 
-from quota_notifier.log import console_logger
 from quota_notifier.cli import Application
+from quota_notifier.log import console_logger
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
 

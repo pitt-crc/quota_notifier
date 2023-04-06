@@ -15,8 +15,9 @@ from pathlib import Path
 from typing import List
 
 from . import __version__
-from .log import configure_console, file_logger, console_logger
+from .log import configure_console, file_logger, console_logger, configure_log_file
 from .notify import UserNotifier
+from .orm import DBConnection
 from .settings import ApplicationSettings
 
 SETTINGS_PATH = Path('/etc/notifier/settings.json')
@@ -73,6 +74,26 @@ class Application:
 
         configure_console(log_level)
 
+    @classmethod
+    def _configure_logging(cls) -> None:
+        """Configure python logging to the given level"""
+
+        log_path = ApplicationSettings.get('log_path')
+        log_level = ApplicationSettings.get('log_level')
+        if log_path is not None:
+            configure_log_file(log_level, log_path)
+
+    @classmethod
+    def _configure_database(cls) -> None:
+        """Configure the application database connection"""
+
+        if ApplicationSettings.get('debug'):
+            logging.warning('Running in debug mode')
+            DBConnection.configure('sqlite:///:memory:')
+
+        else:
+            DBConnection.configure(ApplicationSettings.get('db_url'))
+
     @staticmethod
     def _load_settings() -> None:
         """Load application settings from the given file path"""
@@ -97,10 +118,14 @@ class Application:
             debug: Run the application in debug mode
         """
 
-        # Configure the application
+        # Load settings from disk
         cls._set_console_verbosity(verbose)
         cls._load_settings()
         ApplicationSettings.set(debug=debug)
+
+        # Configure the application
+        cls._configure_logging()
+        cls._configure_database()
 
         # Run core application logic
         if not validate:
