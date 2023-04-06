@@ -14,9 +14,6 @@ from typing import Any, List, Union, Tuple, Set, Optional, Literal
 
 from pydantic import BaseSettings, Field, validator
 
-from .log import configure_log_file
-from .orm import DBConnection
-
 DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
 
 
@@ -237,33 +234,6 @@ class ApplicationSettings:
     _parsed_settings: SettingsSchema = None
 
     @classmethod
-    def _configure_logging(cls) -> None:
-        """Configure python logging to the given level"""
-
-        log_path = cls.get('log_path')
-        log_level = cls.get('log_level')
-        if log_path is not None:
-            configure_log_file(log_level, log_path)
-
-    @classmethod
-    def _configure_database(cls) -> None:
-        """Configure the application database connection"""
-
-        if cls.get('debug'):
-            logging.warning('Running in debug mode')
-            DBConnection.configure('sqlite:///:memory:')
-
-        else:
-            DBConnection.configure(cls.get('db_url'))
-
-    @classmethod
-    def _configure_application(cls):
-        """Update backend application constructs to reflect current application settings"""
-
-        cls._configure_logging()
-        cls._configure_database()
-
-    @classmethod
     def set_from_file(cls, path: Path) -> None:
         """Reset application settings to default values
 
@@ -277,7 +247,6 @@ class ApplicationSettings:
 
         try:
             cls._parsed_settings = SettingsSchema.parse_file(path)
-            cls._configure_application()
 
         except Exception:
             logging.error('settings file is invalid')
@@ -303,18 +272,18 @@ class ApplicationSettings:
 
             setattr(cls._parsed_settings, item, value)
 
-        cls._configure_application()
-
     @classmethod
     def reset_defaults(cls) -> None:
         """Reset application settings to default values"""
 
         cls._parsed_settings = SettingsSchema()
-        cls._configure_application()
 
     @classmethod
     def get(cls, item: str) -> Any:
         """Return a value from application settings
+
+        Valid arguments include any attribute name for the
+        ``SettingsSchema`` class.
 
         Args:
             item: Name of the settings value to retrieve
