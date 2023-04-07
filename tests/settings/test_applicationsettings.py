@@ -8,16 +8,11 @@ from unittest import TestCase
 from pydantic import ValidationError
 
 from quota_notifier.settings import ApplicationSettings
+from tests.base import DefaultSetupTeardown
 
 
-class Defaults(TestCase):
+class Defaults(DefaultSetupTeardown, TestCase):
     """Test default settings"""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        """Set application settings to default values"""
-
-        ApplicationSettings.reset_defaults()
 
     def test_blacklisted_root_user(self) -> None:
         """Test root is in blacklisted users"""
@@ -30,7 +25,7 @@ class Defaults(TestCase):
         self.assertEqual({0, }, ApplicationSettings.get('gid_blacklist'))
 
 
-class ResetDefaults(TestCase):
+class ResetDefaults(DefaultSetupTeardown, TestCase):
     """Test the overwriting of settings via the ``reset_defaults`` method"""
 
     def test_blacklist_is_reset(self) -> None:
@@ -41,7 +36,7 @@ class ResetDefaults(TestCase):
         self.assertEqual({0, }, ApplicationSettings.get('uid_blacklist'))
 
 
-class ConfigureFromFile(TestCase):
+class ConfigureFromFile(DefaultSetupTeardown, TestCase):
     """Test the modification of settings via the ``configure_from_file`` method"""
 
     def test_setting_are_overwritten(self) -> None:
@@ -71,7 +66,7 @@ class ConfigureFromFile(TestCase):
                 ApplicationSettings.set_from_file(path_obj)
 
 
-class Set(TestCase):
+class Set(DefaultSetupTeardown, TestCase):
     """Test application settings can be manipulated via the ``set`` method"""
 
     def test_setting_is_updated(self) -> None:

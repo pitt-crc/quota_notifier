@@ -5,9 +5,10 @@ from pathlib import Path
 from unittest import TestCase
 
 from quota_notifier.settings import FileSystemSchema, SettingsSchema
+from tests.base import DefaultSetupTeardown
 
 
-class BlacklistValidation(TestCase):
+class BlacklistValidation(DefaultSetupTeardown, TestCase):
     """Test validation for the ``uid_blacklist`` and ``gid_blacklist`` fields"""
 
     def test_error_on_id_range_len_1(self) -> None:
@@ -38,7 +39,7 @@ class BlacklistValidation(TestCase):
             SettingsSchema(gid_blacklist=['root', ])
 
 
-class FileSystemValidation(TestCase):
+class FileSystemValidation(DefaultSetupTeardown, TestCase):
     """Test validation for the ``file_systems`` field"""
 
     def test_error_on_duplicate_path(self) -> None:
@@ -70,7 +71,7 @@ class FileSystemValidation(TestCase):
         self.assertEqual(valid_input, returned_value)
 
 
-class DefaultDBUrl(TestCase):
+class DefaultDBUrl(DefaultSetupTeardown, TestCase):
     """Tests for the default database path"""
 
     def test_is_sqlite(self) -> None:

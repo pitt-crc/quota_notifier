@@ -3,8 +3,8 @@
 from quota_notifier.settings import ApplicationSettings
 
 
-class CleanSettingsMixin:
-    """Mixin for resting application settings before and after every test"""
+class DefaultSetupTeardown:
+    """Defines setup/tear down steps for resting default settings before/after every test"""
 
     def setUp(self) -> None:
         """Reset application settings"""

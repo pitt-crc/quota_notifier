@@ -4,9 +4,10 @@ from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
 from quota_notifier.orm import DBConnection
+from tests.base import DefaultSetupTeardown
 
 
-class DBConfiguration(TestCase):
+class DBConfiguration(DefaultSetupTeardown, TestCase):
     """Test configuration of the DB connection via the ``configure`` method"""
 
     def test_connection_is_reset(self) -> None:
