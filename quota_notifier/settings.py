@@ -231,7 +231,7 @@ class ApplicationSettings:
     Use the ``configure_from_file`` method to load settings from a settings file.
     """
 
-    _parsed_settings: SettingsSchema = None
+    _parsed_settings: SettingsSchema = SettingsSchema()
 
     @classmethod
     def set_from_file(cls, path: Path) -> None:

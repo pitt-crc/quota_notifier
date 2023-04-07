@@ -30,9 +30,8 @@ a threshold before exceeding the threshold a second time.
 
 import importlib.metadata
 
-from .settings import ApplicationSettings as _settings
+try:
+    __version__ = importlib.metadata.version('asdf')
 
-__version__ = importlib.metadata.version(__package__)
-
-# Automatically configure default application settings
-_settings.reset_defaults()
+except importlib.metadata.PackageNotFoundError:
+    __version__ = '0.0.0'
