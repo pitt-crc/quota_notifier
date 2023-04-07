@@ -57,6 +57,16 @@ class ConsoleVerbosity(TestCase):
 class DatabaseConfiguration(TestCase):
     """Test configuration of the application database"""
 
+    def tearDown(self) -> None:
+        """Restore default application settings
+
+        These tests run the full application, including the configuration
+        of application settings. As a result, settings need to be reset after
+        each run.
+        """
+
+        ApplicationSettings.reset_defaults()
+
     def test_db_in_memory(self) -> None:
         """Test debug mode forces an in-memory database"""
 
