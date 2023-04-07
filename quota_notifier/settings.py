@@ -10,6 +10,7 @@ Module Contents
 
 import logging
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any, List, Union, Tuple, Set, Optional, Literal
 
 from pydantic import BaseSettings, Field, validator
@@ -146,7 +147,7 @@ class SettingsSchema(BaseSettings):
     log_path: Optional[Path] = Field(
         title='Log Path',
         type=Optional[Path],
-        default=None,
+        default_factory=lambda: Path(NamedTemporaryFile().name),
         description='Optionally log application events to a file.')
 
     # Settings for the smtp host/port
