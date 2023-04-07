@@ -7,7 +7,6 @@ application settings in memory.
 Module Contents
 ---------------
 """
-
 import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -259,6 +258,7 @@ class ApplicationSettings:
     def reset_defaults(cls) -> None:
         """Reset application settings to default values"""
 
+        logging.debug('Resetting application settings to defaults')
         cls._parsed_settings = SettingsSchema()
 
     @classmethod

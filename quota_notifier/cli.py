@@ -119,7 +119,6 @@ class Application:
         """Configure the application database connection"""
 
         if ApplicationSettings.get('debug'):
-            logging.warning('Running in debug mode')
             DBConnection.configure('sqlite:///:memory:')
 
         else:
@@ -135,22 +134,26 @@ class Application:
             debug: Run the application in debug mode
         """
 
-        console_log_level = {
+        # Configure application settings
+        cls._load_settings(force_debug=debug)
+        if validate:
+            return
+
+        # Map number of verbosity flags to logging levels
+        log_levels = {
             0: logging.ERROR,
             1: logging.WARNING,
             2: logging.INFO,
-            3: logging.DEBUG
-        }.get(verbosity, logging.DEBUG)
+            3: logging.DEBUG}
 
-        # Configure the application
-        cls._load_settings(force_debug=debug)
-        cls._configure_logging(console_log_level=console_log_level)
+        # Configure application logging (to console and file)
+        cls._configure_logging(console_log_level=log_levels.get(verbosity, logging.DEBUG))
+        if ApplicationSettings.get('debug'):
+            logging.warning('Running application in debug mode')
+
+        # Connect to the database and run the core application logic
         cls._configure_database()
-
-        # Run core application logic
-        if not validate:
-            UserNotifier().send_notifications()
-            logging.info('Exiting application successfully')
+        UserNotifier().send_notifications()
 
     @classmethod
     def execute(cls, arg_list: List[str] = None) -> None:
@@ -174,3 +177,6 @@ class Application:
         except Exception as caught:
             logging.getLogger('file_logger').exception(str(caught))
             logging.getLogger('console_logger').critical(str(caught))
+
+        else:
+            logging.info('Exiting application successfully')
