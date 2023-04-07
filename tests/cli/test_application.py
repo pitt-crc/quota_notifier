@@ -10,7 +10,7 @@ from quota_notifier.settings import ApplicationSettings
 
 
 class ConsoleVerbosity(TestCase):
-    """Test the application verbosity is set o match commandline arguments"""
+    """Test the application verbosity is set to match commandline arguments"""
 
     @classmethod
     def tearDownClass(cls) -> None:
