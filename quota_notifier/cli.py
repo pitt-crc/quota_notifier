@@ -110,7 +110,7 @@ class Application:
             'loggers': {
                 'console_logger': {'handlers': ['console_handler'], 'level': 0},
                 'file_logger': {'handlers': ['log_file_handler'], 'level': 0},
-                'root': {'handlers': ['console_handler', 'log_file_handler'], 'level': 0}
+                '': {'handlers': ['console_handler', 'log_file_handler'], 'level': 0}
             }
         })
 
