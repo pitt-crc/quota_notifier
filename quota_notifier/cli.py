@@ -82,6 +82,9 @@ class Application:
             console_log_level: Logging level to set console logging to
         """
 
+        # Logging levels are set at the handler level instead of the logger level
+        # This allows more flexible usage of the root logger
+
         logging.config.dictConfig({
             'version': 1,
             'disable_existing_loggers': True,
