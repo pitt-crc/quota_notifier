@@ -285,4 +285,9 @@ class UserNotifier:
 
         logging.info('Scanning user quotas...')
         for user in users:
-            self.notify_user(user)
+            try:
+                self.notify_user(user)
+
+            except Exception as caught:
+                logging.getLogger('file_logger').error(f'Error notifying {user}', exc_info=caught)
+                logging.getLogger('console_logger').error(f'Error notifying {user} - {caught}')
