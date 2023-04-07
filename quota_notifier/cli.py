@@ -108,9 +108,9 @@ class Application:
                 }
             },
             'loggers': {
-                'console_logger': {'handlers': ['console_handler'], 'level': 0},
-                'file_logger': {'handlers': ['log_file_handler'], 'level': 0},
-                '': {'handlers': ['console_handler', 'log_file_handler'], 'level': 0}
+                'console_logger': {'handlers': ['console_handler'], 'level': 0, 'propagate': False},
+                'file_logger': {'handlers': ['log_file_handler'], 'level': 0, 'propagate': False},
+                '': {'handlers': ['console_handler', 'log_file_handler'], 'level': 0, 'propagate': False},
             }
         })
 
@@ -175,7 +175,7 @@ class Application:
                 debug=args.debug)
 
         except Exception as caught:
-            logging.getLogger('file_logger').exception(str(caught))
+            logging.getLogger('file_logger').critical('Application crash', exc_info=caught)
             logging.getLogger('console_logger').critical(str(caught))
 
         else:
