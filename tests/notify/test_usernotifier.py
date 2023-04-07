@@ -102,7 +102,7 @@ class GetLastThreshold(TestCase):
     def setUp(self) -> None:
         """Run tests against a temporary database in memory"""
 
-        ApplicationSettings.set(db_url='sqlite:///:memory:')
+        DBConnection.configure(url='sqlite:///:memory:')
 
     def test_missing_notification_history(self) -> None:
         """Test the return value is ``None`` for a missing notification history"""

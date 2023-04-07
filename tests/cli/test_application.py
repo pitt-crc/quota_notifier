@@ -5,13 +5,12 @@ import os
 from unittest import TestCase
 
 from quota_notifier.cli import Application
-from quota_notifier.log import console_logger
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
 
 
-class VerbosityConfiguration(TestCase):
-    """Test the application verbosity"""
+class ConsoleVerbosity(TestCase):
+    """Test the application verbosity is set o match commandline arguments"""
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -23,35 +22,35 @@ class VerbosityConfiguration(TestCase):
         """Test the application defaults to logging errors and above in the console"""
 
         Application.execute(['--debug'])
-        for handler in console_logger.handlers:
+        for handler in logging.getLogger('console_logger').handlers:
             self.assertEqual(logging.ERROR, handler.level)
 
     def test_verbose_level_one(self):
         """Test a single verbose flag sets the logging level to ``WARNING``"""
 
         Application.execute(['-v', '--debug'])
-        for handler in console_logger.handlers:
+        for handler in logging.getLogger('console_logger').handlers:
             self.assertEqual(logging.WARNING, handler.level)
 
     def test_verbose_level_two(self):
         """Test two verbose flags sets the logging level to ``INFO``"""
 
         Application.execute(['-vv', '--debug'])
-        for handler in console_logger.handlers:
+        for handler in logging.getLogger('console_logger').handlers:
             self.assertEqual(logging.INFO, handler.level)
 
     def test_verbose_level_three(self):
         """Test three verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvv', '--debug'])
-        for handler in console_logger.handlers:
+        for handler in logging.getLogger('console_logger').handlers:
             self.assertEqual(logging.DEBUG, handler.level)
 
     def test_verbose_level_many(self):
         """Test several verbose flags sets the logging level to ``DEBUG``"""
 
         Application.execute(['-vvvvvvvvvv', '--debug'])
-        for handler in console_logger.handlers:
+        for handler in logging.getLogger('console_logger').handlers:
             self.assertEqual(logging.DEBUG, handler.level)
 
 
