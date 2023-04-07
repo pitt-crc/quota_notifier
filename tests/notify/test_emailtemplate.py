@@ -8,9 +8,10 @@ from quota_notifier.disk_utils import GenericQuota
 from quota_notifier.notify import EmailTemplate
 from quota_notifier.settings import ApplicationSettings
 from quota_notifier.shell import User
+from tests.base import DefaultSetupTeardown
 
 
-class TemplateFormatting(TestCase):
+class TemplateFormatting(DefaultSetupTeardown, TestCase):
     """Test the formatting of the email template with quota information
 
     These tests don't enforce the overall formatting of the template, but do
@@ -44,19 +45,15 @@ class TemplateFormatting(TestCase):
         self.assertIn(quota_text, self.template.message)
 
 
-class MessageSending(TestCase):
+class MessageSending(DefaultSetupTeardown, TestCase):
     """Tests for sending emails via an SMTP server"""
 
     def setUp(self) -> None:
         """Create a formatted email template"""
 
+        ApplicationSettings.reset_defaults()
         self.quota = GenericQuota('testquota', Path('/'), User('test_user'), size_used=10, size_limit=100)
         self.template = EmailTemplate([self.quota])
-
-    def tearDown(self) -> None:
-        """Reset any modified application settings"""
-
-        ApplicationSettings.reset_defaults()
 
     @patch('smtplib.SMTP')
     def test_fields_are_set(self, mock_smtp) -> None:
@@ -103,13 +100,8 @@ class MessageSending(TestCase):
         self.assertFalse(mock_smtp.mock_calls)
 
 
-class SendingByUsername(TestCase):
+class SendingByUsername(DefaultSetupTeardown, TestCase):
     """Test sending emails via username instead of address"""
-
-    def tearDown(self) -> None:
-        """Reset application settings to default values"""
-
-        ApplicationSettings.reset_defaults()
 
     @patch('smtplib.SMTP')
     def test_domain_matches_settings(self, mock_smtp) -> None:

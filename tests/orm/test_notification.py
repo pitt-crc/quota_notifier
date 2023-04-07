@@ -5,9 +5,11 @@ from unittest import TestCase
 from sqlalchemy import select
 
 from quota_notifier.orm import DBConnection, Notification
+from quota_notifier.settings import ApplicationSettings
+from tests.base import DefaultSetupTeardown
 
 
-class ThresholdValidation(TestCase):
+class ThresholdValidation(DefaultSetupTeardown, TestCase):
     """Test value validation for the ``threshold`` column"""
 
     def test_value_is_assigned(self) -> None:
@@ -34,7 +36,7 @@ class ThresholdValidation(TestCase):
             self.assertEqual(threshold, notification.threshold)
 
 
-class RequiredFields(TestCase):
+class RequiredFields(DefaultSetupTeardown, TestCase):
     """Test required fields are not nullable"""
 
     required_columns = (
@@ -51,12 +53,13 @@ class RequiredFields(TestCase):
             self.assertFalse(column.nullable, f'Column {column} should not be nullable')
 
 
-class UpdateOnConflict(TestCase):
+class UpdateOnConflict(DefaultSetupTeardown, TestCase):
     """Test records are updated on uniqueness conflict"""
 
     def setUp(self) -> None:
         """Set up an empty mock database"""
 
+        ApplicationSettings.reset_defaults()
         DBConnection.configure('sqlite:///:memory:')
 
     def test_records_updated(self) -> None:

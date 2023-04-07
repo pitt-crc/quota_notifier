@@ -8,9 +8,10 @@ from pydantic import ValidationError
 
 from quota_notifier.disk_utils import QuotaFactory
 from quota_notifier.settings import FileSystemSchema
+from tests.base import DefaultSetupTeardown
 
 
-class NameValidation(TestCase):
+class NameValidation(DefaultSetupTeardown, TestCase):
     """Test validation of the file system ``name`` field"""
 
     def test_blank_name_error(self) -> None:
@@ -30,7 +31,7 @@ class NameValidation(TestCase):
         self.assertEqual('abc', validated_name)
 
 
-class PathValidation(TestCase):
+class PathValidation(DefaultSetupTeardown, TestCase):
     """Test validation of the ``path`` field"""
 
     def test_existing_path_validates(self) -> None:
@@ -47,7 +48,7 @@ class PathValidation(TestCase):
             FileSystemSchema.validate_path(Path('/fake/path'))
 
 
-class TypeValidation(TestCase):
+class TypeValidation(DefaultSetupTeardown, TestCase):
     """Test validation of the ``type`` field"""
 
     @staticmethod
@@ -64,7 +65,7 @@ class TypeValidation(TestCase):
             FileSystemSchema(type='fake_type')
 
 
-class ThresholdValidation(TestCase):
+class ThresholdValidation(DefaultSetupTeardown, TestCase):
     """Test validation of the ``threshold`` field"""
 
     def test_intermediate_values_pass(self) -> None:

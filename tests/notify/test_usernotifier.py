@@ -14,15 +14,11 @@ from quota_notifier.notify import UserNotifier
 from quota_notifier.orm import DBConnection, Notification
 from quota_notifier.settings import ApplicationSettings, FileSystemSchema
 from quota_notifier.shell import User
+from tests.base import DefaultSetupTeardown
 
 
-class GetUsers(TestCase):
+class GetUsers(DefaultSetupTeardown, TestCase):
     """Test the ``get_users`` method"""
-
-    def tearDown(self) -> None:
-        """Reset any modifications to application settings after each test"""
-
-        ApplicationSettings.reset_defaults()
 
     def test_empty_blacklists(self) -> None:
         """Test all users are returned for empty blacklists"""
@@ -61,11 +57,13 @@ class GetUsers(TestCase):
         self.assertNotIn(0, returned_gids)
 
 
-class GetUserQuotas(TestCase):
+class GetUserQuotas(DefaultSetupTeardown, TestCase):
     """Test the fetching of user quotas via the ``get_user_quotas`` method"""
 
     def setUp(self) -> None:
         """Create and register a temporary directory to generate quota objects for"""
+
+        ApplicationSettings.reset_defaults()
 
         # Register a temporary directory with the application
         self.temp_dir = TemporaryDirectory()
@@ -96,12 +94,13 @@ class GetUserQuotas(TestCase):
         self.assertEqual(self.test_user.group, quota.path.name)
 
 
-class GetLastThreshold(TestCase):
+class GetLastThreshold(DefaultSetupTeardown, TestCase):
     """Test fetching a quota's last notification threshold via the ``get_last_threshold`` method"""
 
     def setUp(self) -> None:
         """Run tests against a temporary database in memory"""
 
+        ApplicationSettings.reset_defaults()
         DBConnection.configure(url='sqlite:///:memory:')
 
     def test_missing_notification_history(self) -> None:
@@ -135,7 +134,7 @@ class GetLastThreshold(TestCase):
         self.assertEqual(test_threshold, threshold)
 
 
-class GetNextThreshold(TestCase):
+class GetNextThreshold(DefaultSetupTeardown, TestCase):
     """Test determination of the next notification threshold"""
 
     def setUp(self) -> None:
@@ -206,7 +205,7 @@ class GetNextThreshold(TestCase):
 
 
 @patch('quota_notifier.notify.SMTP')
-class NotificationHistory(TestCase):
+class NotificationHistory(DefaultSetupTeardown, TestCase):
     """Test the database updates after calling ``notify_user``"""
 
     def setUp(self) -> None:

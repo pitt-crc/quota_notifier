@@ -8,16 +8,11 @@ from unittest import TestCase
 from quota_notifier.cli import Application
 from quota_notifier.orm import DBConnection
 from quota_notifier.settings import ApplicationSettings
+from tests.base import DefaultSetupTeardown
 
 
-class ConsoleLogging(TestCase):
+class ConsoleLogging(DefaultSetupTeardown, TestCase):
     """Test the application verbosity is set to match commandline arguments"""
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        """Reset application settings to defaults"""
-
-        ApplicationSettings.reset_defaults()
 
     def test_logger_has_stream_handler(self) -> None:
         """Test the console logger has a single ``StreamHandler``"""
@@ -78,7 +73,7 @@ class ConsoleLogging(TestCase):
         self._assert_console_logging_level(logging.DEBUG)
 
 
-class FileLogging(TestCase):
+class FileLogging(DefaultSetupTeardown, TestCase):
     """Test the configuration for logging to file"""
 
     def test_logger_has_file_handler(self) -> None:
@@ -113,18 +108,8 @@ class FileLogging(TestCase):
             self.assertIn(handler, logging.getLogger().handlers)
 
 
-class DatabaseConfiguration(TestCase):
+class DatabaseConfiguration(DefaultSetupTeardown, TestCase):
     """Test configuration of the application database"""
-
-    def tearDown(self) -> None:
-        """Restore default application settings
-
-        These tests run the full application, including the configuration
-        of application settings. As a result, settings need to be reset after
-        each run.
-        """
-
-        ApplicationSettings.reset_defaults()
 
     def test_db_in_memory(self) -> None:
         """Test debug mode forces an in-memory database"""
