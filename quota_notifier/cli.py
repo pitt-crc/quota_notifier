@@ -10,12 +10,12 @@ Module Contents
 """
 
 import logging
+import logging.config
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import List
 
 from . import __version__
-from .log import configure_console, file_logger, console_logger, configure_log_file
 from .notify import UserNotifier
 from .orm import DBConnection
 from .settings import ApplicationSettings
@@ -57,31 +57,62 @@ class Parser(ArgumentParser):
 class Application:
     """Entry point for instantiating and executing the application"""
 
-    @classmethod
-    def _set_console_verbosity(cls, verbosity: int) -> None:
-        """Set the output verbosity for console messages
+    @staticmethod
+    def _load_settings(force_debug: bool = False) -> None:
+        """Load application settings from the given file path
 
         Args:
-            verbosity: Number of commandline verbosity flags
+            force_debug: Force the application to run in debug mode
         """
 
-        log_level = {
-            0: logging.ERROR,
-            1: logging.WARNING,
-            2: logging.INFO,
-            3: logging.DEBUG
-        }.get(verbosity, logging.DEBUG)
+        # Load and validate custom application settings from disk
+        # Implicitly raises an error if settings are invalid
+        if SETTINGS_PATH.exists():
+            ApplicationSettings.set_from_file(SETTINGS_PATH)
 
-        configure_console(log_level)
+        # Force debug mode if specified
+        if force_debug:
+            ApplicationSettings.set(debug=True)
 
     @classmethod
-    def _configure_logging(cls) -> None:
-        """Configure python logging to the given level"""
+    def _configure_logging(cls, console_log_level: int) -> None:
+        """Configure python logging to the given level
 
-        log_path = ApplicationSettings.get('log_path')
-        log_level = ApplicationSettings.get('log_level')
-        if log_path is not None:
-            configure_log_file(log_level, log_path)
+        Args:
+            console_log_level: Logging level to set console logging to
+        """
+
+        logging.config.dictConfig({
+            'version': 1,
+            'disable_existing_loggers': True,
+            'formatters': {
+                'console_formatter': {
+                    'format': '%(levelname)8s: %(message)s'
+                },
+                'log_file_formatter': {
+                    'format': '%(levelname)8s | %(asctime)s | %(message)s'
+                },
+            },
+            'handlers': {
+                'console_handler': {
+                    'class': 'logging.StreamHandler',
+                    'stream': 'ext://sys.stdout',
+                    'formatter': 'console_formatter',
+                    'level': console_log_level
+                },
+                'log_file_handler': {
+                    'class': 'logging.FileHandler',
+                    'formatter': 'log_file_formatter',
+                    'level': ApplicationSettings.get('log_level'),
+                    'filename': ApplicationSettings.get('log_path')
+                }
+            },
+            'loggers': {
+                'console_logger': {'handlers': ['console_handler'], 'level': 0},
+                'file_logger': {'handlers': ['log_file_handler'], 'level': 0},
+                'root': {'handlers': ['console_handler', 'log_file_handler'], 'level': 0}
+            }
+        })
 
     @classmethod
     def _configure_database(cls) -> None:
@@ -94,37 +125,26 @@ class Application:
         else:
             DBConnection.configure(ApplicationSettings.get('db_url'))
 
-    @staticmethod
-    def _load_settings() -> None:
-        """Load application settings from the given file path"""
-
-        logging.info('Validating settings...')
-
-        # Load and validate custom application settings from disk
-        # Implicitly raises an error if settings are invalid
-        if SETTINGS_PATH.exists():
-            ApplicationSettings.set_from_file(SETTINGS_PATH)
-
-        else:
-            logging.info('Using default settings')
-
     @classmethod
-    def run(cls, validate: bool = False, verbose: int = 0, debug: bool = False) -> None:
+    def run(cls, validate: bool = False, verbosity: int = 0, debug: bool = False) -> None:
         """Run the application using parsed commandline arguments
 
         Args:
             validate: Validate application settings without issuing user notifications
-            verbose: Console output verbosity
+            verbosity: Console output verbosity
             debug: Run the application in debug mode
         """
 
-        # Load settings from disk
-        cls._set_console_verbosity(verbose)
-        cls._load_settings()
-        ApplicationSettings.set(debug=debug)
+        console_log_level = {
+            0: logging.ERROR,
+            1: logging.WARNING,
+            2: logging.INFO,
+            3: logging.DEBUG
+        }.get(verbosity, logging.DEBUG)
 
         # Configure the application
-        cls._configure_logging()
+        cls._load_settings(force_debug=debug)
+        cls._configure_logging(console_log_level=console_log_level)
         cls._configure_database()
 
         # Run core application logic
@@ -148,9 +168,9 @@ class Application:
         try:
             cls.run(
                 validate=args.validate,
-                verbose=args.verbose,
+                verbosity=args.verbose,
                 debug=args.debug)
 
         except Exception as caught:
-            file_logger.exception(str(caught))
-            console_logger.critical(str(caught))
+            logging.getLogger('file_logger').exception(str(caught))
+            logging.getLogger('console_logger').critical(str(caught))
