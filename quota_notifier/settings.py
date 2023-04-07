@@ -24,13 +24,11 @@ class FileSystemSchema(BaseSettings):
     name: str = Field(
         ...,
         title='System Name',
-        type=str,
         description='Human readable name for the file system')
 
     path: Path = Field(
         ...,
         title='System Path',
-        type=Path,
         description='Absolute path to the mounted file system')
 
     # If modifying options for this setting, also update
@@ -38,12 +36,10 @@ class FileSystemSchema(BaseSettings):
     type: Literal['ihome', 'generic', 'beegfs'] = Field(
         ...,
         title='System Type',
-        type=Literal['ihome', 'generic', 'beegfs'],
         description='Type of the file system')
 
     thresholds: List[int] = Field(
         title='Notification Thresholds',
-        type=List[int],
         description='Usage percentages to issue notifications for.')
 
     @validator('name')
@@ -109,58 +105,49 @@ class SettingsSchema(BaseSettings):
     # General application settings
     ihome_quota_path: Path = Field(
         title='Ihome Quota Path',
-        type=Path,
         default=Path('/ihome/crc/scripts/ihome_quota.json'),
         description='Path to ihome storage information.')
 
     file_systems: List[FileSystemSchema] = Field(
         title='Monitored File Systems',
-        type=List[FileSystemSchema],
         default=list(),
         description='List of additional settings that define which file systems to examine.')
 
     uid_blacklist: Set[Union[int, Tuple[int, int]]] = Field(
         title='Blacklisted User IDs',
-        type=Set[Union[int, Tuple[int, int]]],
         default=[0],
         description='Do not notify users with these ID values.')
 
     gid_blacklist: Set[Union[int, Tuple[int, int]]] = Field(
         title='Blacklisted Group IDs',
-        type=Set[Union[int, Tuple[int, int]]],
         default=[0],
         description='Do not notify groups with these ID values.')
 
     disk_timeout: int = Field(
         title='File System Timeout',
-        type=int,
         default=30,
         description='Give up on checking a file system after the given number of seconds.')
 
     # Settings for application logging
     log_level: Literal['DEBUG', 'INFO', 'WARNING', 'ERROR'] = Field(
         title='Logging Level',
-        type=Literal['DEBUG', 'INFO', 'WARNING', 'ERROR'],
         default='INFO',
         description='Application logging level.')
 
     log_path: Optional[Path] = Field(
         title='Log Path',
-        type=Optional[Path],
         default_factory=lambda: Path(NamedTemporaryFile().name),
         description='Optionally log application events to a file.')
 
     # Settings for the smtp host/port
     smtp_host: str = Field(
         title='SMTP Server Host Name',
-        type=str,
         default='',
         description='Name of the SMTP host server'
     )
 
     smtp_port: int = Field(
         title='SMTP Port Number',
-        type=int,
         default=0,
         description='Port for the SMTP server'
     )
@@ -168,7 +155,6 @@ class SettingsSchema(BaseSettings):
     # Settings for database connections
     db_url: str = Field(
         title='Database Path',
-        type=str,
         default=f'sqlite:///{DEFAULT_DB_PATH}',
         description=('URL for the application database. '
                      'By default, a SQLITE database is created in the working directory.'))
@@ -176,19 +162,16 @@ class SettingsSchema(BaseSettings):
     # Email notification settings
     email_from: str = Field(
         title='Email From Address',
-        type=str,
         default='no-reply@domain.com',
         description='From address for automatically generated emails.')
 
     email_subject: str = Field(
         title='Email Subject Line',
-        type=str,
         default='CRC Disk Usage Alert',
         description='Subject line for automatically generated emails.')
 
     email_domain: str = Field(
         title='User Email Address Domain',
-        type=str,
         default='@domain.com',
         description=('String to append to usernames when generating user email addresses. '
                      'The leading `@` is optional.'))
@@ -196,7 +179,6 @@ class SettingsSchema(BaseSettings):
     # Settings for debug / dry-runs
     debug: bool = Field(
         title='Debug Mode',
-        type=bool,
         default=False,
         description='Disable database commits and email notifications. Useful for development and testing.')
 
