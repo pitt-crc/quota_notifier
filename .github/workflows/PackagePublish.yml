@@ -15,7 +15,7 @@ jobs:
     uses: ./.github/workflows/PackageTest.yml
     secrets: inherit
 
-  build-package:
+  build-distribution:
     name: Build Source Distribution
     needs: test-package
     runs-on: ubuntu-latest
@@ -51,9 +51,14 @@ jobs:
           path: dist
           retention-days: 7
 
+  build-docs:
+    needs: test-package
+    uses: ./.github/workflows/DocumentationBuild.yml
+    secrets: inherit
+
   publish-package:
     name: Publish Distribution
-    needs: [ build-package, build-docs ]
+    needs: [ build-distribution, build-docs ]
     runs-on: ubuntu-latest
     environment: ${{ matrix.environment }}
 
@@ -79,25 +84,7 @@ jobs:
           user: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PASSWORD }}
 
-  build-docs:
-    needs: test-package
-    uses: ./.github/workflows/DocumentationBuild.yml
-    secrets: inherit
-
   publish-docs:
     name: Deploy Documentation
     needs: [ build-docs, publish-package ]
-
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
-
+    uses: ./.github/workflows/DocumentationPublish.yml

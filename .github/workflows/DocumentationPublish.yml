@@ -11,6 +11,8 @@ permissions:
 
 jobs:
   build:
+    # If called via `workflow_call`, assume built docs are already available in artifact storage
+    if: github.event_name != 'workflow_call'
     name: Build Documentation
     uses: ./.github/workflows/DocumentationBuild.yml
 
