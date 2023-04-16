@@ -34,7 +34,7 @@ runs:
         coverage report --omit="tests/*"
 
     - name: Export test coverage
-      if: ${{ inputs.coverage-file }}
+      if: ${{ inputs.coverage-output }}
       shell: bash
       run:
         coverage xml --omit="tests/*" -o ${{ inputs.coverage-output }}
