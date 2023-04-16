@@ -303,7 +303,7 @@ class UserNotifier:
         failed_summary = Summary('failed_users', 'Number of users with failed notifications', registry=registry)
         failed_summary.observe(failures)
 
-        processed_summary = Summary('processed_users', 'Number of users scanned for possible notifications', registry=registry)
+        processed_summary = Summary('processed_users', 'Number of users scanned for notification', registry=registry)
         processed_summary.observe(len(users))
 
         prom_port = ApplicationSettings.get('prometheus_port')
