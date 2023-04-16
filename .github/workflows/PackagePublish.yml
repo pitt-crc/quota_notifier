@@ -28,7 +28,7 @@ jobs:
 
   build-distribution:
     name: Build Source Distribution
-    needs: test-package
+    needs: run-tests
     runs-on: ubuntu-latest
 
     steps:
@@ -63,7 +63,7 @@ jobs:
           retention-days: 7
 
   build-docs:
-    needs: test-package
+    needs: run-tests
     uses: ./.github/workflows/DocumentationBuild.yml
     secrets: inherit
 
@@ -92,7 +92,7 @@ jobs:
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          verbose: true
+          print-hash: true
           repository-url: ${{ matrix.host }}
           user: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PASSWORD }}

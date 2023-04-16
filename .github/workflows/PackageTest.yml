@@ -15,16 +15,16 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10", "3.11" ]
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Run Tests
+      - name: Run tests
         uses: ./.github/actions/tests
         with:
           python-version: ${{ matrix.python-version }}
           coverage-file: coverage.xml
 
-      # Report test coverage to codacy for the python version being tested
+      # Report partial coverage results to codacy for the current python version
       - name: Report partial coverage results
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l Python -r coverage.xml
         env:

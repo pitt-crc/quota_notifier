@@ -1,4 +1,4 @@
-name: 'Run Application Test Suite'
+name: 'Run Application Tests'
 description: 'Execute the application test suite.'
 
 inputs:
