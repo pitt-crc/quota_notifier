@@ -1,4 +1,5 @@
 """Tests for the ``QuotaFactory`` class"""
+
 from pathlib import Path
 from unittest import TestCase
 

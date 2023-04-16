@@ -10,13 +10,14 @@ Module Contents
 """
 
 import logging
+import logging.config
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import List
 
 from . import __version__
-from .log import configure_console, file_logger, console_logger
 from .notify import UserNotifier
+from .orm import DBConnection
 from .settings import ApplicationSettings
 
 SETTINGS_PATH = Path('/etc/notifier/settings.json')
@@ -56,56 +57,106 @@ class Parser(ArgumentParser):
 class Application:
     """Entry point for instantiating and executing the application"""
 
-    @classmethod
-    def _set_console_verbosity(cls, verbosity: int) -> None:
-        """Set the output verbosity for console messages
+    @staticmethod
+    def _load_settings(force_debug: bool = False) -> None:
+        """Load application settings from the given file path
 
         Args:
-            verbosity: Number of commandline verbosity flags
+            force_debug: Force the application to run in debug mode
         """
-
-        log_level = {
-            0: logging.ERROR,
-            1: logging.WARNING,
-            2: logging.INFO,
-            3: logging.DEBUG
-        }.get(verbosity, logging.DEBUG)
-
-        configure_console(log_level)
-
-    @staticmethod
-    def _load_settings() -> None:
-        """Load application settings from the given file path"""
-
-        logging.info('Validating settings...')
 
         # Load and validate custom application settings from disk
         # Implicitly raises an error if settings are invalid
         if SETTINGS_PATH.exists():
             ApplicationSettings.set_from_file(SETTINGS_PATH)
 
-        else:
-            logging.info('Using default settings')
+        # Force debug mode if specified
+        if force_debug:
+            ApplicationSettings.set(debug=True)
 
     @classmethod
-    def run(cls, validate: bool = False, verbose: int = 0, debug: bool = False) -> None:
+    def _configure_logging(cls, console_log_level: int) -> None:
+        """Configure python logging to the given level
+
+        Args:
+            console_log_level: Logging level to set console logging to
+        """
+
+        # Logging levels are set at the handler level instead of the logger level
+        # This allows more flexible usage of the root logger
+
+        logging.config.dictConfig({
+            'version': 1,
+            'disable_existing_loggers': True,
+            'formatters': {
+                'console_formatter': {
+                    'format': '%(levelname)8s: %(message)s'
+                },
+                'log_file_formatter': {
+                    'format': '%(levelname)8s | %(asctime)s | %(message)s'
+                },
+            },
+            'handlers': {
+                'console_handler': {
+                    'class': 'logging.StreamHandler',
+                    'stream': 'ext://sys.stdout',
+                    'formatter': 'console_formatter',
+                    'level': console_log_level
+                },
+                'log_file_handler': {
+                    'class': 'logging.FileHandler',
+                    'formatter': 'log_file_formatter',
+                    'level': ApplicationSettings.get('log_level'),
+                    'filename': ApplicationSettings.get('log_path')
+                }
+            },
+            'loggers': {
+                'console_logger': {'handlers': ['console_handler'], 'level': 0, 'propagate': False},
+                'file_logger': {'handlers': ['log_file_handler'], 'level': 0, 'propagate': False},
+                '': {'handlers': ['console_handler', 'log_file_handler'], 'level': 0, 'propagate': False},
+            }
+        })
+
+    @classmethod
+    def _configure_database(cls) -> None:
+        """Configure the application database connection"""
+
+        if ApplicationSettings.get('debug'):
+            DBConnection.configure('sqlite:///:memory:')
+
+        else:
+            DBConnection.configure(ApplicationSettings.get('db_url'))
+
+    @classmethod
+    def run(cls, validate: bool = False, verbosity: int = 0, debug: bool = False) -> None:
         """Run the application using parsed commandline arguments
 
         Args:
             validate: Validate application settings without issuing user notifications
-            verbose: Console output verbosity
+            verbosity: Console output verbosity
             debug: Run the application in debug mode
         """
 
-        # Configure the application
-        cls._set_console_verbosity(verbose)
-        cls._load_settings()
-        ApplicationSettings.set(debug=debug)
+        # Configure application settings
+        cls._load_settings(force_debug=debug)
+        if validate:
+            return
 
-        # Run core application logic
-        if not validate:
-            UserNotifier().send_notifications()
-            logging.info('Exiting application successfully')
+        # Map number of verbosity flags to logging levels
+        log_levels = {
+            0: logging.ERROR,
+            1: logging.WARNING,
+            2: logging.INFO,
+            3: logging.DEBUG}
+
+        # Configure application logging (to console and file)
+        cls._configure_logging(console_log_level=log_levels.get(verbosity, logging.DEBUG))
+        if ApplicationSettings.get('debug'):
+            logging.warning('Running application in debug mode')
+
+        # Connect to the database and run the core application logic
+        cls._configure_database()
+        UserNotifier().send_notifications()
 
     @classmethod
     def execute(cls, arg_list: List[str] = None) -> None:
@@ -123,9 +174,12 @@ class Application:
         try:
             cls.run(
                 validate=args.validate,
-                verbose=args.verbose,
+                verbosity=args.verbose,
                 debug=args.debug)
 
         except Exception as caught:
-            file_logger.exception(str(caught))
-            console_logger.critical(str(caught))
+            logging.getLogger('file_logger').critical('Application crash', exc_info=caught)
+            logging.getLogger('console_logger').critical(str(caught))
+
+        else:
+            logging.info('Exiting application successfully')

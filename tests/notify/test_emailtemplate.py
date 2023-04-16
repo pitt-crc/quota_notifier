@@ -8,9 +8,10 @@ from quota_notifier.disk_utils import GenericQuota
 from quota_notifier.notify import EmailTemplate
 from quota_notifier.settings import ApplicationSettings
 from quota_notifier.shell import User
+from tests.base import DefaultSetupTeardown
 
 
-class TemplateFormatting(TestCase):
+class TemplateFormatting(DefaultSetupTeardown, TestCase):
     """Test the formatting of the email template with quota information
 
     These tests don't enforce the overall formatting of the template, but do
@@ -44,19 +45,15 @@ class TemplateFormatting(TestCase):
         self.assertIn(quota_text, self.template.message)
 
 
-class MessageSending(TestCase):
+class MessageSending(DefaultSetupTeardown, TestCase):
     """Tests for sending emails via an SMTP server"""
 
     def setUp(self) -> None:
         """Create a formatted email template"""
 
+        ApplicationSettings.reset_defaults()
         self.quota = GenericQuota('testquota', Path('/'), User('test_user'), size_used=10, size_limit=100)
         self.template = EmailTemplate([self.quota])
-
-    def tearDown(self) -> None:
-        """Reset any modified application settings"""
-
-        ApplicationSettings.reset_defaults()
 
     @patch('smtplib.SMTP')
     def test_fields_are_set(self, mock_smtp) -> None:
@@ -65,7 +62,6 @@ class MessageSending(TestCase):
         to_address = 'fake_recipient@fake_domain.com'
         sent_message = self.template.send(to_address, mock_smtp)
 
-        # The rstrip removes a newline character that is added automatically in the delivered message
         body = sent_message.get_body().get_content()
         self.assertEqual(self.template.message, body)
 
@@ -104,7 +100,7 @@ class MessageSending(TestCase):
         self.assertFalse(mock_smtp.mock_calls)
 
 
-class SendingByUsername(TestCase):
+class SendingByUsername(DefaultSetupTeardown, TestCase):
     """Test sending emails via username instead of address"""
 
     @patch('smtplib.SMTP')
@@ -117,3 +113,19 @@ class SendingByUsername(TestCase):
 
         self.assertEqual(user.username, username)
         self.assertEqual('@' + domain, ApplicationSettings.get('email_domain'))
+
+    @patch('smtplib.SMTP')
+    def test_at_symbols_ignored(self, mock_smtp) -> None:
+        """Test extra or missing @ symbols defined in application settings are ignored"""
+
+        user = User('myuser')
+        test_domain = 'domain.com'
+        for i in range(0, 3):
+            domain_with_at_symbols = (i * '@') + test_domain
+            ApplicationSettings.set(email_domain=domain_with_at_symbols)
+
+            sent_message = EmailTemplate([]).send_to_user(user, mock_smtp)
+            username, domain = sent_message['To'].split('@')
+
+            self.assertEqual(user.username, username)
+            self.assertEqual(test_domain, domain)
