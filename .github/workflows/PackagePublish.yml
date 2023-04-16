@@ -1,6 +1,7 @@
 name: Publish Package
 
 on:
+  pull_request:
   release:
     types: [ released ]
 
@@ -68,6 +69,7 @@ jobs:
     secrets: inherit
 
   publish-package:
+    if: false
     name: Publish Distribution
     needs: [ build-distribution, build-docs ]
     runs-on: ubuntu-latest
@@ -98,6 +100,7 @@ jobs:
           password: ${{ secrets.REPO_PASSWORD }}
 
   publish-docs:
+    if: false
     name: Deploy Documentation
     needs: [ build-docs, publish-package ]
     uses: ./.github/workflows/DocumentationPublish.yml
