@@ -18,14 +18,8 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - id: debug
-        run:
-          pwd
-          ls
-          ls ..
-
       - id: foo
-        uses: ./.github/workflows/actions/tests
+        uses: ./.github/actions/tests
         with:
           who-to-greet: 'Mona the Octocat'
 
