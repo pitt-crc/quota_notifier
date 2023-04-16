@@ -2,24 +2,46 @@ name: 'Hello World'
 description: 'Greet someone'
 
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  python-version:
+    description: 'Python version to use when running tests'
     required: true
-    default: 'World'
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-number }}
+  codacy-token:
+    description: 'Codacy project token for reporting test coverage'
+    required: false
 
 runs:
   using: "composite"
   steps:
-    - run: echo Hello ${{ inputs.who-to-greet }}.
-      shell: bash
-    - id: random-number-generator
-      run: echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
-      shell: bash
-    - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
-      shell: bash
-    - run: goodbye.sh
-      shell: bash
+    - name: Checkout source
+      uses: actions/checkout@v3
+
+    - id: foo
+      uses: ./.github/actions/tests
+      with:
+        who-to-greet: 'Mona the Octocat'
+
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: false
+
+    - name: Install package dependencies
+      run: poetry install --with tests
+
+    - name: Run tests with coverage
+      run: |
+        pip install coverage
+        coverage run -m unittest discover 
+        coverage report --omit="tests/*"
+        coverage xml --omit="tests/*" -o coverage.xml
+
+    # Report test coverage to codacy for the python version being tested
+    - name: Report partial coverage results
+      run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l Python -r coverage.xml
+      env:
+        CODACY_PROJECT_TOKEN: ${{ inputs.codacy-token }}
