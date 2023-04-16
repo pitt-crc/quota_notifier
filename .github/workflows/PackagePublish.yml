@@ -64,9 +64,14 @@ jobs:
           retention-days: 7
 
   build-docs:
-    needs: run-tests
-    uses: ./.github/workflows/DocumentationBuild.yml
-    secrets: inherit
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project source
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        uses: ./.github/actions/docs
 
   publish-package:
     if: false
