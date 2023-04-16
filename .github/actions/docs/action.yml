@@ -1,13 +1,13 @@
-name: "Build HTML Documentation"
-description: "Build and upload the documentation to artifact storage."
+name: "Build Documentation"
+description: "Build and upload HTML documentation to artifact storage."
 
 inputs:
   python-version:
-    description: "Python version to use when running tests."
+    description: "Python version to use when building documentation."
     default: "3.11"
   artifact-name:
-    description: 'Artifact name to use when uploading the compiled documentation'
-    default: 'github-pages'
+    description: "Artifact name to use when uploading the compiled documentation"
+    default: "github-pages"
 
 runs:
   using: "composite"

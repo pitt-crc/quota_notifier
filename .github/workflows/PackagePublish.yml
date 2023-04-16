@@ -1,7 +1,6 @@
 name: Publish Package
 
 on:
-  push:
   release:
     types: [ released ]
 
@@ -75,7 +74,6 @@ jobs:
         uses: ./.github/actions/docs
 
   publish-package:
-    if: false
     name: Publish Distribution
     needs: [ build-distribution, build-docs ]
     runs-on: ubuntu-latest
@@ -106,7 +104,6 @@ jobs:
           password: ${{ secrets.REPO_PASSWORD }}
 
   publish-docs:
-    if: false
     name: Deploy Documentation
     needs: [ build-docs, publish-package ]
 

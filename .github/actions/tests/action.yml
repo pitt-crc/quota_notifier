@@ -3,10 +3,11 @@ description: "Execute the application test suite."
 
 inputs:
   python-version:
-    description: "Python version to use when running tests."
     required: true
+    description: "Python version to use when running tests."
   coverage-output:
-    description: "If specified, export test coverage to the given XML file path."
+    required: false
+    description: "Optionally export test coverage to the given XML file path."
 
 runs:
   using: "composite"
@@ -36,4 +37,4 @@ runs:
       if: ${{ inputs.coverage-file }}
       shell: bash
       run:
-        coverage xml --omit="tests/*" -o ${{ inputs.coverage-file }}
+        coverage xml --omit="tests/*" -o ${{ inputs.coverage-output }}
