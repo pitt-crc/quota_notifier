@@ -13,8 +13,8 @@ from email.message import EmailMessage
 from pathlib import Path
 from smtplib import SMTP
 from typing import Collection, Optional, Set, Union, Tuple, List
-from typing import Iterable
 
+from prometheus_client import Summary, CollectorRegistry, push_to_gateway
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
 
@@ -93,7 +93,7 @@ class UserNotifier:
     """Issue and manage user quota notifications"""
 
     @classmethod
-    def get_users(cls) -> Iterable[User]:
+    def get_users(cls) -> List[User]:
         """Return a collection of users to check quotas for
 
         Returns:
@@ -284,10 +284,28 @@ class UserNotifier:
             logging.debug('No cachable system queries found')
 
         logging.info('Scanning user quotas...')
+        failures = 0
         for user in users:
             try:
                 self.notify_user(user)
 
             except Exception as caught:
+                failures += 1
                 logging.getLogger('file_logger').error(f'Error notifying {user}', exc_info=caught)
                 logging.getLogger('console_logger').error(f'Error notifying {user} - {caught}')
+
+        # Check if prometheus reporting is enabled
+        prom_host = ApplicationSettings.get('prometheus_host')
+        if not prom_host:
+            return
+
+        registry = CollectorRegistry()
+        failed_summary = Summary('failed_users', 'Number of users with failed notifications', registry=registry)
+        failed_summary.observe(failures)
+
+        processed_summary = Summary('processed_users', 'Number of users scanned for possible notifications', registry=registry)
+        processed_summary.observe(len(users))
+
+        prom_port = ApplicationSettings.get('prometheus_port')
+        prom_job = ApplicationSettings.get('prometheus_job')
+        push_to_gateway(f'{prom_host}:{prom_port}', job=prom_job, registry=registry)

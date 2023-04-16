@@ -7,6 +7,7 @@ application settings in memory.
 Module Contents
 ---------------
 """
+
 import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -137,6 +138,25 @@ class SettingsSchema(BaseSettings):
         title='Log Path',
         default_factory=lambda: Path(NamedTemporaryFile().name),
         description='Optionally log application events to a file.')
+
+    # Prometheus settings
+    prometheus_host: str = Field(
+        title='Prometheus Server Host Name',
+        default='',
+        description='Optional report metrics to a Prometheus server.'
+    )
+
+    prometheus_port: int = Field(
+        title='Prometheus Server Port Number',
+        default=9091,
+        description='Port for the Prometheus server'
+    )
+
+    prometheus_job: str = Field(
+        title='Prometheus Job Name',
+        default='notifier',
+        description='Job label attached to pushed metrics '
+    )
 
     # Settings for the smtp host/port
     smtp_host: str = Field(
