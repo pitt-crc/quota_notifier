@@ -52,13 +52,12 @@ jobs:
         if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1
 
+  # Tell codacy we are done reporting test coverage
   codacy-coverage-reporter:
     name: Report code coverage
     runs-on: ubuntu-latest
     needs: tests
     steps:
-
-      # Tell codacy we are done reporting test coverage
       - name: Finish reporting coverage
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
         env:
