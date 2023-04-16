@@ -1,18 +1,18 @@
 name: 'Run Application Test Suite'
-description: 'Execute the application test suite'
+description: 'Execute the application test suite.'
 
 inputs:
   python-version:
-    description: 'Python version to use when running tests'
+    description: 'Python version to use when running tests.'
     required: true
+  coverage-file:
+    description: 'If specified, export test coverage to the given XML file path.'
 
 runs:
   using: "composite"
   steps:
-    - id: foo
-      uses: ./.github/actions/tests
-      with:
-        who-to-greet: 'Mona the Octocat'
+    - name: Checkout source
+      uses: actions/checkout@v3
 
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v4
@@ -34,4 +34,9 @@ runs:
         pip install coverage
         coverage run -m unittest discover 
         coverage report --omit="tests/*"
-        coverage xml --omit="tests/*" -o coverage.xml
+
+    - name: Export test coverage
+      if: ${{ inputs.coverage-file }}
+      shell: bash
+      run:
+        coverage xml --omit="tests/*" -o ${{ inputs.coverage-file }}
