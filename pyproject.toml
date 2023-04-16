@@ -30,6 +30,7 @@ notifier = "quota_notifier.cli:Application.execute"
 python = ">=3.8"
 pydantic = "1.10.7"
 sqlalchemy = "2.0.8"
+prometheus_client = "0.16.0"
 
 [tool.poetry.group.docs]
 optional = true
