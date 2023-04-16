@@ -1,4 +1,4 @@
-name: "Build Documentation"
+name: "Build Sphinx Documentation"
 description: "Build and upload HTML documentation to artifact storage."
 
 inputs:
