@@ -9,14 +9,13 @@ permissions:
   id-token: write
 
 jobs:
-  build-docs:
-    needs: run-tests
+  build:
     uses: ./.github/workflows/DocumentationBuild.yml
     secrets: inherit
 
   deploy:
     name: Deploy Documentation
-    needs: [ build ]
+    needs: build
 
     runs-on: ubuntu-latest
     environment:
