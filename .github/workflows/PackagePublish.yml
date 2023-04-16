@@ -103,4 +103,16 @@ jobs:
     if: false
     name: Deploy Documentation
     needs: [ build-docs, publish-package ]
-    uses: ./.github/workflows/DocumentationPublish.yml
+
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

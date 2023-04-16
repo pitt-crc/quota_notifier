@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/tests
         with:
           python-version: ${{ matrix.python-version }}
-          coverage-file: coverage.xml
+          coverage-output: coverage.xml
 
       # Report partial coverage results to codacy for the current python version
       - name: Report partial coverage results
