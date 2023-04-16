@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v3
 
       - id: foo
-        uses: ./actions/Tests.yml
+        uses: ./.github/workflows/actions/Tests.yml
         with:
           who-to-greet: 'Mona the Octocat'
 
