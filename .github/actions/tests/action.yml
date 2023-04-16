@@ -1,20 +1,14 @@
-name: 'Hello World'
-description: 'Greet someone'
+name: 'Run Application Test Suite'
+description: 'Execute the application test suite'
 
 inputs:
   python-version:
     description: 'Python version to use when running tests'
     required: true
-  codacy-token:
-    description: 'Codacy project token for reporting test coverage'
-    required: false
 
 runs:
   using: "composite"
   steps:
-    - name: Checkout source
-      uses: actions/checkout@v3
-
     - id: foo
       uses: ./.github/actions/tests
       with:
@@ -31,17 +25,13 @@ runs:
         virtualenvs-create: false
 
     - name: Install package dependencies
+      shell: bash
       run: poetry install --with tests
 
     - name: Run tests with coverage
+      shell: bash
       run: |
         pip install coverage
         coverage run -m unittest discover 
         coverage report --omit="tests/*"
         coverage xml --omit="tests/*" -o coverage.xml
-
-    # Report test coverage to codacy for the python version being tested
-    - name: Report partial coverage results
-      run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l Python -r coverage.xml
-      env:
-        CODACY_PROJECT_TOKEN: ${{ inputs.codacy-token }}
