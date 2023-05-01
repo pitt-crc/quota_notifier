@@ -19,6 +19,23 @@ class ParserHelpData(TestCase):
         self.assertTrue(Parser().description)
 
 
+class ErrorHandling(TestCase):
+    """Test error handling via the ``error`` method"""
+
+    def test_raised_as_system_exit(self) -> None:
+        """Test the ``error`` method raises a ``SystemExit`` error"""
+
+        with self.assertRaises(SystemExit):
+            Parser().error('This is an error')
+
+    def test_raised_with_message(self) -> None:
+        """Test the exit message is included with raised error"""
+
+        message = 'This is a test'
+        with self.assertRaisesRegex(SystemExit, message):
+            Parser().error(message)
+
+
 class ValidateOption(TestCase):
     """Test parsing of the ``--validate`` option"""
 
