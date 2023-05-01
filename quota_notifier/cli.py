@@ -182,4 +182,4 @@ class Application:
             logging.getLogger('console_logger').critical(str(caught))
 
         else:
-            logging.info('Exiting application successfully')
+            logging.info('Exiting application gracefully')
