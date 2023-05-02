@@ -5,6 +5,17 @@ from unittest import TestCase
 from quota_notifier.cli import Parser
 
 
+class ErrorHandling(TestCase):
+    """Test parser error handling"""
+
+    def test_raised_as_system_exit(self) -> None:
+        """Test the ``error`` method raises a ``SystemExit`` error"""
+
+        message = 'This is a test'
+        with self.assertRaisesRegex(SystemExit, message):
+            Parser().error(message)
+
+
 class ParserHelpData(TestCase):
     """Test the parser is configured with help data"""
 
