@@ -29,16 +29,16 @@ notifier = "quota_notifier.cli:Application.execute"
 [tool.poetry.dependencies]
 python = ">=3.8"
 pydantic = "1.10.7"
-sqlalchemy = "2.0.8"
+sqlalchemy = "2.0.12"
 prometheus_client = "0.16.0"
 
 [tool.poetry.group.docs]
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "5.3.0"
+sphinx = "6.2.1"
 sphinx-argparse = "0.4.0"
-sphinx-copybutton = "0.5.1"
+sphinx-copybutton = "0.5.2"
 sphinx-pydantic = "0.1.1"
 sphinx-rtd-theme = "1.2.0"
 sphinx-jsonschema = "1.15"
