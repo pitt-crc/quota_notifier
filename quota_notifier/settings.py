@@ -7,10 +7,11 @@ application settings in memory.
 Module Contents
 ---------------
 """
+
 import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any, List, Union, Tuple, Set, Optional, Literal
+from typing import Any, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import BaseSettings, Field, validator
 
