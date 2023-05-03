@@ -24,11 +24,9 @@ jobs:
           virtualenvs-create: false
 
       - name: Install dependencies
-        shell: bash
         run: poetry install --with docs
 
       - name: Build docs
-        shell: bash
         working-directory: docs
         run: make html SPHINXOPTS="-W"
 

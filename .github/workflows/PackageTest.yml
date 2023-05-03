@@ -35,7 +35,6 @@ jobs:
       # Report partial coverage results to codacy for the current python version
       - name: Report partial coverage results
         if: github.event_name != 'release'
-        shell: bash
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l Python -r coverage.xml
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -48,7 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Finish reporting coverage
-        shell: bash
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
