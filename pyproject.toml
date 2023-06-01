@@ -28,7 +28,7 @@ notifier = "quota_notifier.cli:Application.execute"
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-pydantic = "1.10.7"
+pydantic = "1.10.8"
 sqlalchemy = "2.0.12"
 prometheus_client = "0.16.0"
 
