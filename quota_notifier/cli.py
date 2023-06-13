@@ -170,11 +170,13 @@ class Application:
         # Configure application logging (to console and file)
         verbosity_to_log_level = {0: logging.ERROR, 1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
         cls._configure_logging(console_log_level=verbosity_to_log_level.get(verbosity, logging.DEBUG))
+
+        # Test the SMTP server can be reached
         if ApplicationSettings.get('debug'):
             logging.warning('Running application in debug mode')
 
-        # Test the SMTP server can be reached
-        cls._test_smtp_server()
+        else:
+            cls._test_smtp_server()
 
         # Connect to the application database
         cls._configure_database()
