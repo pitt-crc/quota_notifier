@@ -13,6 +13,7 @@ import logging
 import logging.config
 from argparse import ArgumentParser
 from pathlib import Path
+from smtplib import SMTP
 from typing import List
 
 from . import __version__
@@ -138,6 +139,20 @@ class Application:
             DBConnection.configure(ApplicationSettings.get('db_url'))
 
     @classmethod
+    def _test_smtp_server(cls) -> None:
+        """Ensure the SMTP server can be reached"""
+
+        host = ApplicationSettings.get('smtp_host')
+        port = ApplicationSettings.get('smtp_port')
+        server = SMTP(host=host, port=port)
+
+        try:
+            server.connect()
+
+        except Exception as caught:
+            raise ConnectionError(f'Could not connect to SMTP server at {host}:{port}') from caught
+
+    @classmethod
     def run(cls, validate: bool = False, verbosity: int = 0, debug: bool = False) -> None:
         """Run the application using parsed commandline arguments
 
@@ -152,29 +167,26 @@ class Application:
         if validate:
             return
 
-        # Map number of verbosity flags to logging levels
-        log_levels = {
-            0: logging.ERROR,
-            1: logging.WARNING,
-            2: logging.INFO,
-            3: logging.DEBUG}
-
         # Configure application logging (to console and file)
-        cls._configure_logging(console_log_level=log_levels.get(verbosity, logging.DEBUG))
+        verbosity_to_log_level = {0: logging.ERROR, 1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
+        cls._configure_logging(console_log_level=verbosity_to_log_level.get(verbosity, logging.DEBUG))
         if ApplicationSettings.get('debug'):
             logging.warning('Running application in debug mode')
 
-        # Connect to the database and run the core application logic
+        # Test the SMTP server can be reached
+        cls._test_smtp_server()
+
+        # Connect to the application database
         cls._configure_database()
+
+        # Run the core application logic
         UserNotifier().send_notifications()
 
     @classmethod
     def execute(cls, arg_list: List[str] = None) -> None:
         """Parse arguments and execute the application
 
-        This method is equivalent to parsing commandline arguments and passing
-        them to the `run` method. Raised exceptions are passed to STDERR via the
-        argument parser.
+        This method is equivalent to parsing arguments and passing them to the `run` method.
 
         Args:
             arg_list: Parse the given argument list instead of parsing the command line
@@ -188,6 +200,9 @@ class Application:
                 validate=args.validate,
                 verbosity=args.verbose,
                 debug=args.debug)
+
+        except ConnectionError as caught:
+            logging.getLogger('console_logger').critical(f'Error connecting to SMTP server - {caught}')
 
         except Exception as caught:
             logging.getLogger('file_logger').critical('Application crash', exc_info=caught)
