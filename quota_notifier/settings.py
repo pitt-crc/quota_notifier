@@ -176,6 +176,12 @@ class SettingsSchema(BaseSettings):
         description=('String to append to usernames when generating user email addresses. '
                      'The leading `@` is optional.'))
 
+    email_admins: List[str] = Field(
+        title='Administrator Emails',
+        default=[],
+        description='Admin users to contact when the application encounters a critical issue.'
+    )
+
     # Settings for debug / dry-runs
     debug: bool = Field(
         title='Debug Mode',

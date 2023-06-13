@@ -108,11 +108,21 @@ class Application:
                     'formatter': 'log_file_formatter',
                     'level': ApplicationSettings.get('log_level'),
                     'filename': ApplicationSettings.get('log_path')
+                },
+                'smtp_handler': {
+                    'class': 'logging.handlers.SMTPHandler',
+                    'formatter': 'log_file_formatter',
+                    'level': 'CRITICAL',
+                    'mailhost': ApplicationSettings.get('smtp_host'),
+                    'fromaddr': ApplicationSettings.get('email_from'),
+                    'toaddrs': ApplicationSettings.get('email_admins'),
+                    'subject': 'Quota Notifier - Admin Notification'
                 }
             },
             'loggers': {
                 'console_logger': {'handlers': ['console_handler'], 'level': 0, 'propagate': False},
                 'file_logger': {'handlers': ['log_file_handler'], 'level': 0, 'propagate': False},
+                'smtp_logger': {'handlers': ['smtp_handler'], 'level': 0, 'propagate': False},
                 '': {'handlers': ['console_handler', 'log_file_handler'], 'level': 0, 'propagate': False},
             }
         })
@@ -162,10 +172,12 @@ class Application:
     def execute(cls, arg_list: List[str] = None) -> None:
         """Parse arguments and execute the application
 
-        Raised exceptions are passed to STDERR via the argument parser.
+        This method is equivalent to parsing commandline arguments and passing
+        them to the `run` method. Raised exceptions are passed to STDERR via the
+        argument parser.
 
         Args:
-            arg_list: Run the application with the given arguments instead of parsing the command line
+            arg_list: Parse the given argument list instead of parsing the command line
         """
 
         parser = Parser()
@@ -180,6 +192,7 @@ class Application:
         except Exception as caught:
             logging.getLogger('file_logger').critical('Application crash', exc_info=caught)
             logging.getLogger('console_logger').critical(str(caught))
+            logging.getLogger('smtp_logger').critical(str(caught))
 
         else:
             logging.info('Exiting application gracefully')
