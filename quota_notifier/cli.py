@@ -132,6 +132,7 @@ class Application:
     def _configure_database(cls) -> None:
         """Configure the application database connection"""
 
+        logging.debug('Configuring database connection...')
         if ApplicationSettings.get('debug'):
             DBConnection.configure('sqlite:///:memory:')
 
@@ -142,6 +143,7 @@ class Application:
     def _test_smtp_server(cls) -> None:
         """Ensure the SMTP server can be reached"""
 
+        logging.debug('Testing SMTP server...')
         host = ApplicationSettings.get('smtp_host')
         port = ApplicationSettings.get('smtp_port')
         server = SMTP(host=host, port=port)
@@ -209,7 +211,8 @@ class Application:
         except Exception as caught:
             logging.getLogger('file_logger').critical('Application crash', exc_info=caught)
             logging.getLogger('console_logger').critical(str(caught))
-            logging.getLogger('smtp_logger').critical(str(caught))
+            if ApplicationSettings.get('admin_emails'):
+                logging.getLogger('smtp_logger').critical(str(caught))
 
         else:
             logging.info('Exiting application gracefully')

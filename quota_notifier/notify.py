@@ -295,7 +295,7 @@ class UserNotifier:
                 logging.getLogger('console_logger').error(f'Error notifying {user} - {caught}')
                 failure = True
 
-        if failure:
+        if failure and ApplicationSettings.get('admin_emails'):
             logging.getLogger('smtp_logger').critical(
                 'Email notifications failed for one or more user accounts. See the application logs for more details.'
             )
