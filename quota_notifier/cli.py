@@ -152,7 +152,9 @@ class Application:
             server.connect()
 
         except Exception as caught:
-            raise ConnectionError(f'Could not connect to SMTP server at {host}:{port}') from caught
+            raise ConnectionError(
+                f'Could not connect to SMTP server at {host}:{port}. Please check your application settings file.'
+            ) from caught
 
     @classmethod
     def run(cls, validate: bool = False, verbosity: int = 0, debug: bool = False) -> None:
