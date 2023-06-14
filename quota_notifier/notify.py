@@ -81,8 +81,8 @@ class EmailTemplate:
             return email
 
         with smtp or SMTP(
-            host=ApplicationSettings.get('smtp_host'),
-            port=ApplicationSettings.get('smtp_port')
+                host=ApplicationSettings.get('smtp_host'),
+                port=ApplicationSettings.get('smtp_port')
         ) as smtp_server:
             smtp_server.send_message(email)
 
@@ -284,6 +284,7 @@ class UserNotifier:
             logging.debug('No cachable system queries found')
 
         logging.info('Scanning user quotas...')
+        failure = False
         for user in users:
             try:
                 self.notify_user(user)
@@ -292,3 +293,9 @@ class UserNotifier:
                 # Only include exception information in the logfile, not the console
                 logging.getLogger('file_logger').error(f'Error notifying {user}', exc_info=caught)
                 logging.getLogger('console_logger').error(f'Error notifying {user} - {caught}')
+                failure = True
+
+        if failure:
+            logging.getLogger('smtp_logger').critical(
+                'Email notifications failed for one or more user accounts. See the application logs for more details.'
+            )
