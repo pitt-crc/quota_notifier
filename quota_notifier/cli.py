@@ -13,6 +13,7 @@ import logging
 import logging.config
 from argparse import ArgumentParser
 from pathlib import Path
+from smtplib import SMTP
 from typing import List
 
 from . import __version__
@@ -108,11 +109,21 @@ class Application:
                     'formatter': 'log_file_formatter',
                     'level': ApplicationSettings.get('log_level'),
                     'filename': ApplicationSettings.get('log_path')
+                },
+                'smtp_handler': {
+                    'class': 'logging.handlers.SMTPHandler',
+                    'formatter': 'log_file_formatter',
+                    'level': 'CRITICAL',
+                    'mailhost': ApplicationSettings.get('smtp_host'),
+                    'fromaddr': ApplicationSettings.get('email_from'),
+                    'toaddrs': ApplicationSettings.get('email_admins'),
+                    'subject': 'Quota Notifier - Admin Notification'
                 }
             },
             'loggers': {
                 'console_logger': {'handlers': ['console_handler'], 'level': 0, 'propagate': False},
                 'file_logger': {'handlers': ['log_file_handler'], 'level': 0, 'propagate': False},
+                'smtp_logger': {'handlers': ['smtp_handler'], 'level': 0, 'propagate': False},
                 '': {'handlers': ['console_handler', 'log_file_handler'], 'level': 0, 'propagate': False},
             }
         })
@@ -121,11 +132,29 @@ class Application:
     def _configure_database(cls) -> None:
         """Configure the application database connection"""
 
+        logging.debug('Configuring database connection...')
         if ApplicationSettings.get('debug'):
             DBConnection.configure('sqlite:///:memory:')
 
         else:
             DBConnection.configure(ApplicationSettings.get('db_url'))
+
+    @classmethod
+    def _test_smtp_server(cls) -> None:
+        """Ensure the SMTP server can be reached"""
+
+        logging.debug('Testing SMTP server...')
+        host = ApplicationSettings.get('smtp_host')
+        port = ApplicationSettings.get('smtp_port')
+        server = SMTP(host=host, port=port)
+
+        try:
+            server.connect()
+
+        except Exception as caught:
+            raise ConnectionError(
+                f'Could not connect to SMTP server at {host}:{port}. Please check your application settings file.'
+            ) from caught
 
     @classmethod
     def run(cls, validate: bool = False, verbosity: int = 0, debug: bool = False) -> None:
@@ -142,30 +171,31 @@ class Application:
         if validate:
             return
 
-        # Map number of verbosity flags to logging levels
-        log_levels = {
-            0: logging.ERROR,
-            1: logging.WARNING,
-            2: logging.INFO,
-            3: logging.DEBUG}
-
         # Configure application logging (to console and file)
-        cls._configure_logging(console_log_level=log_levels.get(verbosity, logging.DEBUG))
+        verbosity_to_log_level = {0: logging.ERROR, 1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
+        cls._configure_logging(console_log_level=verbosity_to_log_level.get(verbosity, logging.DEBUG))
+
+        # Test the SMTP server can be reached
         if ApplicationSettings.get('debug'):
             logging.warning('Running application in debug mode')
 
-        # Connect to the database and run the core application logic
+        else:
+            cls._test_smtp_server()
+
+        # Connect to the application database
         cls._configure_database()
+
+        # Run the core application logic
         UserNotifier().send_notifications()
 
     @classmethod
     def execute(cls, arg_list: List[str] = None) -> None:
         """Parse arguments and execute the application
 
-        Raised exceptions are passed to STDERR via the argument parser.
+        This method is equivalent to parsing arguments and passing them to the `run` method.
 
         Args:
-            arg_list: Run the application with the given arguments instead of parsing the command line
+            arg_list: Parse the given argument list instead of parsing the command line
         """
 
         parser = Parser()
@@ -177,9 +207,14 @@ class Application:
                 verbosity=args.verbose,
                 debug=args.debug)
 
+        except ConnectionError as caught:
+            logging.getLogger('console_logger').critical(f'Error connecting to SMTP server - {caught}')
+
         except Exception as caught:
             logging.getLogger('file_logger').critical('Application crash', exc_info=caught)
             logging.getLogger('console_logger').critical(str(caught))
+            if ApplicationSettings.get('admin_emails'):
+                logging.getLogger('smtp_logger').critical(str(caught))
 
         else:
             logging.info('Exiting application gracefully')

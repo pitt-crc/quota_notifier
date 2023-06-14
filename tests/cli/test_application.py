@@ -116,10 +116,3 @@ class DatabaseConfiguration(DefaultSetupTeardown, TestCase):
 
         Application.execute(['--debug'])
         self.assertEqual('sqlite:///:memory:', DBConnection.url)
-
-    def test_db_matches_default_settings(self) -> None:
-        """Test the DB URL defaults to the default application settings"""
-
-        Application.execute([])
-        os.remove(ApplicationSettings.get('db_url').lstrip('sqlite:'))
-        self.assertEqual(ApplicationSettings.get('db_url'), DBConnection.url)

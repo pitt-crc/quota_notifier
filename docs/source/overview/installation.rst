@@ -3,13 +3,10 @@ Installation
 
 Follow the instructions below to install and configure the ``notifier`` utility.
 
-System Utilities
-----------------
+Installing System Utilities
+---------------------------
 
-The ``df`` command line utility must be installed for the quota notifier to
-process *generic* file systems. The ``beegfs-ctl`` utility is also required to
-support BeeGFS file systems. See :doc:`file_systems` for more details on how
-different file system types are expected to be configured.
+The ``df`` command line utility must be installed for the quota notifier to function properly.
 
 Installing the Package
 ----------------------
@@ -19,7 +16,7 @@ The ``notifier`` command line utility is installable via the `pip <https://pip.p
 
 .. code-block::
 
-   pipx install git+https://github.com/pitt-crc/quota_notifier.git
+   pip install quota-notifier
 
 Configuration
 -------------
@@ -46,7 +43,8 @@ The :doc:`file_systems` page provides an overview of supported file system types
            }
        ],
        "email_from": "no-reply@domain.com",
-       "email_domain": "@domain.com"
+       "email_domain": "@domain.com",
+       "email_admins": ["admin.user@domain.com"]
    }
 
 Once the application has been configured, you can check the configuration file is valid by running:
