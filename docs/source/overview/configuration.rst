@@ -30,9 +30,9 @@ A full list of available settings and their defaults is provided below.
 
 
 .. important:: The top level ``file_systems`` field is a nested field and entries
-   should adhere to the :ref:`#/definitions/FileSystemSchema` schema outlined below.
+   should adhere to the :ref:`#/$defs/filesystemschema` schema outlined below.
 
 .. pydantic:: quota_notifier.settings.SettingsSchema
 
-.. _#/definitions/FileSystemSchema:
+.. _#/$defs/filesystemschema:
 .. pydantic:: quota_notifier.settings.FileSystemSchema

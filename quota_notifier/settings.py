@@ -13,7 +13,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, List, Literal, Optional, Set, Tuple, Union
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import field_validator, Field
+from pydantic_settings import BaseSettings
 
 DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
 
@@ -42,7 +43,8 @@ class FileSystemSchema(BaseSettings):
         title='Notification Thresholds',
         description='Usage percentages to issue notifications for.')
 
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, value: str) -> str:
         """Ensure the given name is not blank
 
@@ -59,7 +61,8 @@ class FileSystemSchema(BaseSettings):
 
         return stripped
 
-    @validator('path')
+    @field_validator('path')
+    @classmethod
     def validate_path(cls, value: Path) -> Path:
         """Ensure the given system path exists
 
@@ -78,7 +81,8 @@ class FileSystemSchema(BaseSettings):
 
         return value
 
-    @validator('thresholds')
+    @field_validator('thresholds')
+    @classmethod
     def validate_thresholds(cls, value: list) -> list:
         """Validate threshold values are between 0 and 100 (exclusive)
 
@@ -188,7 +192,8 @@ class SettingsSchema(BaseSettings):
         default=False,
         description='Disable database commits and email notifications. Useful for development and testing.')
 
-    @validator('file_systems')
+    @field_validator('file_systems')
+    @classmethod
     def validate_unique_file_systems(cls, value: List[FileSystemSchema]) -> List[FileSystemSchema]:
         """Ensure file systems have unique names/paths
 

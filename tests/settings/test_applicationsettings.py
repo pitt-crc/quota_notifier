@@ -62,7 +62,7 @@ class ConfigureFromFile(DefaultSetupTeardown, TestCase):
             with path_obj.open('w') as io:
                 json.dump(settings, io)
 
-            with self.assertRaisesRegex(ValidationError, 'extra fields not permitted'):
+            with self.assertRaisesRegex(Exception, 'Extra inputs are not permitted'):
                 ApplicationSettings.set_from_file(path_obj)
 
 

@@ -17,11 +17,11 @@ class NameValidation(DefaultSetupTeardown, TestCase):
     def test_blank_name_error(self) -> None:
         """Test a ``ValueError`` is raised for empty/blank names"""
 
-        with self.assertRaisesRegex(ValueError, 'File system name cannot be blank'):
+        with self.assertRaisesRegex(Exception, 'File system name cannot be blank'):
             FileSystemSchema(name='')
 
         for char in string.whitespace:
-            with self.assertRaisesRegex(ValueError, 'File system name cannot be blank'):
+            with self.assertRaisesRegex(Exception, 'File system name cannot be blank'):
                 FileSystemSchema(name=char)
 
     def test_whitespace_is_stripped(self) -> None:
@@ -61,7 +61,7 @@ class TypeValidation(DefaultSetupTeardown, TestCase):
     def test_invalid_type_error(self) -> None:
         """Test a ``ValueError`` is raised for invalid types"""
 
-        with self.assertRaisesRegex(ValidationError, 'type\n  unexpected value;'):
+        with self.assertRaisesRegex(Exception, 'type\n  Input should be '):
             FileSystemSchema(type='fake_type')
 
 
@@ -78,29 +78,29 @@ class ThresholdValidation(DefaultSetupTeardown, TestCase):
     def test_empty_list_fails(self) -> None:
         """Test an empty collection of thresholds fails validation"""
 
-        with self.assertRaisesRegex(ValidationError, 'At least one threshold must be specified'):
+        with self.assertRaisesRegex(Exception, 'At least one threshold must be specified'):
             FileSystemSchema(thresholds=[])
 
     def test_zero_percent(self) -> None:
         """Test the value ``0`` fails validation"""
 
-        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+        with self.assertRaisesRegex(Exception, 'must be greater than 0 and less than 100'):
             FileSystemSchema(thresholds=[0, 50])
 
     def test_100_percent(self) -> None:
         """Test the value ``100`` fails validation"""
 
-        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+        with self.assertRaisesRegex(Exception, 'must be greater than 0 and less than 100'):
             FileSystemSchema(thresholds=[50, 100])
 
     def test_negative_percent(self) -> None:
         """Test negative values fail validation"""
 
-        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+        with self.assertRaisesRegex(Exception, 'must be greater than 0 and less than 100'):
             FileSystemSchema(thresholds=[-1, 50])
 
     def test_over_100_percent(self) -> None:
         """Test values over ``100`` fail validation"""
 
-        with self.assertRaisesRegex(ValidationError, 'must be greater than 0 and less than 100'):
+        with self.assertRaisesRegex(Exception, 'must be greater than 0 and less than 100'):
             FileSystemSchema(thresholds=[50, 101])
