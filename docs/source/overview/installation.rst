@@ -44,7 +44,7 @@ The :doc:`file_systems` page provides an overview of supported file system types
        ],
        "email_from": "no-reply@domain.com",
        "email_domain": "@domain.com",
-       "email_admins": ["admin.user@domain.com"]
+       "admin_emails": ["admin.user@domain.com"]
    }
 
 Once the application has been configured, you can check the configuration file is valid by running:
