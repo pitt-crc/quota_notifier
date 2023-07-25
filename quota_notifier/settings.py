@@ -7,7 +7,6 @@ application settings in memory.
 Module Contents
 ---------------
 """
-
 import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -180,7 +179,7 @@ class SettingsSchema(BaseSettings):
         description=('String to append to usernames when generating user email addresses. '
                      'The leading `@` is optional.'))
 
-    email_admins: List[str] = Field(
+    admin_emails: List[str] = Field(
         title='Administrator Emails',
         default=[],
         description='Admin users to contact when the application encounters a critical issue.'
@@ -237,16 +236,7 @@ class ApplicationSettings:
             path: Path to load settings from
         """
 
-        logging.debug(f'Looking for settings file: {path.resolve()}')
-
-        try:
-            cls._parsed_settings = SettingsSchema.parse_file(path)
-
-        except Exception:
-            logging.error('settings file is invalid')
-            raise
-
-        logging.info(f'Loaded settings from file: {path.resolve()}')
+        cls._parsed_settings = SettingsSchema.model_validate_json(path.read_text())
 
     @classmethod
     def set(cls, **kwargs) -> None:

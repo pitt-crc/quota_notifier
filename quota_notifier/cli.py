@@ -11,6 +11,7 @@ Module Contents
 
 import logging
 import logging.config
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from smtplib import SMTP
@@ -116,7 +117,7 @@ class Application:
                     'level': 'CRITICAL',
                     'mailhost': ApplicationSettings.get('smtp_host'),
                     'fromaddr': ApplicationSettings.get('email_from'),
-                    'toaddrs': ApplicationSettings.get('email_admins'),
+                    'toaddrs': ApplicationSettings.get('admin_emails'),
                     'subject': 'Quota Notifier - Admin Notification'
                 }
             },
@@ -167,7 +168,13 @@ class Application:
         """
 
         # Configure application settings
-        cls._load_settings(force_debug=debug)
+        try:
+            cls._load_settings(force_debug=debug)
+
+        except Exception as e:
+            print(e)
+            sys.exit(0)
+
         if validate:
             return
 
