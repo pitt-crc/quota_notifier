@@ -7,6 +7,7 @@ application settings in memory.
 Module Contents
 ---------------
 """
+
 import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
