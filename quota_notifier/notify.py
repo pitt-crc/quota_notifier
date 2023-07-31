@@ -81,8 +81,8 @@ class EmailTemplate:
             return email
 
         with smtp or SMTP(
-                host=ApplicationSettings.get('smtp_host'),
-                port=ApplicationSettings.get('smtp_port')
+            host=ApplicationSettings.get('smtp_host'),
+            port=ApplicationSettings.get('smtp_port')
         ) as smtp_server:
             smtp_server.send_message(email)
 
