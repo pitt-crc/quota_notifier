@@ -168,6 +168,7 @@ class Application:
         """
 
         # Configure application settings
+        # Logging is not configured yet so errors must be handled manually
         try:
             cls._load_settings(force_debug=debug)
 
@@ -175,6 +176,7 @@ class Application:
             print(e)
             sys.exit(0)
 
+        # If the application was only asked to validate the settings file, we are done
         if validate:
             return
 
