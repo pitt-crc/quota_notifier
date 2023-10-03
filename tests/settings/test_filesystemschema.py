@@ -4,8 +4,6 @@ import string
 from pathlib import Path
 from unittest import TestCase
 
-from pydantic import ValidationError
-
 from quota_notifier.disk_utils import QuotaFactory
 from quota_notifier.settings import FileSystemSchema
 from tests.base import DefaultSetupTeardown
