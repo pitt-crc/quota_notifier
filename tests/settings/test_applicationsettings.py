@@ -5,8 +5,6 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
-from pydantic import ValidationError
-
 from quota_notifier.settings import ApplicationSettings
 from tests.base import DefaultSetupTeardown
 

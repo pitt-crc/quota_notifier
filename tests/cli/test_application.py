@@ -1,7 +1,6 @@
 """Tests for the ``Application`` class."""
 
 import logging
-import os
 from pathlib import Path
 from unittest import TestCase
 
