@@ -45,6 +45,4 @@ optional = true
 sphinx = "6.2.1"
 sphinx-argparse = "0.4.0"
 sphinx-copybutton = "0.5.2"
-sphinx-pydantic = "0.1.1"
 sphinx-rtd-theme = "2.0.0"
-sphinx-jsonschema = "1.19.1"
