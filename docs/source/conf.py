@@ -32,7 +32,6 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx_copybutton',
     'sphinxarg.ext',
-    'sphinx-pydantic'
 ]
 
 # Customize default options for the sphinx autodoc utility
