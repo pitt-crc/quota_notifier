@@ -29,7 +29,7 @@ notifier = "quota_notifier.cli:Application.execute"
 
 [tool.poetry.dependencies]
 python = ">=3.9"
-pydantic-settings = "2.3.4"
+pydantic-settings = "2.4.0"
 sqlalchemy = "2.0.31"
 
 [tool.poetry.group.tests]
@@ -42,7 +42,7 @@ coverage = "*"
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "7.1.2"
+sphinx = "7.4.7"
 sphinx-argparse = "0.4.0"
 sphinx-copybutton = "0.5.2"
 sphinx-rtd-theme = "2.0.0"
