@@ -146,9 +146,14 @@ class UserNotifier:
 
         quota_list = []
         for file_sys in ApplicationSettings.get('file_systems'):
-            user_path = file_sys.path
-            if file_sys.type == 'generic':
-                user_path /= user.group
+            if file_sys.type == 'ihome':
+                user_path = user.home_dir
+
+            elif file_sys.type in ('generic', 'vast'):
+                user_path = file_sys.path / user.group
+
+            else:
+                user_path = file_sys.path
 
             quota = QuotaFactory(quota_type=file_sys.type, name=file_sys.name, path=user_path, user=user)
             if quota:

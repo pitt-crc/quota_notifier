@@ -9,6 +9,7 @@ from __future__ import annotations
 import grp
 import logging
 import pwd
+from pathlib import Path
 from shlex import split
 from subprocess import PIPE, Popen
 from typing import Optional, Iterator
@@ -92,6 +93,12 @@ class User:
         """Fetch and return the users group id"""
 
         return pwd.getpwnam(self._username).pw_gid
+
+    @property
+    def home_dir(self) -> Path:
+        """Fetch and return the users home directory"""
+
+        return Path(pwd.getpwnam(self._username).pw_dir)
 
     def __eq__(self, other):
         """Return true if both user objects have the same username"""
