@@ -38,8 +38,6 @@ Core Settings
 +------------------+-----------------------------------------+---------------------------------------------------------+
 | Setting          | Default Value                           | Description                                             |
 +==================+=========================================+=========================================================+
-| ihome_quota_path | ``/ihome/crc/scripts/ihome_quota.json`` | Path to ihome storage information.                      |
-+------------------+-----------------------------------------+---------------------------------------------------------+
 | file_systems     | ``[]``                                  | List of file systems to examine. See the                |
 |                  |                                         | :ref:`fs-label` section for details                     |
 +------------------+-----------------------------------------+---------------------------------------------------------+
@@ -96,8 +94,8 @@ The following fields are required when defining which file systems to scan.
 +------------------------+---------------------------------------------------------------------------------------------+
 | path                   | Absolute path to the mounted file system.                                                   |
 +------------------------+---------------------------------------------------------------------------------------------+
-| type                   | Type of the file system. Options: ``ihome``, ``generic``, ``beegfs``. If modifying options, |
-|                        | update QuotaType in ``quota_notifier.disk_utils.QuotaFactory``.                             |
+| type                   | Type of the file system. Options: ``ihome``, ``generic``, ``beegfs``, ``vast``. If          |
+|                        | modifying options, update QuotaType in ``quota_notifier.disk_utils.QuotaFactory``.          |
 +------------------------+---------------------------------------------------------------------------------------------+
 | thresholds             | Usage percentages to issue notifications for.                                               |
 +------------------------+---------------------------------------------------------------------------------------------+

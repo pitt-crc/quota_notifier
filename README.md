@@ -88,7 +88,6 @@ Run `notifier --help` for the full argument list.
 
 | Setting            | Default                               | Description                                                                                         |
 |--------------------|---------------------------------------|-----------------------------------------------------------------------------------------------------|
-| `ihome_quota_path` | `/ihome/crc/scripts/ihome_quota.json` | Path to ihome storage information.                                                                  |
 | `file_systems`     | `[]`                                  | List of file systems to examine. See [File System Settings](#file-system-settings).                 |
 | `uid_blacklist`    | `[0]`                                 | Do not notify users with these UID values.                                                          |
 | `gid_blacklist`    | `[0]`                                 | Do not notify groups with these GID values.                                                         |
@@ -108,12 +107,12 @@ Run `notifier --help` for the full argument list.
 
 Each entry in the `file_systems` list requires the following fields:
 
-| Setting      | Description                                               |
-|--------------|-----------------------------------------------------------|
-| `name`       | Human-readable name for the file system.                  |
-| `path`       | Absolute path to the mounted file system.                 |
-| `type`       | File system type. One of `ihome`, `generic`, or `beegfs`. |
-| `thresholds` | Usage percentages to issue notifications for.             |
+| Setting      | Description                                                       |
+|--------------|-------------------------------------------------------------------|
+| `name`       | Human-readable name for the file system.                          |
+| `path`       | Absolute path to the mounted file system.                         |
+| `type`       | File system type. One of `ihome`, `generic`, `beegfs`, or `vast`. |
+| `thresholds` | Usage percentages to issue notifications for.                     |
 
 Adding a new file system type also requires updating `QuotaType` in
 `quota_notifier.disk_utils.QuotaFactory`.
@@ -152,12 +151,18 @@ indicated with curly braces:
 Most file systems are supported by default, with dedicated support for the types below.
 
 **Generic** — Any file system where usage and available space can be determined with
-`df`. Generic file systems **must** be organized so that each subdirectory is named
-after a user group. For a file system mounted at `/mnt`, the directory for group
+`os.statvfs`. Generic file systems **must** be organized so that each subdirectory is
+named after a user group. For a file system mounted at `/mnt`, the directory for group
 `group1` must be `/mnt/group1`. Directories not named after a user group are ignored,
 and a directory does not have to exist for every group.
 
 **BeeGFS** — Quota information is read directly from the `beegfs-ctl` utility, so there
 are no requirements on how the file system is organized.
 
-**ihome** — Usage information is read from the JSON file at `ihome_quota_path`.
+**ihome** — Usage is determined with `os.statvfs` against the user's home directory.
+Since VAST reports the quota limit as the size of the underlying file system when no
+quota is configured, a user is skipped if their reported size is within 1% of the
+enclosing mount point's size.
+
+**vast** — Usage is determined the same way as **ihome**, but against a group directory
+on VAST-hosted storage (organized the same way as **generic** file systems).
