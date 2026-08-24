@@ -76,6 +76,23 @@ class AbstractQuota(object):
         """
 
     @staticmethod
+    def _get_statvfs_usage(path: Path) -> tuple[int, int]:
+        """Return the used and total size (in bytes) for a mounted file system path
+
+        Args:
+            path: The file path to check usage for
+
+        Returns:
+            A tuple with the space used and the total space available
+        """
+
+        stat = os.statvfs(path)
+        block_size = stat.f_frsize
+        size_limit = stat.f_blocks * block_size
+        size_used = (stat.f_blocks - stat.f_bavail) * block_size
+        return size_used, size_limit
+
+    @staticmethod
     def bytes_to_str(size: int) -> str:
         """Convert the given number of bytes to a human-readable string
 
@@ -125,11 +142,7 @@ class GenericQuota(AbstractQuota):
             logging.debug(f'Could not find path: {path}')
             return None
 
-        stat = os.statvfs(path)
-        block_size = stat.f_frsize
-        size_limit = stat.f_blocks * block_size
-        size_used = (stat.f_blocks - stat.f_bavail) * block_size
-
+        size_used, size_limit = cls._get_statvfs_usage(path)
         quota = cls(name, path, user, size_used, size_limit)
         logging.debug(str(quota))
         return quota
@@ -265,13 +278,8 @@ class VastBackedQuota(AbstractQuota):
             logging.debug(f'Could not find path: {path}')
             return None
 
-        stat = os.statvfs(path)
-        block_size = stat.f_frsize
-        size_limit = stat.f_blocks * block_size
-        size_used = (stat.f_blocks - stat.f_bavail) * block_size
-
-        mount_stat = os.statvfs(cls._find_mount_point(path))
-        mount_size = mount_stat.f_blocks * mount_stat.f_frsize
+        size_used, size_limit = cls._get_statvfs_usage(path)
+        _, mount_size = cls._get_statvfs_usage(cls._find_mount_point(path))
 
         if mount_size and 0.99 <= (size_limit / mount_size) <= 1.01:
             logging.debug(f'No quota configured for {user.username} at {path}')
