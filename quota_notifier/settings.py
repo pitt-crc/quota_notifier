@@ -34,7 +34,7 @@ class FileSystemSchema(BaseSettings):
 
     # If modifying options for this setting, also update
     # quota_notifier.disk_utils.QuotaFactory.QuotaType
-    type: Literal['ihome', 'generic', 'beegfs'] = Field(
+    type: Literal['ihome', 'generic', 'beegfs', 'vast'] = Field(
         ...,
         title='System Type',
         description='Type of the file system')
@@ -107,11 +107,6 @@ class SettingsSchema(BaseSettings):
     """Defines the schema and default values for top level application settings"""
 
     # General application settings
-    ihome_quota_path: Path = Field(
-        title='Ihome Quota Path',
-        default=Path('/ihome/crc/scripts/ihome_quota.json'),
-        description='Path to ihome storage information.')
-
     file_systems: List[FileSystemSchema] = Field(
         title='Monitored File Systems',
         default=list(),

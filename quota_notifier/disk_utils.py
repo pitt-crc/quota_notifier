@@ -1,8 +1,8 @@
 """Utilities for fetching disk quota information.
 
 Different quota objects (classes) are provided for different file system structures.
-The ``GenericQuota`` is generally applicable to any file system whose
-quota can be determined using the ``df`` commandline utility.
+The ``GenericQuota`` is generally applicable to any file system whose usage and quota
+can be determined via ``os.statvfs``.
 
 Quota classes may provide factory methods to facilitate creating instances
 based on simple user data. In all cases, these methods will return ``None``
@@ -17,16 +17,15 @@ Module Contents
 
 from __future__ import annotations
 
-import json
 import logging
 import math
+import os
 from abc import abstractmethod
 from copy import copy
 from enum import Enum
 from pathlib import Path
 from typing import Iterable, Optional
 
-from .settings import ApplicationSettings
 from .shell import ShellCmd, User
 
 
@@ -77,6 +76,23 @@ class AbstractQuota(object):
         """
 
     @staticmethod
+    def _get_statvfs_usage(path: Path) -> tuple[int, int]:
+        """Return the used and total size (in bytes) for a mounted file system path
+
+        Args:
+            path: The file path to check usage for
+
+        Returns:
+            A tuple with the space used and the total space available
+        """
+
+        stat = os.statvfs(path)
+        block_size = stat.f_frsize
+        size_limit = stat.f_blocks * block_size
+        size_used = (stat.f_blocks - stat.f_bavail) * block_size
+        return size_used, size_limit
+
+    @staticmethod
     def bytes_to_str(size: int) -> str:
         """Convert the given number of bytes to a human-readable string
 
@@ -119,23 +135,15 @@ class GenericQuota(AbstractQuota):
 
         Returns:
             An instance of the parent class or None if the allocation does not exist
-
-        Raises:
-            RuntimeError: If something goes wrong communicating with the file system
         """
 
         logging.debug(f'fetching generic quota for {user.username} at {path}')
         if not path.exists():
-            logging.debug(f'Could not file path: {path}')
+            logging.debug(f'Could not find path: {path}')
             return None
 
-        df_command = ShellCmd(f"df {path}")
-        if df_command.err:
-            logging.error(df_command.err)
-            return None
-
-        result = df_command.out.splitlines()[1].split()
-        quota = cls(name, path, user, int(result[2]) * 1024, int(result[1]) * 1024)
+        size_used, size_limit = cls._get_statvfs_usage(path)
+        quota = cls(name, path, user, size_used, size_limit)
         logging.debug(str(quota))
         return quota
 
@@ -225,30 +233,35 @@ class BeeGFSQuota(AbstractQuota):
             cls._cached_quotas[path][int(gid)] = cls(name, path, None, int(used), int(avail))
 
 
-class IhomeQuota(AbstractQuota):
-    """Disk storage quota for the ihome file system"""
+class VastBackedQuota(AbstractQuota):
+    """Base class for quotas hosted on VAST file systems
 
-    _parsed_quota_data = None
+    VAST reports the quota limit as the size of the underlying mounted file
+    system when a directory has no quota configured. To detect whether a
+    quota is actually set, the reported size of the directory is compared
+    against the reported size of its enclosing mount point. Sizes within 1%
+    of each other are treated as "no quota configured".
+    """
 
-    @classmethod
-    def _get_quota_data(cls) -> dict:
-        """Parse and cache Ihome quota data
+    @staticmethod
+    def _find_mount_point(path: Path) -> Path:
+        """Return the mount point a given path is stored under
+
+        Args:
+            path: The file path to find the mount point for
 
         Returns:
-            Quota information as a dictionary
+            The nearest ancestor of ``path`` (possibly ``path`` itself) that is a mount point
         """
 
-        # Get the information from Isilon
-        if cls._parsed_quota_data is None:
-            ihome_data_path = ApplicationSettings.get('ihome_quota_path')
-            logging.debug(f'Parsing {ihome_data_path}')
-            with ihome_data_path.open('r') as infile:
-                cls._parsed_quota_data = json.load(infile)
+        path = path.resolve()
+        while not path.is_mount() and path.parent != path:
+            path = path.parent
 
-        return cls._parsed_quota_data
+        return path
 
     @classmethod
-    def get_quota(cls, name: str, path: Path, user: User) -> Optional[IhomeQuota]:
+    def get_quota(cls, name: str, path: Path, user: User) -> Optional[VastBackedQuota]:
         """Return a quota object for a given user and file path
 
         Args:
@@ -257,19 +270,28 @@ class IhomeQuota(AbstractQuota):
             user: User that the quota is tied to
 
         Returns:
-            An instance of the parent class or None if the allocation does not exist
+            An instance of the parent class or None if no quota is configured for the path
         """
 
-        logging.debug(f'fetching Ihome quota for {user.username} at {path}')
+        logging.debug(f'fetching {name} quota for {user.username} at {path}')
+        if not path.exists():
+            logging.debug(f'Could not find path: {path}')
+            return None
 
-        quota_data = cls._get_quota_data()
-        persona = f"UID:{user.uid}"
-        for item in quota_data["quotas"]:
-            if item["persona"] is not None:
-                if item["persona"]["id"] == persona:
-                    quota = cls(name, path, user, item["usage"]["logical"], item["thresholds"]["hard"])
-                    logging.debug(str(quota))
-                    return quota
+        size_used, size_limit = cls._get_statvfs_usage(path)
+        _, mount_size = cls._get_statvfs_usage(cls._find_mount_point(path))
+
+        if mount_size and 0.99 <= (size_limit / mount_size) <= 1.01:
+            logging.debug(f'No quota configured for {user.username} at {path}')
+            return None
+
+        quota = cls(name, path, user, size_used, size_limit)
+        logging.debug(str(quota))
+        return quota
+
+
+class VastQuota(VastBackedQuota):
+    """Disk storage quota for file systems hosted on VAST (ihome, group/project storage)"""
 
 
 class QuotaFactory:
@@ -282,7 +304,8 @@ class QuotaFactory:
         # settings.FileSystemSchema.type
         generic = GenericQuota
         beegfs = BeeGFSQuota
-        ihome = IhomeQuota
+        ihome = VastQuota
+        vast = VastQuota
 
     def __new__(cls, quota_type: str, name: str, path: Path, user: User, **kwargs) -> AbstractQuota:
         """Create a new quota instance

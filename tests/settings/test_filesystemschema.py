@@ -53,8 +53,8 @@ class TypeValidation(DefaultSetupTeardown, TestCase):
     def test_valid_types_pass() -> None:
         """Test valid types do not raise errors"""
 
-        for fs_type in QuotaFactory.QuotaType:
-            FileSystemSchema(name='name', type=fs_type.name, path='/', thresholds=[50])
+        for type_name in QuotaFactory.QuotaType.__members__:
+            FileSystemSchema(name='name', type=type_name, path='/', thresholds=[50])
 
     def test_invalid_type_error(self) -> None:
         """Test a ``ValueError`` is raised for invalid types"""

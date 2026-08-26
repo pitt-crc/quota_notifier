@@ -1,6 +1,7 @@
 """Tests for the ``User`` class"""
 
 import pwd
+from pathlib import Path
 from unittest import TestCase
 
 from quota_notifier.shell import User
@@ -17,6 +18,12 @@ class UserInfo(TestCase):
         self.assertEqual(user.uid, 0)
         self.assertEqual(user.group, 'root')
         self.assertEqual(user.gid, 0)
+
+    def test_home_dir(self) -> None:
+        """Test the home directory matches the value reported by ``pwd``"""
+
+        user = User('root')
+        self.assertEqual(Path(pwd.getpwnam('root').pw_dir), user.home_dir)
 
 
 class IterAllUsers(TestCase):
