@@ -290,12 +290,8 @@ class VastBackedQuota(AbstractQuota):
         return quota
 
 
-class IhomeQuota(VastBackedQuota):
-    """Disk storage quota for the ihome file system hosted on VAST"""
-
-
 class VastQuota(VastBackedQuota):
-    """Disk storage quota for group/project storage hosted on VAST"""
+    """Disk storage quota for file systems hosted on VAST (ihome, group/project storage)"""
 
 
 class QuotaFactory:
@@ -308,7 +304,7 @@ class QuotaFactory:
         # settings.FileSystemSchema.type
         generic = GenericQuota
         beegfs = BeeGFSQuota
-        ihome = IhomeQuota
+        ihome = VastQuota
         vast = VastQuota
 
     def __new__(cls, quota_type: str, name: str, path: Path, user: User, **kwargs) -> AbstractQuota:
