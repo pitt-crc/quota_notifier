@@ -18,7 +18,7 @@ from typing import Iterable
 from sqlalchemy import delete, insert, select
 from sqlalchemy.orm import Session
 
-from .disk_utils import AbstractQuota, BeeGFSQuota, QuotaFactory
+from .disk_utils import AbstractQuota, BeeGFSQuota, QuotaFactory, VastApiQuota
 from .orm import DBConnection, Notification
 from .settings import ApplicationSettings
 from .shell import User
@@ -276,14 +276,19 @@ class UserNotifier:
 
         users = self.get_users()
 
-        # Cache queries for BeeGFS file systems
+        # Cache queries for BeeGFS and VAST API backed file systems
         logging.info('Checking for cachable file system queries...')
         cachable_systems_found = False
+        vast_quotas_cached = False
 
         for file_system in ApplicationSettings.get('file_systems'):
             if file_system.type == 'beegfs':
                 cachable_systems_found = True
                 BeeGFSQuota.cache_quotas(name=file_system.name, path=file_system.path, users=users)
+
+            elif file_system.type == 'ihome' and not vast_quotas_cached:
+                cachable_systems_found = vast_quotas_cached = True
+                VastApiQuota.cache_quotas()
 
         if not cachable_systems_found:
             logging.debug('No cachable system queries found')

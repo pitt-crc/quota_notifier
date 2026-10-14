@@ -102,6 +102,11 @@ Run `notifier --help` for the full argument list.
 | `email_domain`     | `@domain.com`                         | Appended to usernames when generating email addresses. The leading `@` is optional.                 |
 | `admin_emails`     | `[]`                                  | Admin users to contact when the application hits a critical issue.                                  |
 | `debug`            | `False`                               | Disable database commits and email notifications. Useful for development and testing.               |
+| `vast_host`        |                                       | Hostname of the VAST management server (VMS). Required for `ihome` file systems.                    |
+| `vast_user`        |                                       | Username for the VAST API. Read-only permissions are sufficient.                                    |
+| `vast_password`    |                                       | Password for the VAST API.                                                                          |
+| `vast_token`       |                                       | VAST API token. Use instead of `vast_user`/`vast_password`.                                         |
+| `vast_ca_cert`     |                                       | CA bundle used to verify the VAST management server certificate. Not verified if unset.             |
 
 ### File System Settings
 
@@ -116,6 +121,25 @@ Each entry in the `file_systems` list requires the following fields:
 
 Adding a new file system type also requires updating `QuotaType` in
 `quota_notifier.disk_utils.QuotaFactory`.
+
+### VAST API Credentials
+
+Quotas for `ihome` file systems are read directly from the VAST management API using
+[vastpy](https://pypi.org/project/vastpy/), so the
+`vast_host` setting and exactly one of `vast_token` or `vast_user`/`vast_password` are
+required whenever an `ihome` file system is configured. The credentials only need
+read-only access to quota information:
+
+```json
+{
+  "vast_host": "vms.domain.com",
+  "vast_user": "readonly-user",
+  "vast_password": "********"
+}
+```
+
+Since the settings file now contains credentials, restrict its permissions so only the
+account running the notifier can read it (e.g., `chmod 600 /etc/notifier/settings.json`).
 
 ### Blacklisting Users and Groups
 
@@ -159,10 +183,13 @@ and a directory does not have to exist for every group.
 **BeeGFS** — Quota information is read directly from the `beegfs-ctl` utility, so there
 are no requirements on how the file system is organized.
 
-**ihome** — Usage is determined with `os.statvfs` against the user's home directory.
-Since VAST reports the quota limit as the size of the underlying file system when no
-quota is configured, a user is skipped if their reported size is within 1% of the
-enclosing mount point's size.
+**ihome** — Usage and limits are read from the VAST management API by matching each
+user's home directory (as reported by the system password database) against the path of
+quotas configured in VAST. The notifier does not need read access to user home
+directories. Users without a quota, or whose quota has no hard or soft limit, are skipped.
+See [VAST API Credentials](#vast-api-credentials).
 
-**vast** — Usage is determined the same way as **ihome**, but against a group directory
-on VAST-hosted storage (organized the same way as **generic** file systems).
+**vast** — Usage is determined with `os.statvfs` against a group directory on VAST-hosted
+storage (organized the same way as **generic** file systems). Since VAST reports the quota
+limit as the size of the underlying file system when no quota is configured, a group is
+skipped if its reported size is within 1% of the enclosing mount point's size.
