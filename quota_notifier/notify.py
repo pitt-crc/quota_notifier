@@ -288,7 +288,11 @@ class UserNotifier:
 
             elif file_system.type == 'ihome' and not vast_quotas_cached:
                 cachable_systems_found = vast_quotas_cached = True
-                VastApiQuota.cache_quotas()
+                try:
+                    VastApiQuota.cache_quotas()
+                except Exception as caught:
+                    logging.error(f'Failed to cache VAST quotas; ihome users will be skipped this run: {caught}')
+                    VastApiQuota._cached_quotas = {}
 
         if not cachable_systems_found:
             logging.debug('No cachable system queries found')
