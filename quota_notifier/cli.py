@@ -46,6 +46,8 @@ class Parser(ArgumentParser):
         self.add_argument('--version', action='version', version=__version__)
         self.add_argument('--validate', action='store_true', help='validate settings without sending notifications')
         self.add_argument('--debug', action='store_true', help='run the application but do not send any emails')
+        self.add_argument('--settings', type=Path, default=SETTINGS_PATH, metavar='PATH',
+            help=f'path to the application settings file (default: {SETTINGS_PATH})')
         self.add_argument(
             '-v', action='count', dest='verbose', default=0,
             help='set output verbosity to warning (-v), info (-vv), or debug (-vvv)')
@@ -60,17 +62,20 @@ class Application:
     """Entry point for instantiating and executing the application"""
 
     @staticmethod
-    def _load_settings(force_debug: bool = False) -> None:
+    def _load_settings(settings_path: Path = SETTINGS_PATH, force_debug: bool = False) -> None:
         """Load application settings from the given file path
 
         Args:
+            settings_path: Path to the settings file to load
             force_debug: Force the application to run in debug mode
         """
 
         # Load and validate custom application settings from disk
         # Implicitly raises an error if settings are invalid
-        if SETTINGS_PATH.exists():
-            ApplicationSettings.set_from_file(SETTINGS_PATH)
+        if settings_path.exists():
+            ApplicationSettings.set_from_file(settings_path)
+        elif settings_path != SETTINGS_PATH:
+            raise FileNotFoundError(f'Settings file not found: {settings_path')
 
         # Force debug mode if specified
         if force_debug:
@@ -158,7 +163,8 @@ class Application:
             ) from caught
 
     @classmethod
-    def run(cls, validate: bool = False, verbosity: int = 0, debug: bool = False) -> None:
+    def run(cls, validate: bool = False, verbosity: int = 0, debug: bool = False,
+            settings_path: Path = SETTINGS_PATH) -> None:
         """Run the application using parsed commandline arguments
 
         Args:
@@ -170,7 +176,7 @@ class Application:
         # Configure application settings
         # Logging is not configured yet so errors must be handled manually
         try:
-            cls._load_settings(force_debug=debug)
+            cls._load_settings(settings_path=settings_path, force_debug=debug)
 
         except Exception as e:
             print(e)
@@ -214,7 +220,8 @@ class Application:
             cls.run(
                 validate=args.validate,
                 verbosity=args.verbose,
-                debug=args.debug)
+                debug=args.debug,
+                settings_path=args.settings)
 
         except ConnectionError as caught:
             logging.getLogger('console_logger').critical(f'Error connecting to SMTP server - {caught}')
