@@ -1,5 +1,6 @@
 """Tests for the ``VastApiQuota`` class"""
 
+import secrets
 from pathlib import Path
 from typing import Optional
 from unittest import TestCase
@@ -11,6 +12,9 @@ from quota_notifier.disk_utils import QuotaFactory, VastApiQuota
 from quota_notifier.settings import ApplicationSettings
 from quota_notifier.shell import User
 from tests.base import DefaultSetupTeardown
+
+TEST_TOKEN = secrets.token_hex(8)
+TEST_PASSWORD = secrets.token_hex(8)
 
 TEST_RECORDS = [
     {'path': '/ihome/group/user1', 'hard_limit': 1000, 'soft_limit': 0, 'used_capacity': 250},
@@ -39,13 +43,13 @@ class VastApiTestBase(DefaultSetupTeardown):
 
         self.mock_client = MagicMock()
         self.mock_client.quotas.get.side_effect = mock_get_quotas
-        patcher = patch.object(VastApiQuota, '_get_client', return_value=self.mock_client)
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        self.client_patcher = patch.object(VastApiQuota, '_get_client', return_value=self.mock_client)
+        self.client_patcher.start()
 
     def tearDown(self) -> None:
-        """Clear cached quota data"""
+        """Stop API mocking and clear cached quota data"""
 
+        self.client_patcher.stop()
         VastApiQuota._cached_quotas = None
         super().tearDown()
 
@@ -113,19 +117,19 @@ class GetClient(DefaultSetupTeardown, TestCase):
     def test_token_credentials(self) -> None:
         """Test the API token is passed to the client when configured"""
 
-        ApplicationSettings.set(vast_host='vms.domain.com', vast_token=SecretStr('abc123'))
+        ApplicationSettings.set(vast_host='vms.domain.com', vast_token=SecretStr(TEST_TOKEN))
         with patch('quota_notifier.disk_utils.VASTClient') as mock_client:
             VastApiQuota._get_client()
 
-        mock_client.assert_called_once_with(address='vms.domain.com', cert_file=None, token='abc123')
+        mock_client.assert_called_once_with(address='vms.domain.com', cert_file=None, token=TEST_TOKEN)
 
     def test_password_credentials(self) -> None:
         """Test the username and password are passed to the client when no token is configured"""
 
         ApplicationSettings.set(
-            vast_host='vms.domain.com', vast_user='user', vast_password=SecretStr('pass'), vast_ca_cert=Path('/ca.pem'))
+            vast_host='vms.domain.com', vast_user='user', vast_password=SecretStr(TEST_PASSWORD), vast_ca_cert=Path('/ca.pem'))
 
         with patch('quota_notifier.disk_utils.VASTClient') as mock_client:
             VastApiQuota._get_client()
 
-        mock_client.assert_called_once_with(address='vms.domain.com', cert_file='/ca.pem', user='user', password='pass')
+        mock_client.assert_called_once_with(address='vms.domain.com', cert_file='/ca.pem', user='user', password=TEST_PASSWORD)
