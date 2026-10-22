@@ -29,8 +29,8 @@ notifier = "quota_notifier.cli:Application.execute"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
-pydantic-settings = "2.15.0"
-sqlalchemy = "2.0.52"
+pydantic-settings = "2.16.0"
+sqlalchemy = "2.1.5"
 vastpy = "0.3.22"
 
 [tool.poetry.group.tests]
