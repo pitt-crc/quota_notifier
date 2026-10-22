@@ -13,7 +13,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, List, Literal, Optional, Set, Tuple, Union
 
-from pydantic import field_validator, Field
+from pydantic import field_validator, model_validator, Field, SecretStr
 from pydantic_settings import BaseSettings
 
 DEFAULT_DB_PATH = Path.cwd().resolve() / 'notifier_data.db'
@@ -151,6 +151,33 @@ class SettingsSchema(BaseSettings):
         description='Port for the SMTP server'
     )
 
+    # Settings for the VAST management API (used by ``ihome`` file systems)
+    vast_host: str = Field(
+        title='VAST Host',
+        default='',
+        description='Hostname of the VAST management server (VMS) used to fetch ihome quotas.')
+
+    vast_user: str = Field(
+        title='VAST Username',
+        default='',
+        description='Username for authenticating against the VAST API. Read-only permissions are sufficient.')
+
+    vast_password: Optional[SecretStr] = Field(
+        title='VAST Password',
+        default=None,
+        description='Password for authenticating against the VAST API.')
+
+    vast_token: Optional[SecretStr] = Field(
+        title='VAST API Token',
+        default=None,
+        description='API token for authenticating against the VAST API. Used instead of a username/password.')
+
+    vast_ca_cert: Optional[Path] = Field(
+        title='VAST CA Certificate',
+        default=None,
+        description='CA bundle used to verify the VAST management server certificate. '
+                    'The certificate is not verified if unset.')
+
     # Settings for database connections
     db_url: str = Field(
         title='Database Path',
@@ -211,6 +238,31 @@ class SettingsSchema(BaseSettings):
             raise ValueError('File systems do not have unique names')
 
         return value
+
+    @model_validator(mode='after')
+    def validate_vast_settings(self) -> 'SettingsSchema':
+        """Ensure VAST API settings are provided when an ``ihome`` file system is configured
+
+        Returns:
+            The validated settings
+
+        Raises:
+            ValueError: If the VAST host or credentials are missing
+        """
+
+        if not any(fs.type == 'ihome' for fs in self.file_systems):
+            return self
+
+        if not self.vast_host.strip():
+            raise ValueError('The `vast_host` setting is required for ihome file systems')
+
+        has_token = bool(self.vast_token and self.vast_token.get_secret_value())
+        has_password = bool(self.vast_user and self.vast_password and self.vast_password.get_secret_value())
+        if has_token == has_password:
+            raise ValueError(
+                'ihome file systems require exactly one of `vast_token` or `vast_user`/`vast_password`')
+
+        return self
 
 
 class ApplicationSettings:

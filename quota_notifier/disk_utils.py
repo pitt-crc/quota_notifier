@@ -26,6 +26,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Iterable, Optional
 
+from vastpy import VASTClient
+
+from .settings import ApplicationSettings
 from .shell import ShellCmd, User
 
 
@@ -291,7 +294,108 @@ class VastBackedQuota(AbstractQuota):
 
 
 class VastQuota(VastBackedQuota):
-    """Disk storage quota for file systems hosted on VAST (ihome, group/project storage)"""
+    """Disk storage quota for group/project file systems hosted on VAST"""
+
+
+class VastApiQuota(AbstractQuota):
+    """Disk storage quota fetched directly from the VAST management API
+
+    Quotas are matched by comparing the requested path (e.g., a user's home
+    directory) against the path each quota is configured on in VAST. Unlike
+    ``VastQuota``, this does not require read access to the directory itself.
+    """
+
+    # Map VAST quota paths to (used, limit) byte counts {quota path: (size used, size limit)}
+    _cached_quotas: Optional[dict[str, tuple[int, int]]] = None
+
+    @staticmethod
+    def _get_client() -> VASTClient:
+        """Return a VAST API client configured from application settings
+
+        Returns:
+            A configured ``VASTClient`` instance
+        """
+
+        token = ApplicationSettings.get('vast_token')
+        password = ApplicationSettings.get('vast_password')
+        ca_cert = ApplicationSettings.get('vast_ca_cert')
+
+        if token:
+            credentials = dict(token=token.get_secret_value())
+
+        else:
+            credentials = dict(user=ApplicationSettings.get('vast_user'), password=password.get_secret_value())
+
+        return VASTClient(
+            address=ApplicationSettings.get('vast_host'),
+            cert_file=str(ca_cert) if ca_cert else None,
+            **credentials)
+
+    @staticmethod
+    def _parse_record(record: dict) -> Optional[tuple[int, int]]:
+        """Return the used and limit size (in bytes) from a VAST quota record
+
+        Args:
+            record: A quota record returned by the VAST API
+
+        Returns:
+            A tuple with the space used and the quota limit, or None if no limit is set
+        """
+
+        size_limit = record.get('hard_limit') or record.get('soft_limit')
+        if not size_limit:
+            return None
+
+        return int(record.get('used_capacity') or 0), int(size_limit)
+
+    @classmethod
+    def get_quota(cls, name: str, path: Path, user: User) -> Optional[VastApiQuota]:
+        """Return a quota object for a given user and file path
+
+        Args:
+            name: Name of the file system
+            path: The file path to fetch a quota for
+            user: User that the quota is tied to
+
+        Returns:
+            An instance of the parent class or None if no quota is configured for the path
+        """
+
+        logging.debug(f'fetching {name} quota for {user.username} at {path} from VAST')
+        quota_path = str(path).rstrip('/')
+
+        if cls._cached_quotas is not None:
+            usage = cls._cached_quotas.get(quota_path)
+
+        else:
+            records = cls._get_client().quotas.get(path=quota_path)
+            usage = cls._parse_record(records[0]) if records else None
+
+        if usage is None:
+            logging.debug(f'No quota configured for {user.username} at {path}')
+            return None
+
+        quota = cls(name, path, user, *usage)
+        logging.debug(str(quota))
+        return quota
+
+    @classmethod
+    def cache_quotas(cls) -> None:
+        """Fetch and cache all quotas from the VAST API with a single bulk query
+
+        Cached information is used to speed up future calls to the ``get_quota`` method.
+        """
+
+        logging.info('Caching quota information from the VAST API')
+
+        cached_quotas = dict()
+        for record in cls._get_client().quotas.get():
+            usage = cls._parse_record(record)
+            if record.get('path') and usage:
+                cached_quotas[record['path'].rstrip('/')] = usage
+
+        logging.debug(f'Cached {len(cached_quotas)} quotas from the VAST API')
+        cls._cached_quotas = cached_quotas
 
 
 class QuotaFactory:
@@ -304,7 +408,7 @@ class QuotaFactory:
         # settings.FileSystemSchema.type
         generic = GenericQuota
         beegfs = BeeGFSQuota
-        ihome = VastQuota
+        ihome = VastApiQuota
         vast = VastQuota
 
     def __new__(cls, quota_type: str, name: str, path: Path, user: User, **kwargs) -> AbstractQuota:
