@@ -127,9 +127,11 @@ class GetClient(DefaultSetupTeardown, TestCase):
         """Test the username and password are passed to the client when no token is configured"""
 
         ApplicationSettings.set(
-            vast_host='vms.domain.com', vast_user='user', vast_password=SecretStr(TEST_PASSWORD), vast_ca_cert=Path('/ca.pem'))
+            vast_host='vms.domain.com', vast_user='user', vast_password=SecretStr(TEST_PASSWORD),
+            vast_ca_cert=Path('/ca.pem'))
 
         with patch('quota_notifier.disk_utils.VASTClient') as mock_client:
             VastApiQuota._get_client()
 
-        mock_client.assert_called_once_with(address='vms.domain.com', cert_file='/ca.pem', user='user', password=TEST_PASSWORD)
+        mock_client.assert_called_once_with(address='vms.domain.com', cert_file='/ca.pem', user='user',
+                                            password=TEST_PASSWORD)
