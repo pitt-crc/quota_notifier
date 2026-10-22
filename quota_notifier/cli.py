@@ -75,7 +75,7 @@ class Application:
         if settings_path.exists():
             ApplicationSettings.set_from_file(settings_path)
         elif settings_path != SETTINGS_PATH:
-            raise FileNotFoundError(f'Settings file not found: {settings_path')
+            raise FileNotFoundError(f'Settings file not found: {settings_path}')
 
         # Force debug mode if specified
         if force_debug:
